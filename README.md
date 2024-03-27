@@ -1,45 +1,6 @@
-![PAMPLEJUCE](assets/images/pamplejuce.png)
-[![](https://github.com/sudara/pamplejuce/workflows/Pamplejuce/badge.svg)](https://github.com/sudara/pamplejuce/actions)
 
-Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2023.
+This is the starting repo for the Pamplejuce template
 
-Out of the box, it:
-
-1. Supports C++20.
-2. Uses JUCE 7.x as a submodule tracking develop.
-3. Relies on CMake 3.24.1 and higher for cross-platform building.
-4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 for the test framework and runner.
-5. Includes a `Tests` target and a `Benchmarks` target some examples to get started quickly.
-6. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
-
-It also has integration with GitHub Actions, specifically:
-
-1. Building and testing cross-platform (linux, macOS, Windows) binaries
-2. Running tests and benchmarks in CI
-3. Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
-4. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
-5. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
-6. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
-
-It also contains:
-
-1. A `.gitignore` for all platforms.
-2. A `.clang-format` file for keeping code tidy.
-3. A `VERSION` file that will propagate through JUCE and your app.
-4. A ton of useful comments and options around the CMake config.
-
-## How does this all work at a high level?
-
-If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
-
-## Can I see some examples?
-
-Lots of people have used Pamplejuce as their starting place for their private plugin projects. 
-
-Two amazing public examples (complete with signed binaries) are:
-
-* [Valentine](https://github.com/tote-bag-labs/valentine), a compressor plugin by Jose Diaz Rohena
-* [Maim](https://github.com/ArdenButterfield/Maim), an mp3 distortion plugin by Arden Butterfield
 
 ## Setting up for YOUR project
 
@@ -49,13 +10,13 @@ That means the easiest thing to do is click "[Use this template](https://github.
 
 After you've created a new repo from the template, you have a checklist of things to do to customize for your project.
 
-* [ ] `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
+* [x] `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
 
-* [ ] [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
+* [x] [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
 
-* [ ] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin. It will also pull in the CMake needed and an example module, my component inspector.
+* [x] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin. It will also pull in the CMake needed and an example module, my component inspector.
 
-* [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
+* [x] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
 
 * [ ] Adjust which plugin formats you want built as needed (VST3, AU, etc).
 

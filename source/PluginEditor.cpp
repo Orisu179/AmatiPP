@@ -24,8 +24,7 @@ PluginEditor::PluginEditor (PluginProcessor& p)
 }
 
 PluginEditor::~PluginEditor()
-{
-}
+= default;
 
 void PluginEditor::paint (juce::Graphics& g)
 {

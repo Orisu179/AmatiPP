@@ -24,7 +24,7 @@ set(PROJECT_NAME "FaustVST")
 set(PRODUCT_NAME "FaustVST")
 
 # Change me! Used for the MacOS bundle name and Installers
-set(COMPANY_NAME "Jingge Li")
+set(COMPANY_NAME "Tyler Li")
 
 # Change me! Used for the MacOS bundle identifier (and signing)
 set(BUNDLE_ID "com.orisu179.faustvst")
@@ -44,6 +44,8 @@ include(JUCEDefaults)
 # and later `git submodule update --remote --merge` to keep it up to date
 # On Github Actions, this is done as a part of actions/checkout
 add_subdirectory(JUCE)
+
+find_package(FAUST)
 
 # Add any other modules you want modules here, before the juce_add_plugin call
 # juce_add_module(modules/my_module)
