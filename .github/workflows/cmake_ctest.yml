@@ -20,6 +20,7 @@ env:
 
 # jobs are run in paralell on different machines
 # all steps run in series
+# TODO: fix windows by installing Faust
 jobs:
   build_and_test:
     name: ${{ matrix.name }}
