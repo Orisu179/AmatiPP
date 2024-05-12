@@ -7,7 +7,15 @@ This project uses the [pamplejuce](https://github.com/sudara/pamplejuce) templat
 
 Building
 --------
-To build, make sure that libfaust is installed from [here](https://faust.grame.fr/downloads/).
+- To build, make sure that libfaust is installed from [here](https://faust.grame.fr/downloads/), and [CMake](https://cmake.org/download/) is installed.
+
+- Next, populate the sub repositories with ``git submodule update --init``
+
+- Open the project in Clion or VS2022 and build the standalone version, otherwise run the following in order:
+  -   ``mkdir build``
+  -   ``cd build``
+  -   ``cmake ..``
+  -   ``cmake --build``
 
 
 More details will be added as the project gets developed.
