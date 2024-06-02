@@ -86,15 +86,21 @@ void PluginEditor::paint (juce::Graphics& g)
 
 void PluginEditor::resized()
 {
-    // layout the positions of your child components here
-    auto area = getLocalBounds();
-    area.removeFromBottom(50);
-    inspectButton.setBounds (getLocalBounds().withSizeKeepingCentre(100, 50));
+//    // layout the positions of your child components here
+//    auto area = getLocalBounds();
+//    area.removeFromBottom(50);
+//    inspectButton.setBounds (getLocalBounds().withSizeKeepingCentre(100, 50));
+
+    int margin = 10;
+    auto bounds = getLocalBounds();
+    statusLabel.setBounds(bounds.removeFromTop(50));
+    tabbedComponent.setBounds (bounds.reduced(margin, margin));
 }
 void PluginEditor::updateParameters()
 {
+    paramEditor.updateParameters(processorRef.getFaustParameter());
 }
 
 void PluginEditor::updateEditor() {
-
+    editorComponent.setSource(processorRef.getSourceCode());
 }
