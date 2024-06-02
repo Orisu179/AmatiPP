@@ -1,12 +1,20 @@
 #pragma once
 
+#include "FaustProgram.h"
+#include <faust/dsp/llvm-dsp.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #if (MSVC)
-#include "ipps.h"
+    #include "ipps.h"
 #endif
+inline juce::String paramIdForIdx(int idx) {
+    return juce::String("Param") + juce::String(idx);
+}
+inline juce::String paramIdForIdx(size_t idx) {
+    return paramIdForIdx(static_cast<int>(idx));
+}
 
-class PluginProcessor : public juce::AudioProcessor
+class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener
 {
 public:
     PluginProcessor();
@@ -38,6 +46,33 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+
+    // For compiling faust program ---------
+    bool compileSource(juce::String);
+    juce::String getSourceCode();
+    void setBackend(FaustProgram::Backend);
+
+    struct FaustParameter {
+        juce::String id;
+        FaustProgram::Parameter programParameter;
+    };
+    std::vector<FaustParameter> getFaustParameter() const;
+
 private:
+    void valueTreePropertyChanged (
+        juce::ValueTree& tree,
+        const juce::Identifier& property) override;
+    juce::String sourceCode = "";
+    FaustProgram::Backend backend {};
+    std::unique_ptr<FaustProgram> faustProgram {};
+    bool playing { false };
+    juce::AudioProcessorValueTreeState valueTreeState;
+
+    // used to copy the input buffers
+    juce::AudioBuffer<float> tmpBufferIn;
+    juce::AudioBuffer<float> tmpBufferOut;
+    double sampRate {};
+
+    void updateDspParameters();
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };
