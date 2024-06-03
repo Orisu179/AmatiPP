@@ -1,6 +1,6 @@
 
 #include "EditorComponent.h"
-EditorComponent::EditorComponent() : codeEditor (sourceCode, nullptr),
+EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
                                      workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory))
 {
     addAndMakeVisible (&codeEditor);

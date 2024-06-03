@@ -1,6 +1,7 @@
 #pragma once
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "juce_gui_extra/juce_gui_extra.h"
+#include "FaustTokeniser.h"
 
 class EditorComponent : public juce::Component
 {
@@ -15,7 +16,7 @@ public:
     std::function<void(void)> onCompile;
     std::function<void(void)> onRevert;
 private:
-//    FaustTokeniser tokeniser;
+    FaustTokeniser tokeniser;
 
     // Source code HAVE to be declared before codeEditor
     juce::CodeDocument sourceCode;
