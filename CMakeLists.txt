@@ -9,11 +9,8 @@ include (PamplejuceVersion)
 # Configures universal binaries and decides which version of macOS to support
 include(PamplejuceMacOS)
 
-# Change me!
-# This is the internal name of the project and the name of JUCE's shared code target
-# Note: This cannot have spaces (it may be 2024, but you can't have it all!)
-# Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs display)
-set(PROJECT_NAME "FaustVST")
+# This is the internal name of the project and the name of JUCE's shared code target, cannot have spaces
+set(PROJECT_NAME "Amati_pp")
 
 # Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs will display)
 # You can also just have it be the same thing as PROJECT_NAME
@@ -21,17 +18,17 @@ set(PROJECT_NAME "FaustVST")
 #   set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
 # Doing so enables major versions to show up in IDEs and DAWs as separate plugins
 # allowing you to change parameters and behavior without breaking existing user projects
-set(PRODUCT_NAME "FaustVST")
+set(PRODUCT_NAME "Amati_pp")
 
 # Change me! Used for the MacOS bundle name and Installers
 set(COMPANY_NAME "Tyler Li")
 
 # Change me! Used for the MacOS bundle identifier (and signing)
-set(BUNDLE_ID "com.orisu179.faustvst")
+set(BUNDLE_ID "com.orisu179.amatipp")
 
 # Change me! Set the plugin formats you want built
 # Valid choices: AAX Unity VST VST3 AU AUv3 Standalone
-set(FORMATS Standalone AU VST3 AUv3)
+set(FORMATS Standalone VST3 CLAP)
 
 # For simplicity, the name of the CMake project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
@@ -44,6 +41,8 @@ include(JUCEDefaults)
 # and later `git submodule update --remote --merge` to keep it up to date
 # On Github Actions, this is done as a part of actions/checkout
 add_subdirectory(JUCE)
+
+add_subdirectory(modules/clap-juce-extensions EXCLUDE_FROM_ALL)
 
 find_package(FAUST)
 
@@ -68,7 +67,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # Change me!
     # A four-character plugin id
     # First character MUST be uppercase for AU formats
-    PLUGIN_MANUFACTURER_CODE FVST
+    PLUGIN_MANUFACTURER_CODE AMTI
 
     # Change me!
     # A unique four-character plugin id
@@ -81,6 +80,11 @@ juce_add_plugin("${PROJECT_NAME}"
     # This can be different from PROJECT_NAME and can have spaces!
     # You might want to use v${MAJOR_VERSION} here once you go to v2...
     PRODUCT_NAME "${PRODUCT_NAME}")
+
+# This is for the CLAP format
+clap_juce_extensions_plugin(TARGET Amati_pp
+        CLAP_ID "${BUNDLE_ID}"
+        CLAP_FEATURES instrument synthesizer audio-effect)
 
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
@@ -118,7 +122,7 @@ target_compile_definitions(SharedCode
     VERSION="${CURRENT_VERSION}"
 
     # JucePlugin_Name is for some reason doesn't use the nicer PRODUCT_NAME
-    PRODUCT_NAME_WITHOUT_VERSION="FaustVST"
+    PRODUCT_NAME_WITHOUT_VERSION="Amati_pp"
 )
 
 # Link to any other modules you added (with juce_add_module) here!
@@ -130,6 +134,7 @@ target_link_libraries(SharedCode
     INTERFACE
     Assets
     melatonin_inspector
+    clap_juce_extensions
     juce_audio_utils
     juce_audio_processors
     juce_dsp
