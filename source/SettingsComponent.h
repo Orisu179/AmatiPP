@@ -23,5 +23,6 @@ public:
 private:
     ComboBoxSetting backendComboBox;
     // TODO: Get rid of this test combo
+    ComboBoxSetting colourComboBox;
     ComboBoxSetting testComboBox;
 };

@@ -1,4 +1,3 @@
-
 #include "EditorComponent.h"
 EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
                                      workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory))
@@ -40,21 +39,24 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
     addAndMakeVisible (exportButton);
     revertButton.setButtonText ("Revert");
     addAndMakeVisible (revertButton);
+
+    //==========
+    auto font = juce::Font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain);
+    codeEditor.setFont(font);
 }
 
 void EditorComponent::resized()
 {
     int margin = 10;
     int buttonHeight = 30;
-    int buttonWidth = 100;
+    int buttonWidth = 75;
 
     using FB = juce::FlexBox;
     FB buttons;
     buttons.flexDirection = FB::Direction::row;
     buttons.alignItems = FB::AlignItems::flexStart;
     buttons.flexWrap = FB::Wrap::noWrap;
-    buttons.justifyContent = FB::JustifyContent::flexStart;
-    buttons.alignItems = FB::AlignItems::flexStart;
+    buttons.justifyContent = FB::JustifyContent::flexEnd;
 
     auto addButton = [&] (auto& button) {
         buttons.items.add (juce::FlexItem (button).withMargin (margin).withMinHeight (buttonHeight).withMaxWidth (buttonWidth).withFlex (1));

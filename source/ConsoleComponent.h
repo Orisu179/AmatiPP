@@ -10,7 +10,7 @@ class ConsoleComponent : public juce::Component,
 {
 public:
     ConsoleComponent();
-    ~ConsoleComponent() override {}
+    ~ConsoleComponent();
 
     void paint (juce::Graphics&) override {}
     void resized() override;

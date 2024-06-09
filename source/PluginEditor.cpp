@@ -12,9 +12,8 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+    juce::LookAndFeel_V4::setDefaultLookAndFeel(&amatiLookAndFeel);
     setSize (800, 600);
-
-    juce::ignoreUnused (processorRef);
     setResizable(true, true);
     setResizeLimits(100, 100, 1920, 1080);
 
@@ -69,32 +68,35 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     settingTree.addListener(this);
 }
 
-PluginEditor::~PluginEditor()
-= default;
+PluginEditor::~PluginEditor() {
+    setLookAndFeel(nullptr);
+}
 
 void PluginEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-//
-//    auto area = getLocalBounds();
-//    g.setColour (juce::Colours::white);
-//    g.setFont (16.0f);
-//    auto helloWorld = juce::String ("Hello from ") + PRODUCT_NAME_WITHOUT_VERSION + " v" VERSION + " running in " + CMAKE_BUILD_TYPE;
-//    g.drawText (helloWorld, area.removeFromTop (150), juce::Justification::centred, false);
 }
 
 void PluginEditor::resized()
 {
 //    // layout the positions of your child components here
-//    auto area = getLocalBounds();
-//    area.removeFromBottom(50);
-//    inspectButton.setBounds (getLocalBounds().withSizeKeepingCentre(100, 50));
-
     int margin = 10;
     auto bounds = getLocalBounds();
-    statusLabel.setBounds(bounds.removeFromTop(50));
+    topItemFlex.flexDirection = juce::FlexBox::Direction::row;
+    topItemFlex.flexWrap = juce::FlexBox::Wrap::wrap;
+    topItemFlex.justifyContent = juce::FlexBox::JustifyContent::flexStart;
+    topItemFlex.alignItems = juce::FlexBox::AlignItems::flexStart;
+
+//    menuBarFb.flexDirection = juce::FlexBox::Direction::row;
+//    menuBarFb.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
+    topItemFlex.items.add(juce::FlexItem(statusLabel).withMinWidth(50.0f).withMinHeight(50.0f));
+    topItemFlex.items.add(juce::FlexItem(inspectButton).withMinWidth(50.0f).withMinHeight(50.0f));
+//    statusLabel.setBounds(bounds.removeFromTop(50));
+//    inspectButton.setBounds(bounds.removeFromTop(10));
+    topItemFlex.performLayout(bounds.removeFromTop(50.0f));
     tabbedComponent.setBounds (bounds.reduced(margin, margin));
+
 }
 void PluginEditor::updateParameters()
 {

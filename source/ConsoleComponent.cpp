@@ -18,6 +18,11 @@ ConsoleComponent::ConsoleComponent()
     addAndMakeVisible (&console);
 }
 
+ConsoleComponent::~ConsoleComponent()
+{
+   juce::Logger::setCurrentLogger(nullptr);
+}
+
 void ConsoleComponent::resized ()
 {
     int margin = 10;

@@ -8,6 +8,7 @@
 #include "ParamEditor.h"
 #include "EditorComponent.h"
 #include <faust/gui/MapUI.h>
+#include "AmatiLookAndFeel.h"
 
 //==============================================================================
 class PluginEditor : public juce::AudioProcessorEditor,
@@ -27,6 +28,7 @@ private:
     PluginProcessor& processorRef;
     juce::AudioProcessorValueTreeState& valueTreeState;
     juce::ValueTree settingTree;
+    AmatiLookAndFeel amatiLookAndFeel;
 
     MapUI faustUI;
     void updateParameters();
@@ -38,6 +40,8 @@ private:
     ParamEditor paramEditor;
     juce::TabbedComponent tabbedComponent;
     juce::Label statusLabel;
+    juce::FlexBox topItemFlex;
+//    juce::FlexBox menuBarFb;
 
     // melatonin stuff
     std::unique_ptr<melatonin::Inspector> inspector;

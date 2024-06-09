@@ -5,6 +5,7 @@
 #include "SettingsComponent.h"
 
 SettingsComponent::SettingsComponent (juce::ValueTree settingsTree) : backendComboBox (settingsTree.getPropertyAsValue ("backend", nullptr), "Backend", { "LLVM", "Interpreter" }),
+                                                                      colourComboBox(settingsTree.getPropertyAsValue("colour", nullptr), "Colour Theme", {"One Dark", "Moonlight"}),
                                                                       testComboBox (settingsTree.getPropertyAsValue ("test", nullptr), "Test", { "A", "B" })
 {
     addAndMakeVisible (backendComboBox);
