@@ -2,6 +2,9 @@
 EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
                                      workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory))
 {
+    addAndMakeVisible (statusLabel);
+    statusLabel.setText ("Status: Modified", juce::dontSendNotification);
+
     addAndMakeVisible (&codeEditor);
     compileButton.setComponentID ("compile");
     compileButton.setButtonText ("compile");
@@ -41,22 +44,25 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
     addAndMakeVisible (revertButton);
 
     //==========
-    auto font = juce::Font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain);
-    codeEditor.setFont(font);
+    auto font = juce::Font (juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain);
+    codeEditor.setFont (font);
 }
 
 void EditorComponent::resized()
 {
+    using FB = juce::FlexBox;
     int margin = 10;
     int buttonHeight = 30;
     int buttonWidth = 75;
-
-    using FB = juce::FlexBox;
-    FB buttons;
     buttons.flexDirection = FB::Direction::row;
     buttons.alignItems = FB::AlignItems::flexStart;
     buttons.flexWrap = FB::Wrap::noWrap;
     buttons.justifyContent = FB::JustifyContent::flexEnd;
+
+//    topBar.flexWrap = FB::Wrap::noWrap;
+//    topBar.flexDirection = FB::Direction::row;
+//    topBar.justifyContent = FB::JustifyContent::spaceBetween;
+//    topBar.alignItems = FB::AlignItems::flexStart;
 
     auto addButton = [&] (auto& button) {
         buttons.items.add (juce::FlexItem (button).withMargin (margin).withMinHeight (buttonHeight).withMaxWidth (buttonWidth).withFlex (1));
@@ -65,6 +71,9 @@ void EditorComponent::resized()
     addButton (importButton);
     addButton (exportButton);
     addButton (revertButton);
+
+//    topBar.items.add(juce::FlexItem(statusLabel));
+//    topBar.items.add(juce::FlexItem(buttons));
 
     auto bounds = getLocalBounds();
     buttons.performLayout (bounds.removeFromTop (buttonHeight));
@@ -81,7 +90,11 @@ juce::String EditorComponent::getSource()
     return sourceCode.getAllContent();
 }
 
-void EditorComponent::setSource (juce::String source)
+void EditorComponent::setSource (const juce::String& source)
 {
     sourceCode.replaceAllContent (source);
+}
+void EditorComponent::setStatus (const juce::String& status, juce::NotificationType notice)
+{
+    statusLabel.setText (status, notice);
 }

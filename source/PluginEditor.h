@@ -39,8 +39,6 @@ private:
     EditorComponent editorComponent;
     ParamEditor paramEditor;
     juce::TabbedComponent tabbedComponent;
-    juce::Label statusLabel;
-    juce::FlexBox topItemFlex;
 //    juce::FlexBox menuBarFb;
 
     // melatonin stuff

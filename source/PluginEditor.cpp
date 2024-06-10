@@ -29,9 +29,6 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
         inspector->setVisible (true);
     };
 
-    addAndMakeVisible(statusLabel);
-    statusLabel.setText("Status: Modified", juce::dontSendNotification);
-
     addAndMakeVisible (&tabbedComponent);
 
     juce::Colour tabColour = getLookAndFeel(). findColour (juce::TabbedComponent::backgroundColourId);
@@ -49,11 +46,11 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
         consoleComponent.clearMessages();
         if (processorRef.compileSource(editorComponent.getSource ()))
         {
-            statusLabel.setText("Status: Running", juce::sendNotification);
+            editorComponent.setStatus("Status: Running", juce::sendNotification);
             updateParameters ();
             tabbedComponent.setCurrentTabIndex(1);
         } else {
-            statusLabel.setText("Status: Error", juce::sendNotification);
+            editorComponent.setStatus("Status: Error", juce::sendNotification);
             tabbedComponent.setCurrentTabIndex(2);
         }
     };
@@ -61,8 +58,8 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
         updateEditor();
     };
 
-    updateParameters (); // set the right display for the parameters
-    updateEditor (); // set editor to display the processor's source code
+    updateParameters(); // set the right display for the parameters
+    updateEditor(); // set editor to display the processor's source code
 
     juce::Logger::setCurrentLogger (&consoleComponent);
     settingTree.addListener(this);
@@ -72,7 +69,7 @@ PluginEditor::~PluginEditor() {
     setLookAndFeel(nullptr);
 }
 
-void PluginEditor::paint (juce::Graphics& g)
+void PluginEditor::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
@@ -83,18 +80,11 @@ void PluginEditor::resized()
 //    // layout the positions of your child components here
     int margin = 10;
     auto bounds = getLocalBounds();
-    topItemFlex.flexDirection = juce::FlexBox::Direction::row;
-    topItemFlex.flexWrap = juce::FlexBox::Wrap::wrap;
-    topItemFlex.justifyContent = juce::FlexBox::JustifyContent::flexStart;
-    topItemFlex.alignItems = juce::FlexBox::AlignItems::flexStart;
 
 //    menuBarFb.flexDirection = juce::FlexBox::Direction::row;
 //    menuBarFb.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
-    topItemFlex.items.add(juce::FlexItem(statusLabel).withMinWidth(50.0f).withMinHeight(50.0f));
-    topItemFlex.items.add(juce::FlexItem(inspectButton).withMinWidth(50.0f).withMinHeight(50.0f));
 //    statusLabel.setBounds(bounds.removeFromTop(50));
-//    inspectButton.setBounds(bounds.removeFromTop(10));
-    topItemFlex.performLayout(bounds.removeFromTop(50.0f));
+    inspectButton.setBounds(bounds.removeFromBottom(30));
     tabbedComponent.setBounds (bounds.reduced(margin, margin));
 
 }
@@ -106,3 +96,4 @@ void PluginEditor::updateParameters()
 void PluginEditor::updateEditor() {
     editorComponent.setSource(processorRef.getSourceCode());
 }
+

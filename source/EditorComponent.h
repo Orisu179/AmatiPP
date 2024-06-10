@@ -13,9 +13,10 @@ public:
     void resized() override;
 
     juce::String getSource();
-    void setSource(juce::String);
+    void setSource(const juce::String&);
     std::function<void(void)> onCompile;
     std::function<void(void)> onRevert;
+    void setStatus(const juce::String&, juce::NotificationType);
 private:
     FaustTokeniser tokeniser;
 
@@ -27,6 +28,11 @@ private:
     juce::TextButton revertButton;
     juce::TextButton importButton;
     juce::TextButton exportButton;
+
+    juce::FlexBox buttons;
+    juce::FlexBox topBar;
+
+    juce::Label statusLabel;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File workDir;
