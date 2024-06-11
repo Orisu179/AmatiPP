@@ -54,29 +54,36 @@ void EditorComponent::resized()
     int margin = 10;
     int buttonHeight = 30;
     int buttonWidth = 75;
+    int textHeight = 40;
+    int textWidth = 100;
     buttons.flexDirection = FB::Direction::row;
     buttons.alignItems = FB::AlignItems::flexStart;
     buttons.flexWrap = FB::Wrap::noWrap;
     buttons.justifyContent = FB::JustifyContent::flexEnd;
 
-//    topBar.flexWrap = FB::Wrap::noWrap;
-//    topBar.flexDirection = FB::Direction::row;
-//    topBar.justifyContent = FB::JustifyContent::spaceBetween;
-//    topBar.alignItems = FB::AlignItems::flexStart;
+    topBar.flexWrap = FB::Wrap::noWrap;
+    topBar.flexDirection = FB::Direction::row;
+    topBar.alignItems = FB::AlignItems::flexStart;
+    topBar.justifyContent = FB::JustifyContent::flexStart;
 
-    auto addButton = [&] (auto& button) {
-        buttons.items.add (juce::FlexItem (button).withMargin (margin).withMinHeight (buttonHeight).withMaxWidth (buttonWidth).withFlex (1));
-    };
-    addButton (compileButton);
-    addButton (importButton);
-    addButton (exportButton);
-    addButton (revertButton);
+//    auto addButton = [&] (auto& button) {
+//        buttons.items.add (juce::FlexItem(button).
+//                           withMargin(margin).
+//                           withMinHeight(buttonHeight).
+//                           withMaxWidth(buttonWidth).
+//                           withFlex(1.0));
+//    };
+//    addButton (compileButton);
+//    addButton (importButton);
+//    addButton (exportButton);
+//    addButton (revertButton);
 
-//    topBar.items.add(juce::FlexItem(statusLabel));
-//    topBar.items.add(juce::FlexItem(buttons));
+    topBar.items.add(juce::FlexItem(statusLabel).withMinHeight(textHeight).withMaxWidth(textWidth).withFlex(1.0));
+//    topBar.items.add(juce::FlexItem(buttons).withFlex(2.0));
 
     auto bounds = getLocalBounds();
-    buttons.performLayout (bounds.removeFromTop (buttonHeight));
+    topBar.performLayout(bounds.removeFromTop(buttonHeight));
+
 
     codeEditor.setBounds (
         margin,

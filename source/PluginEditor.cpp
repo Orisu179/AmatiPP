@@ -47,7 +47,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
         if (processorRef.compileSource(editorComponent.getSource ()))
         {
             editorComponent.setStatus("Status: Running", juce::sendNotification);
-            updateParameters ();
+            updateParameters();
             tabbedComponent.setCurrentTabIndex(1);
         } else {
             editorComponent.setStatus("Status: Error", juce::sendNotification);
