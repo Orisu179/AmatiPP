@@ -97,6 +97,9 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: true # Get JUCE populated
+    # Update references
+    - name: Git submodule update
+      run: git submodule update --init --recursive
 
     - name: Cache the build
       uses: mozilla-actions/sccache-action@v0.0.3
