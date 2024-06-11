@@ -20,6 +20,7 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
+#include <cstring>
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
 #include <juce_core/juce_core.h>
