@@ -30,12 +30,12 @@ private:
     juce::TextButton exportButton;
 
     juce::FlexBox buttons;
-//    juce::FlexBox topBar;
 
     juce::Label statusLabel;
     juce::Label fileLabel;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File workDir;
+    juce::Font font;
 };
 

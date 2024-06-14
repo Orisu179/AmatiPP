@@ -1,9 +1,11 @@
 #include "EditorComponent.h"
-EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
+EditorComponent::EditorComponent() : font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain),
+                                     codeEditor (sourceCode, &tokeniser),
                                      workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory))
 {
     addAndMakeVisible (statusLabel);
     statusLabel.setText ("Status: Modified", juce::dontSendNotification);
+    statusLabel.setFont(font);
 
     addAndMakeVisible(fileLabel);
     fileLabel.setText("Whatever.dsp", juce::dontSendNotification);
@@ -47,7 +49,6 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
     addAndMakeVisible (revertButton);
 
     //==========
-    auto font = juce::Font (juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain);
     codeEditor.setFont (font);
 }
 
@@ -57,38 +58,32 @@ void EditorComponent::resized()
     int margin = 10;
     int buttonHeight = 30;
     int buttonWidth = 75;
-    float textHeight = 40;
+    float textHeight = 60;
     float textWidth = 100;
     auto bounds = getLocalBounds();
 
-//    topBar.flexDirection = fb::Direction::row;
-//    topBar.alignItems = fb::AlignItems::flexStart;
-//    topBar.justifyContent = fb::JustifyContent::spaceBetween;
 
     buttons.flexDirection = fb::Direction::row;
     buttons.alignItems = fb::AlignItems::flexStart;
     buttons.flexWrap = fb::Wrap::noWrap;
-    buttons.justifyContent = fb::JustifyContent::flexStart;
+    buttons.justifyContent = fb::JustifyContent::flexEnd;
 
 
-//    buttons.items.add(juce::FlexItem(textWidth, textHeight, statusLabel));
     auto addButton = [&] (auto& button) {
         buttons.items.add (juce::FlexItem(button).
                            withMargin(margin).
                            withMinHeight(buttonHeight).
                            withMaxWidth(buttonWidth).
-                           withFlex(0.5));
+                           withFlex(1));
     };
     addButton (compileButton);
     addButton (importButton);
     addButton (exportButton);
     addButton (revertButton);
 
-//    topBar.items.add(juce::FlexItem(fileLabel).withMinHeight(textHeight).withMaxWidth(textWidth).withFlex(1.0));
-//    topBar.items.add(juce::FlexItem(statusLabel).withMinHeight(textHeight).withMaxWidth(textWidth).withFlex(1.0));
-//    topBar.items.add(juce::FlexItem(buttons).withFlex(1.0));
 
-    buttons.performLayout(bounds);
+    buttons.performLayout(bounds.removeFromTop(buttonHeight));
+    statusLabel.setBounds(getWidth() / 60, -5, textWidth, textHeight);
 
 
     codeEditor.setBounds (

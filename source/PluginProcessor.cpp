@@ -311,7 +311,6 @@ void PluginProcessor::updateDspParameters() {
     }
 }
 void PluginProcessor::setBackend (FaustProgram::Backend newBackend) {
-    DBG("setBackend: " << int(newBackend));
     backend = newBackend;
     compileSource(sourceCode);
 }
