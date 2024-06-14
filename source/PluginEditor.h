@@ -39,7 +39,6 @@ private:
     EditorComponent editorComponent;
     ParamEditor paramEditor;
     juce::TabbedComponent tabbedComponent;
-//    juce::FlexBox menuBarFb;
 
     // melatonin stuff
     std::unique_ptr<melatonin::Inspector> inspector;

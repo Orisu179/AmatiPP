@@ -81,9 +81,6 @@ void PluginEditor::resized()
     int margin = 10;
     auto bounds = getLocalBounds();
 
-//    menuBarFb.flexDirection = juce::FlexBox::Direction::row;
-//    menuBarFb.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
-//    statusLabel.setBounds(bounds.removeFromTop(50));
     inspectButton.setBounds(bounds.removeFromBottom(30));
     tabbedComponent.setBounds (bounds.reduced(margin, margin));
 

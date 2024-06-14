@@ -1,7 +1,3 @@
-//
-// Created by tyler on 5/18/24.
-//
-
 #include "ConsoleComponent.h"
 
 ConsoleComponent::ConsoleComponent()

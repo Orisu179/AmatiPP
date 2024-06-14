@@ -5,6 +5,9 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
     addAndMakeVisible (statusLabel);
     statusLabel.setText ("Status: Modified", juce::dontSendNotification);
 
+    addAndMakeVisible(fileLabel);
+    fileLabel.setText("Whatever.dsp", juce::dontSendNotification);
+
     addAndMakeVisible (&codeEditor);
     compileButton.setComponentID ("compile");
     compileButton.setButtonText ("compile");
@@ -50,39 +53,42 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
 
 void EditorComponent::resized()
 {
-    using FB = juce::FlexBox;
+    using fb = juce::FlexBox;
     int margin = 10;
     int buttonHeight = 30;
     int buttonWidth = 75;
-    int textHeight = 40;
-    int textWidth = 100;
-    buttons.flexDirection = FB::Direction::row;
-    buttons.alignItems = FB::AlignItems::flexStart;
-    buttons.flexWrap = FB::Wrap::noWrap;
-    buttons.justifyContent = FB::JustifyContent::flexEnd;
-
-    topBar.flexWrap = FB::Wrap::noWrap;
-    topBar.flexDirection = FB::Direction::row;
-    topBar.alignItems = FB::AlignItems::flexStart;
-    topBar.justifyContent = FB::JustifyContent::flexStart;
-
-//    auto addButton = [&] (auto& button) {
-//        buttons.items.add (juce::FlexItem(button).
-//                           withMargin(margin).
-//                           withMinHeight(buttonHeight).
-//                           withMaxWidth(buttonWidth).
-//                           withFlex(1.0));
-//    };
-//    addButton (compileButton);
-//    addButton (importButton);
-//    addButton (exportButton);
-//    addButton (revertButton);
-
-    topBar.items.add(juce::FlexItem(statusLabel).withMinHeight(textHeight).withMaxWidth(textWidth).withFlex(1.0));
-//    topBar.items.add(juce::FlexItem(buttons).withFlex(2.0));
-
+    float textHeight = 40;
+    float textWidth = 100;
     auto bounds = getLocalBounds();
-    topBar.performLayout(bounds.removeFromTop(buttonHeight));
+
+//    topBar.flexDirection = fb::Direction::row;
+//    topBar.alignItems = fb::AlignItems::flexStart;
+//    topBar.justifyContent = fb::JustifyContent::spaceBetween;
+
+    buttons.flexDirection = fb::Direction::row;
+    buttons.alignItems = fb::AlignItems::flexStart;
+    buttons.flexWrap = fb::Wrap::noWrap;
+    buttons.justifyContent = fb::JustifyContent::flexStart;
+
+
+//    buttons.items.add(juce::FlexItem(textWidth, textHeight, statusLabel));
+    auto addButton = [&] (auto& button) {
+        buttons.items.add (juce::FlexItem(button).
+                           withMargin(margin).
+                           withMinHeight(buttonHeight).
+                           withMaxWidth(buttonWidth).
+                           withFlex(0.5));
+    };
+    addButton (compileButton);
+    addButton (importButton);
+    addButton (exportButton);
+    addButton (revertButton);
+
+//    topBar.items.add(juce::FlexItem(fileLabel).withMinHeight(textHeight).withMaxWidth(textWidth).withFlex(1.0));
+//    topBar.items.add(juce::FlexItem(statusLabel).withMinHeight(textHeight).withMaxWidth(textWidth).withFlex(1.0));
+//    topBar.items.add(juce::FlexItem(buttons).withFlex(1.0));
+
+    buttons.performLayout(bounds);
 
 
     codeEditor.setBounds (

@@ -1,5 +1,7 @@
-//
-// Created by tyler on 6/10/24.
-//
-
+#pragma once
 #include "Colours.h"
+
+Colours::Colours()
+{
+
+}
