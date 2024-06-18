@@ -1,15 +1,9 @@
-//
-// Created by tyler on 5/18/24.
-//
-
 #include "SettingsComponent.h"
 
 SettingsComponent::SettingsComponent (juce::ValueTree settingsTree) : backendComboBox (settingsTree.getPropertyAsValue ("backend", nullptr), "Backend", { "LLVM", "Interpreter" }),
-                                                                      colourComboBox(settingsTree.getPropertyAsValue("colour", nullptr), "Colour Theme", {"One Dark", "Moonlight"}),
-                                                                      testComboBox (settingsTree.getPropertyAsValue ("test", nullptr), "Test", { "A", "B" })
+                                                                      themeComboBox(settingsTree.getPropertyAsValue("colour", nullptr), "Colour Theme", {"One Dark", "Moonlight"})
 {
     addAndMakeVisible (backendComboBox);
-    // addAndMakeVisible(testComboBox);
 }
 
 void SettingsComponent::resized()
@@ -27,13 +21,12 @@ void SettingsComponent::resized()
         box.items.add (item);
     };
     addItem (backendComboBox);
-    // addItem(testComboBox);
 
     box.performLayout (getLocalBounds());
 }
 
 ComboBoxSetting::ComboBoxSetting (const juce::Value& value,
-    juce::String labelText,
+    const juce::String& labelText,
     const std::vector<juce::String>& items)
 {
     label.setText (labelText, juce::dontSendNotification);

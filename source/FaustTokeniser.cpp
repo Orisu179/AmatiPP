@@ -247,8 +247,8 @@ struct FaustTokeniserFunctions
 };
 
 //==============================================================================
-FaustTokeniser::FaustTokeniser() {}
-FaustTokeniser::~FaustTokeniser() {}
+FaustTokeniser::FaustTokeniser() = default;
+FaustTokeniser::~FaustTokeniser() = default;
 
 int FaustTokeniser::readNextToken (juce::CodeDocument::Iterator& source)
 {
@@ -257,23 +257,23 @@ int FaustTokeniser::readNextToken (juce::CodeDocument::Iterator& source)
 
 juce::CodeEditorComponent::ColourScheme FaustTokeniser::getDefaultColourScheme()
 {
-    static const juce::CodeEditorComponent::ColourScheme::TokenType types[] =
-        {
-            { "Error",          juce::Colour (0xffffffff) },
-            { "Comment",        juce::Colour (0xff707880) },
-            { "Primitive",      juce::Colour (0xffde935f) },
-            { "Operator",       juce::Colour (0xff8abeb7) },
-            { "Identifier",     juce::Colour (0xffc5c8c6) },
-            { "Integer",        juce::Colour (0xffcc6666) },
-            { "Float",          juce::Colour (0xffcc6666) },
-            { "String",   juce::Colour (0xffb5bd68) },
-            { "Bracket",        juce::Colour (0xffffffff) },
-            { "Punctuation",    juce::Colour (0xffffffff) }
-        };
+    Colours& globalColours = Colours::getInstance();
 
+    static const juce::CodeEditorComponent::ColourScheme::TokenType types[] = {
+        { "Error",          globalColours.getColour("oneDarkMidGrey") }, // white
+        { "Comment",        globalColours.getColour("oneDarkMidGrey") },
+        { "Primitive",      globalColours.getColour("oneDarkPurple") }, //orange
+        { "Operator",       globalColours.getColour("oneDarkTeal") },
+        { "Identifier",     globalColours.getColour("oneDarkLightGrey") },
+        { "Integer",        globalColours.getColour("oneDarkYellow") },
+        { "Float",          globalColours.getColour("oneDarkYellow") },
+        { "String",         globalColours.getColour("oneDarkGreen") },
+        { "Bracket",        globalColours.getColour("oneDarkLightGrey") },
+        { "Punctuation",    globalColours.getColour("oneDarkLightGrey") }
+    };
     juce::CodeEditorComponent::ColourScheme cs;
 
-    for (unsigned int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
+    for(unsigned int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
         cs.set (types[i].name, types[i].colour);
 
     return cs;
