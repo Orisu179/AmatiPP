@@ -257,19 +257,17 @@ int FaustTokeniser::readNextToken (juce::CodeDocument::Iterator& source)
 
 juce::CodeEditorComponent::ColourScheme FaustTokeniser::getDefaultColourScheme()
 {
-    Colours& globalColours = Colours::getInstance();
-
     static const juce::CodeEditorComponent::ColourScheme::TokenType types[] = {
-        { "Error",          globalColours.getColour("oneDarkMidGrey") }, // white
-        { "Comment",        globalColours.getColour("oneDarkMidGrey") },
-        { "Primitive",      globalColours.getColour("oneDarkPurple") }, //orange
-        { "Operator",       globalColours.getColour("oneDarkTeal") },
-        { "Identifier",     globalColours.getColour("oneDarkLightGrey") },
-        { "Integer",        globalColours.getColour("oneDarkYellow") },
-        { "Float",          globalColours.getColour("oneDarkYellow") },
-        { "String",         globalColours.getColour("oneDarkGreen") },
-        { "Bracket",        globalColours.getColour("oneDarkLightGrey") },
-        { "Punctuation",    globalColours.getColour("oneDarkLightGrey") }
+        { "Error",          oneDarkMidGrey }, // white
+        { "Comment",        oneDarkMidGrey },
+        { "Primitive",      oneDarkPurple }, //orange
+        { "Operator",       oneDarkTeal },
+        { "Identifier",     oneDarkLightGrey },
+        { "Integer",        oneDarkYellow },
+        { "Float",          oneDarkYellow },
+        { "String",         oneDarkGreen },
+        { "Bracket",        oneDarkLightGrey },
+        { "Punctuation",    oneDarkLightGrey }
     };
     juce::CodeEditorComponent::ColourScheme cs;
 

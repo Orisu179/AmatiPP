@@ -22,5 +22,5 @@ public:
     void resized() override;
 private:
     ComboBoxSetting backendComboBox;
-    ComboBoxSetting themeComboBox;
+//    ComboBoxSetting themeComboBox;
 };

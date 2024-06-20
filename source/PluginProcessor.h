@@ -48,7 +48,7 @@ public:
 
 
     // For compiling faust program ---------
-    bool compileSource(juce::String);
+    bool compileSource(const juce::String&);
     juce::String getSourceCode();
     void setBackend(FaustProgram::Backend);
 

@@ -1,7 +1,7 @@
 #include "EditorComponent.h"
-EditorComponent::EditorComponent() : font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain),
-                                     codeEditor (sourceCode, &tokeniser),
-                                     workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory))
+EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
+                                     workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory)),
+                                     font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain)
 {
     addAndMakeVisible (statusLabel);
     statusLabel.setText ("Status: Modified", juce::dontSendNotification);

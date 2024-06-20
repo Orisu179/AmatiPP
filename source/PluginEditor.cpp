@@ -44,7 +44,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     editorComponent.onCompile = [&] {
         consoleComponent.clearMessages();
-        if (processorRef.compileSource(editorComponent.getSource ()))
+        if (processorRef.compileSource(editorComponent.getSource()))
         {
             editorComponent.setStatus("Status: Running", juce::sendNotification);
             updateParameters();

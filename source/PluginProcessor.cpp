@@ -270,7 +270,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new PluginProcessor();
 }
 
-bool PluginProcessor::compileSource (juce::String source) {
+bool PluginProcessor::compileSource (const juce::String& source) {
     if(!playing) {
         return false;
     }
@@ -296,8 +296,8 @@ bool PluginProcessor::compileSource (juce::String source) {
     int inChans  = faustProgram->getNumInChannels  ();
     int outChans = faustProgram->getNumOutChannels ();
 
-    tmpBufferIn.setSize  (inChans,  tmpBufferIn.getNumSamples  ());
-    tmpBufferOut.setSize (outChans, tmpBufferOut.getNumSamples ());
+    tmpBufferIn.setSize(inChans,  tmpBufferIn.getNumSamples());
+    tmpBufferOut.setSize(outChans, tmpBufferOut.getNumSamples());
     return true;
 }
 
