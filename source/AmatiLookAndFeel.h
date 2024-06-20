@@ -6,6 +6,7 @@ class AmatiLookAndFeel : public juce::LookAndFeel_V4
 public:
     //==============================================================================
     AmatiLookAndFeel();
+    void drawRoundThumb();
 private:
     juce::Colour oneDarkBlack = juce::Colour(40, 44, 52);
     juce::Colour oneDarkDeepGrey = juce::Colour(50, 54, 62);

@@ -7,7 +7,6 @@
 #include "SettingsComponent.h"
 #include "ParamEditor.h"
 #include "EditorComponent.h"
-#include <faust/gui/MapUI.h>
 #include "AmatiLookAndFeel.h"
 
 //==============================================================================
@@ -23,14 +22,11 @@ public:
     void resized() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     PluginProcessor& processorRef;
     juce::AudioProcessorValueTreeState& valueTreeState;
     juce::ValueTree settingTree;
     AmatiLookAndFeel amatiLookAndFeel;
 
-    MapUI faustUI;
     void updateParameters();
     void updateEditor();
 

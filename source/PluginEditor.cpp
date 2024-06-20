@@ -31,7 +31,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     addAndMakeVisible (&tabbedComponent);
 
-    juce::Colour tabColour = getLookAndFeel(). findColour (juce::TabbedComponent::backgroundColourId);
+    juce::Colour tabColour = getLookAndFeel().findColour(juce::TabbedComponent::backgroundColourId);
     tabbedComponent.addTab ("Editor", tabColour, &editorComponent, false);
     tabbedComponent.addTab ("Parameters", tabColour, &paramEditor, false);
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
@@ -58,8 +58,8 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
         updateEditor();
     };
 
-    updateParameters(); // set the right display for the parameters
     updateEditor(); // set editor to display the processor's source code
+    updateParameters(); // set the right display for the parameters
 
     juce::Logger::setCurrentLogger (&consoleComponent);
     settingTree.addListener(this);

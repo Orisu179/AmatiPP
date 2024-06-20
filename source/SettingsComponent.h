@@ -16,7 +16,7 @@ private:
 class SettingsComponent : public juce::Component
 {
 public:
-    explicit SettingsComponent(juce::ValueTree settingsTree);
+    SettingsComponent(juce::ValueTree settingsTree);
 
     void paint (juce::Graphics&) override {}
     void resized() override;

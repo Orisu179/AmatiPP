@@ -200,7 +200,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 //==============================================================================
 bool PluginProcessor::hasEditor() const
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    return true;
 }
 
 juce::AudioProcessorEditor* PluginProcessor::createEditor()
@@ -224,7 +224,6 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
     sourceTag->addTextElement(sourceCode);
     auto state = valueTreeState.copyState().createXml();
     preset.addChildElement(new juce::XmlElement(*state.get()));
-    // DBG(preset.toString());
     // stores tree on desk
     copyXmlToBinary(preset, destData);
 }
@@ -320,8 +319,10 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     if(!faustProgram) {
         return params;
     }
-    for(int i = 0; i<faustProgram->getParamCount(); i++)
+    for(int i = 0; i<faustProgram->getParamCount(); i++) {
         params.push_back({ paramIdForIdx(i), faustProgram->getParameter(i)});
+        DBG(paramIdForIdx(i));
+    }
     return params;
 }
 

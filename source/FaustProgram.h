@@ -52,7 +52,7 @@ public:
 
     /// Construct a Faust Program.
     /// @throws CompileError
-    FaustProgram (juce::String source, Backend, int sampRate);
+    FaustProgram (const juce::String& source, Backend, int sampRate);
     ~FaustProgram();
 
     int getParamCount();
@@ -75,7 +75,7 @@ public:
     void compute (int sampleCount, const float* const* input, float* const* output);
 
 private:
-    void compileSource (juce::String);
+    void compileSource (const juce::String&);
 
     Backend backend;
 

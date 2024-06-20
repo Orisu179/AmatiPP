@@ -173,13 +173,16 @@ void ParamEditor::resized ()
     }
 }
 
+// If there are more attachments than whatever the valuetreestate has stored, the program will crash
 AmatiSliderAttachment::AmatiSliderAttachment(
-    juce::AudioProcessorValueTreeState &stateToUse, const juce::String &parameterID,
+    juce::AudioProcessorValueTreeState &stateToUse,
+    const juce::String &parameterID,
     juce::Slider &slider) {
-    if (auto* parameter = stateToUse.getParameter (parameterID)) {
-        attachment = std::make_unique<AmatiSliderParameterAttachment>(
-            *parameter, slider, stateToUse.undoManager);
+    if (juce::RangedAudioParameter* parameter = stateToUse.getParameter(parameterID)) {
+        attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, slider, stateToUse.undoManager);
     } else {
         jassertfalse;
+//        auto* newParameter = stateToUse.createAndAddParameter();
+//        attachment = std::make_unique<AmatiSliderParameterAttachment>(*newParameter, slider, stateToUse.undoManager);
     }
 }

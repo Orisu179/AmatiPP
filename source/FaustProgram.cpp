@@ -24,7 +24,9 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <faust/dsp/interpreter-dsp.h>
 #include <faust/dsp/llvm-dsp.h>
 
-FaustProgram::FaustProgram (juce::String source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
+#include <memory>
+
+FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
 {
     compileSource (source);
 }
@@ -46,7 +48,7 @@ FaustProgram::~FaustProgram()
     }
 }
 
-void FaustProgram::compileSource (juce::String source)
+void FaustProgram::compileSource (const juce::String& source)
 {
     const char* argv[] = { "" }; // compilation arguments
     std::string errorString;
@@ -85,7 +87,7 @@ void FaustProgram::compileSource (juce::String source)
 
     dspInstance.reset (dspFactory->createDSPInstance());
     dspInstance->init (sampleRate);
-    faustInterface.reset (new APIUI);
+    faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
 }
 
