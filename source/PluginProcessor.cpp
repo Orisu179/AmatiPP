@@ -7,14 +7,15 @@
 static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 16; i++)
     {
         auto id = juce::ParameterID (paramIdForIdx (i), 1);
-        auto name = juce::String ("Parameter ") + juce::String (i);
+        auto name = juce::String ("Parameter ") + juce::String (0);
         layout.add (std::make_unique<juce::AudioParameterFloat> (id, name, 0.f, 1.f, 0.f));
     }
     return layout;
 }
+
 namespace Id {
     const juce::Identifier sourceCode("source_code");
     const juce::Identifier settings("settings");
@@ -259,7 +260,7 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
         return;
     }
 
-    valueTreeState.replaceState(juce::ValueTree::fromXml(*parameters));
+//    valueTreeState.replaceState(juce::ValueTree::fromXml(*parameters));
     sourceCode = source->getAllSubText();
 }
 //==============================================================================
@@ -309,6 +310,7 @@ void PluginProcessor::updateDspParameters() {
        faustProgram->setValue(i, value);
     }
 }
+
 void PluginProcessor::setBackend (FaustProgram::Backend newBackend) {
     backend = newBackend;
     compileSource(sourceCode);

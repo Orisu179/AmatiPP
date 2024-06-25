@@ -84,7 +84,7 @@ ParamEditor::~ParamEditor() noexcept {
     components.clear();
 }
 
-void ParamEditor::updateParameters(const std::vector<Param>& params) {
+void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParameter>& params) {
     sliderAttachments.clear();
     buttonAttachments.clear();
     labels.clear();
@@ -172,6 +172,13 @@ void ParamEditor::resized ()
         );
     }
 }
+void ParamEditor::createParameter (const PluginProcessor::FaustParameter& parameter, juce::AudioProcessorValueTreeState& stateToUse)
+{
+   if(!stateToUse.getParameter(parameter.id)){
+       juce::String name = juce::String("Parameter") + juce::String(parameter.id);
+       stateToUse.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(parameter.id, name, 0.f, 1.f, 0.f));
+   }
+}
 
 // If there are more attachments than whatever the valuetreestate has stored, the program will crash
 AmatiSliderAttachment::AmatiSliderAttachment(
@@ -182,7 +189,5 @@ AmatiSliderAttachment::AmatiSliderAttachment(
         attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, slider, stateToUse.undoManager);
     } else {
         jassertfalse;
-//        auto* newParameter = stateToUse.createAndAddParameter();
-//        attachment = std::make_unique<AmatiSliderParameterAttachment>(*newParameter, slider, stateToUse.undoManager);
     }
 }

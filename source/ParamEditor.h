@@ -45,9 +45,7 @@ public:
     void paint (juce::Graphics&) override {}
     void resized () override;
 
-    using Param = PluginProcessor::FaustParameter;
-
-    void updateParameters(const std::vector<Param>&);
+    void updateParameters(const std::vector<PluginProcessor::FaustParameter>&);
 
 private:
     juce::AudioProcessorValueTreeState& valueTreeState;
@@ -55,6 +53,8 @@ private:
     juce::OwnedArray<juce::Label> labels{};
     juce::OwnedArray<AmatiSliderAttachment> sliderAttachments{};
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachments{};
+
+    static void createParameter(const PluginProcessor::FaustParameter&, juce::AudioProcessorValueTreeState &stateToUse);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamEditor)
 };

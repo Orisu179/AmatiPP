@@ -5,12 +5,12 @@ Copyright (C) 2022 by GRAME <research@grame.fr>
 
 This file is part of Amati.
 
-    Amati is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-                                     (at your option) any later version.
+Amati is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-                                     Amati is distributed in the hope that it will be useful, but
+Amati is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -137,19 +137,18 @@ FaustProgram::Parameter FaustProgram::getParameter (int idx)
 
 float FaustProgram::getValue (int index)
 {
-    if (index < 0 || index >= getParamCount())
-        return 0.0;
-    else
+    if (index > 0 || index <= getParamCount())
         return static_cast<float> (faustInterface->getParamRatio (index));
+    else
+        return 0.0;
 }
 
 void FaustProgram::setValue (int index, float value)
 {
-    if (index < 0 || index >= getParamCount())
+    if (index > 0 || index <= getParamCount())
     {
-    }
-    else
         faustInterface->setParamRatio (index, value);
+    }
 }
 
 void FaustProgram::compute (int samples, const float* const* in, float* const* out)
