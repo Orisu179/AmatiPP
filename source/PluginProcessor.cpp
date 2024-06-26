@@ -103,15 +103,14 @@ void PluginProcessor::changeProgramName (int index, const juce::String& newName)
 //==============================================================================
 void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
-    sampleRate = sampRate;
+    sampRate = sampleRate;
 
     // numChannelsIn and numChannelsOut should be equal
     // (and probably equal to 0),
     // but we get both just in case
 
-    int numChannelsIn  = tmpBufferIn.getNumChannels ();
-    int numChannelsOut = tmpBufferOut.getNumChannels ();
+    int numChannelsIn  = tmpBufferIn.getNumChannels();
+    int numChannelsOut = tmpBufferOut.getNumChannels();
 
     tmpBufferIn  = juce::AudioBuffer<float> (numChannelsIn,  samplesPerBlock);
     tmpBufferOut = juce::AudioBuffer<float> (numChannelsOut, samplesPerBlock);
@@ -156,7 +155,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
     // If it does, we resize our internal buffers
-    if(numSamples > tmpBufferIn.getNumChannels()) {
+    if(numSamples > tmpBufferIn.getNumSamples()) {
         tmpBufferIn.setSize(tmpBufferIn.getNumChannels(), numSamples);
         tmpBufferOut.setSize(tmpBufferOut.getNumChannels(), numSamples);
     }
@@ -172,7 +171,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     } else {
         updateDspParameters();
 
-        // here, the buffered are copied into tmpBufferIn, then processed into tmpBufferOut
+        // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
         // tmpBufferOut would then be copied into buffer again
         // This is to make sure that computation is done in a controlled environment
         // i.e. buffers with known number of channels

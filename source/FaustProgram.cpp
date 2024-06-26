@@ -155,3 +155,11 @@ void FaustProgram::compute (int samples, const float* const* in, float* const* o
 {
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
 }
+void FaustProgram::setSampleRate (int sr)
+{
+    if(sr > 0){
+        sampleRate = sr;
+    } else {
+        jassertfalse;
+    }
+}

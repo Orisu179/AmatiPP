@@ -69,8 +69,9 @@ public:
     };
     Parameter getParameter (int idx);
 
-    float getValue (int idx);
-    void setValue (int idx, float);
+    float getValue(int idx);
+    void setValue(int idx, float);
+    void setSampleRate(int);
 
     void compute (int sampleCount, const float* const* input, float* const* output);
 
