@@ -87,6 +87,7 @@ void PluginEditor::resized()
 }
 void PluginEditor::updateParameters()
 {
+//    processorRef.updateValueTreeState();
     paramEditor.updateParameters(processorRef.getFaustParameter());
 }
 

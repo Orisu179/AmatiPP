@@ -90,6 +90,8 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
     labels.clear();
     components.clear();
 
+    // change the value tree state parameters
+
     using Type = FaustProgram::ItemType;
     for (const auto& param : params) {
         juce::Component* component;
@@ -180,7 +182,6 @@ void ParamEditor::createParameter (const PluginProcessor::FaustParameter& parame
    }
 }
 
-// If there are more attachments than whatever the valuetreestate has stored, the program will crash
 AmatiSliderAttachment::AmatiSliderAttachment(
     juce::AudioProcessorValueTreeState &stateToUse,
     const juce::String &parameterID,

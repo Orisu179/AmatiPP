@@ -10,7 +10,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
     for (int i = 0; i < 16; i++)
     {
         auto id = juce::ParameterID (paramIdForIdx (i), 1);
-        auto name = juce::String ("Parameter ") + juce::String (0);
+        auto name = juce::String ("Parameter ") + juce::String (i);
         layout.add (std::make_unique<juce::AudioParameterFloat> (id, name, 0.f, 1.f, 0.f));
     }
     return layout;
@@ -166,13 +166,8 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     if(!faustProgram){
-        // In case we have more outputs than inputs, this code clears any output
-        // channels that didn't contain input data, (because these aren't
-        // guaranteed to be empty - they may contain garbage).
-        // This is here to avoid people getting screaming feedback
-        // when they first compile a plugin, but obviously you don't need to keep
-        // this code if your algorithm always overwrites all the output channels.
-        for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        // clears output channels that doesn't contain any input data
+        for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
             buffer.clear (i, 0, buffer.getNumSamples());
     } else {
         updateDspParameters();
@@ -190,8 +185,9 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             tmpBufferIn.clear(chan, 0, numSamples);
 
         faustProgram->compute(numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
-        for(int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan)
+        for(int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan) {
             buffer.copyFrom(chan, 0, tmpBufferOut, chan, 0, numSamples);
+        }
 
         for(int chan = tmpBufferOut.getNumChannels(); chan < totalNumOutputChannels; ++chan)
             buffer.clear(chan, 0, numSamples);
@@ -223,8 +219,8 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
     //Add source code
     juce::XmlElement* sourceTag = preset.createNewChildElement("source");
     sourceTag->addTextElement(sourceCode);
-    auto state = valueTreeState.copyState().createXml();
-    preset.addChildElement(new juce::XmlElement(*state.get()));
+//    auto state = valueTreeState.copyState().createXml();
+//    preset.addChildElement(new juce::XmlElement(*state.get()));
     // stores tree on desk
     copyXmlToBinary(preset, destData);
 }
@@ -248,11 +244,11 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
         logger->writeToLog("Invalid preset: wrong root tag");
         return;
     }
-    auto* parameters = preset->getChildByName(valueTreeState.state.getType());
-    if (!parameters) {
-        logger->writeToLog("Invalid preset: missing parameters");
-        return;
-    }
+//    auto* parameters = preset->getChildByName(valueTreeState.state.getType());
+//    if (!parameters) {
+//        logger->writeToLog("Invalid preset: missing parameters");
+//        return;
+//    }
 
     auto* source = preset->getChildByName("source");
     if (!source) {
@@ -323,7 +319,7 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     }
     for(int i = 0; i<faustProgram->getParamCount(); i++) {
         params.push_back({ paramIdForIdx(i), faustProgram->getParameter(i)});
-        DBG(paramIdForIdx(i));
+//        DBG(paramIdForIdx(i));
     }
     return params;
 }
@@ -337,6 +333,23 @@ void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juc
         int newBackend = tree[property];
         setBackend(static_cast<FaustProgram::Backend>(newBackend - 1));
     }
-    DBG("property change: " << tree.getType() << " " << property);
+//    DBG("property change: " << tree.getType() << " " << property);
 }
-
+void PluginProcessor::updateValueTreeState()
+{
+    auto params = getFaustParameter();
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+//    if(!valueTreeState.getParameter(static_cast<juce::String>(params.size() - 1))) {
+        juce::String tempName;
+        for(const auto& param: params) {
+            tempName = juce::String("Parameter ")  + param.id;
+            layout.add(std::make_unique<juce::AudioParameterFloat>(param.id, tempName, 0.f, 1.f, 0.f));
+            DBG(tempName);
+        }
+        auto tempValueTreeState = juce::AudioProcessorValueTreeState(*this, nullptr, "parameters", createParameterLayout());
+        auto state = tempValueTreeState.copyState().createXml();
+        valueTreeState.replaceState(juce::ValueTree::fromXml(*state));
+        DBG("changed state is: ");
+        DBG(valueTreeState.state.toXmlString());
+//    }
+}
