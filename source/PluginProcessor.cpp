@@ -155,7 +155,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
     // If it does, we resize our internal buffers
-    if(numSamples > tmpBufferIn.getNumChannels()) {
+    if(numSamples > tmpBufferIn.getNumSamples()) {
         tmpBufferIn.setSize(tmpBufferIn.getNumChannels(), numSamples);
         tmpBufferOut.setSize(tmpBufferOut.getNumChannels(), numSamples);
     }
