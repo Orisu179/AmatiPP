@@ -1,13 +1,13 @@
 #pragma once
 
-#include "PluginProcessor.h"
-#include "BinaryData.h"
-#include "melatonin_inspector/melatonin_inspector.h"
-#include "ConsoleComponent.h"
-#include "SettingsComponent.h"
-#include "ParamEditor.h"
-#include "EditorComponent.h"
 #include "AmatiLookAndFeel.h"
+#include "BinaryData.h"
+#include "Components/ConsoleComponent.h"
+#include "Components/EditorComponent.h"
+#include "Components/SettingsComponent.h"
+#include "ParamEditor.h"
+#include "PluginProcessor.h"
+#include "melatonin_inspector/melatonin_inspector.h"
 
 //==============================================================================
 class PluginEditor : public juce::AudioProcessorEditor,

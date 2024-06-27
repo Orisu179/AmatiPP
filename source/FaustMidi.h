@@ -1,10 +1,8 @@
-#ifndef AMATI_PP_FAUSTMIDI_H
-#define AMATI_PP_FAUSTMIDI_H
-#include "faust/midi/juce-midi.h"
+#pragma once
+//#include "faust/midi/juce-midi.h"
 
 class FaustMidi
 {
+public:
     FaustMidi();
 };
-
-#endif //AMATI_PP_FAUSTMIDI_H

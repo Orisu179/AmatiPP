@@ -1,8 +1,8 @@
 #pragma once
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "juce_gui_extra/juce_gui_extra.h"
-#include "FaustTokeniser.h"
-#include "AmatiLookAndFeel.h"
+#include "../FaustTokeniser.h"
+#include "../AmatiLookAndFeel.h"
 
 class EditorComponent : public juce::Component
 {
