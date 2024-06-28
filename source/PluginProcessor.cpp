@@ -218,8 +218,8 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
     //Add source code
     juce::XmlElement* sourceTag = preset.createNewChildElement("source");
     sourceTag->addTextElement(sourceCode);
-//    auto state = valueTreeState.copyState().createXml();
-//    preset.addChildElement(new juce::XmlElement(*state.get()));
+    auto state = valueTreeState.copyState().createXml();
+    preset.addChildElement(new juce::XmlElement(*state.get()));
     // stores tree on desk
     copyXmlToBinary(preset, destData);
 }
@@ -243,11 +243,11 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
         logger->writeToLog("Invalid preset: wrong root tag");
         return;
     }
-//    auto* parameters = preset->getChildByName(valueTreeState.state.getType());
-//    if (!parameters) {
-//        logger->writeToLog("Invalid preset: missing parameters");
-//        return;
-//    }
+    auto* parameters = preset->getChildByName(valueTreeState.state.getType());
+    if (!parameters) {
+        logger->writeToLog("Invalid preset: missing parameters");
+        return;
+    }
 
     auto* source = preset->getChildByName("source");
     if (!source) {
@@ -255,7 +255,7 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
         return;
     }
 
-//    valueTreeState.replaceState(juce::ValueTree::fromXml(*parameters));
+    valueTreeState.replaceState(juce::ValueTree::fromXml(*parameters));
     sourceCode = source->getAllSubText();
 }
 //==============================================================================

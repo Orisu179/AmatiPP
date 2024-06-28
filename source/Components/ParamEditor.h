@@ -1,5 +1,5 @@
 #pragma once
-#include "PluginProcessor.h"
+#include "../PluginProcessor.h"
 class AmatiSliderParameterAttachment : private juce::Slider::Listener
 {
 public:
@@ -39,11 +39,11 @@ private:
 class ParamEditor : public juce::Component
 {
 public:
-    ParamEditor (juce::AudioProcessorValueTreeState&);
-    ~ParamEditor () noexcept override;
+    ParamEditor(juce::AudioProcessorValueTreeState&);
+    ~ParamEditor() noexcept override;
 
-    void paint (juce::Graphics&) override {}
-    void resized () override;
+    void paint(juce::Graphics&) override {}
+    void resized() override;
 
     void updateParameters(const std::vector<PluginProcessor::FaustParameter>&);
 

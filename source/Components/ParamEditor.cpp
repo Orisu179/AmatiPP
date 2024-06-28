@@ -74,8 +74,7 @@ void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
         attachment.setValueAsPartOfGesture ((float) slider.getValue());
 }
 
-ParamEditor::ParamEditor (juce::AudioProcessorValueTreeState& vts) :
-                                                                     valueTreeState(vts) {}
+ParamEditor::ParamEditor(juce::AudioProcessorValueTreeState& vts) : valueTreeState(vts) {}
 
 ParamEditor::~ParamEditor() noexcept {
     sliderAttachments.clear();

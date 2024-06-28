@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FaustProgram.h"
+#include "Faust/FaustProgram.h"
 #include <faust/dsp/llvm-dsp.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
