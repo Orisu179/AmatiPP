@@ -54,8 +54,6 @@ private:
     juce::OwnedArray<AmatiSliderAttachment> sliderAttachments{};
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachments{};
 
-    static void createParameter(const PluginProcessor::FaustParameter&, juce::AudioProcessorValueTreeState &stateToUse);
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamEditor)
 };
 

@@ -68,6 +68,7 @@ public:
         double step;
     };
     Parameter getParameter (int idx);
+    std::vector<Parameter> getParameters();
 
     float getValue(int idx);
     void setValue(int idx, float);
@@ -83,6 +84,7 @@ private:
     dsp_factory* dspFactory;
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
+    std::vector<Parameter> parameters;
 
     int sampleRate;
 };

@@ -26,6 +26,27 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
 
+
+static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
+{
+    using ItemType = FaustProgram::ItemType;
+    switch (type)
+    {
+        case APIUI::kButton:
+            return ItemType::Button;
+        case APIUI::kCheckButton:
+            return ItemType::CheckButton;
+        case APIUI::kVSlider:
+        case APIUI::kHSlider:
+        case APIUI::kNumEntry:
+            return ItemType::Slider;
+        case APIUI::kHBargraph:
+        case APIUI::kVBargraph:
+        default:
+            return ItemType::Unavailable;
+    }
+}
+
 FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
 {
     compileSource (source);
@@ -89,6 +110,15 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance->init (sampleRate);
     faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
+    for(int i{0}; i<getParamCount(); i++) {
+        parameters.push_back(
+            { juce::String (faustInterface->getParamLabel (i)),
+              apiToItemType (faustInterface->getParamItemType (i)),
+              { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
+              faustInterface->getParamInit (i),
+              faustInterface->getParamStep (i) }
+            );
+    }
 }
 
 int FaustProgram::getParamCount()
@@ -106,33 +136,9 @@ int FaustProgram::getNumOutChannels()
     return dspInstance->getNumOutputs();
 }
 
-static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
-{
-    using ItemType = FaustProgram::ItemType;
-    switch (type)
-    {
-        case APIUI::kButton:
-            return ItemType::Button;
-        case APIUI::kCheckButton:
-            return ItemType::CheckButton;
-        case APIUI::kVSlider:
-        case APIUI::kHSlider:
-        case APIUI::kNumEntry:
-            return ItemType::Slider;
-        case APIUI::kHBargraph:
-        case APIUI::kVBargraph:
-        default:
-            return ItemType::Unavailable;
-    }
-}
-
 FaustProgram::Parameter FaustProgram::getParameter (int idx)
 {
-    return { juce::String (faustInterface->getParamLabel (idx)),
-        apiToItemType (faustInterface->getParamItemType (idx)),
-        { faustInterface->getParamMin (idx), faustInterface->getParamMax (idx) },
-        faustInterface->getParamInit (idx),
-        faustInterface->getParamStep (idx) };
+    return parameters[idx];
 }
 
 float FaustProgram::getValue (int index)
@@ -162,4 +168,8 @@ void FaustProgram::setSampleRate (int sr)
     } else {
         jassertfalse;
     }
+}
+std::vector<FaustProgram::Parameter> FaustProgram::getParameters()
+{
+    return parameters;
 }

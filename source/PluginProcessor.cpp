@@ -4,14 +4,15 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParameterLayout()
 {
+    juce::NormalisableRange<float> paramRange = juce::NormalisableRange<float>(0.f, 1.f);
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     for (int i = 0; i < 16; i++)
     {
         auto id = juce::ParameterID (paramIdForIdx (i), 1);
         auto name = juce::String ("Parameter ") + juce::String (i);
-        layout.add (std::make_unique<juce::AudioParameterFloat> (id, name, 0.f, 1.f, 0.f));
+        layout.add (std::make_unique<juce::AudioParameterFloat> (id, name, paramRange, 0.f));
     }
     return layout;
 }
@@ -302,6 +303,8 @@ void PluginProcessor::updateDspParameters() {
     for (int i = 0; i < paramCount; ++i) {
        juce::String id = paramIdForIdx(i);
        float value = *valueTreeState.getRawParameterValue(id);
+       DBG(value);
+//       value = convertNormaliseRange(i, value);
        faustProgram->setValue(i, value);
     }
 }
@@ -351,4 +354,8 @@ void PluginProcessor::updateValueTreeState()
         DBG("changed state is: ");
         DBG(valueTreeState.state.toXmlString());
 //    }
+}
+float PluginProcessor::convertNormaliseRange (int index, float value)
+{
+    return static_cast<float>(index) * value;
 }

@@ -1,8 +1,6 @@
 
 /*
-    Copyright (C) 2020 by Grégoire Locqueville <gregoireloc@gmail.com>
-    Copyright (C) 2022 by Kamil Kisiel <kamil@kamilkisiel.net>
-
+    Copyright (C) 2020 by Grégoire Locqueville <gregoireloc@gmail.com> Copyright (C) 2022 by Kamil Kisiel <kamil@kamilkisiel.net>
 This file is part of Amati.
 
     Amati is free software: you can redistribute it and/or modify it
@@ -98,10 +96,14 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
         switch (p.type) {
             case Type::Slider: {
                 auto *slider = new juce::Slider();
-                slider->setNormalisableRange({p.range, p.step});
+                auto range = juce::NormalisableRange(p.range, p.step);
+                slider->setNormalisableRange(range);
+
 
                 auto *attachment = new AmatiSliderAttachment(
                     valueTreeState, param.id, *slider);
+
+                slider->setValue(p.init, juce::dontSendNotification);
 
                 auto *label = new juce::Label();
                 label->attachToComponent(slider, false);
@@ -173,19 +175,13 @@ void ParamEditor::resized ()
         );
     }
 }
-void ParamEditor::createParameter (const PluginProcessor::FaustParameter& parameter, juce::AudioProcessorValueTreeState& stateToUse)
-{
-   if(!stateToUse.getParameter(parameter.id)){
-       juce::String name = juce::String("Parameter") + juce::String(parameter.id);
-       stateToUse.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(parameter.id, name, 0.f, 1.f, 0.f));
-   }
-}
 
 AmatiSliderAttachment::AmatiSliderAttachment(
     juce::AudioProcessorValueTreeState &stateToUse,
     const juce::String &parameterID,
     juce::Slider &slider) {
     if (juce::RangedAudioParameter* parameter = stateToUse.getParameter(parameterID)) {
+        // Do something here to make sure the parameters are normalised somehow
         attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, slider, stateToUse.undoManager);
     } else {
         jassertfalse;
