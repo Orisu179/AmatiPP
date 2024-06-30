@@ -13,7 +13,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     juce::LookAndFeel_V4::setDefaultLookAndFeel(&amatiLookAndFeel);
-    setSize (800, 600);
+    setSize(800, 600);
     setResizable(true, true);
     setResizeLimits(100, 100, 1920, 1080);
 
@@ -36,6 +36,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     tabbedComponent.addTab ("Parameters", tabColour, &paramEditor, false);
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
     tabbedComponent.addTab("Settings", tabColour, &settingsComponent, false);
+    tabbedComponent.addTab("Midi Keyboard", tabColour, &midiComponent, false);
 
     setResizable (true, true);
     setResizeLimits (100, 100, std::numeric_limits<int>::max(), std::numeric_limits<int>::max());

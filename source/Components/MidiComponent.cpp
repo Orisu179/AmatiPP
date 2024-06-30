@@ -32,9 +32,10 @@ MidiComponent::MidiComponent() : keyboardComponent(keyboardState, juce::Keyboard
 
 void MidiComponent::handleIncomingMidiMessage (juce::MidiInput* source, const juce::MidiMessage& message)
 {
+    juce::ignoreUnused(source);
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
     keyboardState.processNextMidiEvent(message);
-    DBG(message);
+    DBG(message.getDescription());
 }
 
 // listen to selected device, while enabling it if it's disabled
@@ -51,4 +52,25 @@ void MidiComponent::setMidiInput (int index)
     midiInputList.setSelectedId(index + 1, juce::dontSendNotification);
 
     lastInputIndex = index;
+}
+
+void MidiComponent::handleNoteOff (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
+{
+   if(!isAddingFromMidiInput)
+   {
+       auto m = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
+       m.setTimeStamp(juce::Time::getMillisecondCounterHiRes());
+       DBG(m.getDescription());
+   }
+}
+
+void MidiComponent::handleNoteOn (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) {
+    auto m = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
+    m.setTimeStamp(juce::Time::getMillisecondCounterHiRes());
+    DBG(m.getDescription());
+}
+
+void MidiComponent::resized()
+{
+
 }

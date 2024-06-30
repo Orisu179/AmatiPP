@@ -148,10 +148,8 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 #endif
 }
 
-void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-    juce::MidiBuffer& midiMessages)
+void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused (midiMessages);
     int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
     // If it does, we resize our internal buffers
@@ -169,6 +167,12 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
             buffer.clear (i, 0, buffer.getNumSamples());
     } else {
+
+        for(const auto metaData: midiMessages) {
+            if(metaData.numBytes == 3) {
+
+            }
+        }
         updateDspParameters();
 
         // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
