@@ -168,11 +168,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
             buffer.clear (i, 0, buffer.getNumSamples());
     } else {
 
-        for(const auto metaData: midiMessages) {
-            if(metaData.numBytes == 3) {
-
-            }
-        }
         updateDspParameters();
 
         // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
@@ -187,6 +182,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         for (int chan = totalNumInputChannels; chan < tmpBufferIn.getNumChannels(); ++chan)
             tmpBufferIn.clear(chan, 0, numSamples);
 
+        faustProgram->handleMidi(midiMessages);
         faustProgram->compute(numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
         for(int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan) {
             buffer.copyFrom(chan, 0, tmpBufferOut, chan, 0, numSamples);

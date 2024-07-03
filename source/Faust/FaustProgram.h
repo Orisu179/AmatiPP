@@ -25,10 +25,10 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
 #include <faust/gui/MidiUI.h>
+#include <faust/gui//GUI.h>
 
 class FaustProgram
 {
-public:
 public:
     class CompileError : public std::runtime_error
     {
@@ -75,16 +75,21 @@ public:
     void setSampleRate(int);
 
     void compute (int sampleCount, const float* const* input, float* const* output);
+    void handleMidi(juce::MidiBuffer&);
 
 private:
+    // std::list<GUI*> GUI::fGuiList;
+    // ztimedmap GUI::gTimedZoneMap;
     void compileSource (const juce::String&);
+
+    static bool midiOn(const juce::String&);
 
     Backend backend;
 
-    std::unique_ptr<FaustMidi> midi_handler;
     dsp_factory* dspFactory;
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
+    std::unique_ptr<FaustMidi> midi_handler;
 
     int sampleRate;
 };

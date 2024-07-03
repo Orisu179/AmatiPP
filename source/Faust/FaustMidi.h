@@ -4,15 +4,12 @@
 #include "juce_audio_basics/juce_audio_basics.h"
 #include "juce_audio_devices/juce_audio_devices.h"
 
-class FAUST_API MapUI;
-
 class FaustMidi : public midi_handler, juce::MidiInputCallback
 {
 public:
     FaustMidi();
     ~FaustMidi() override;
 
-    static bool checkMidi(const juce::String&);
     void encodeBuffer(juce::MidiBuffer&);
     void decodeBuffer(juce::MidiBuffer&);
     bool startMidi() override;

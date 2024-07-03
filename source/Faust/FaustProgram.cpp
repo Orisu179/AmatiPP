@@ -88,17 +88,18 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance.reset (dspFactory->createDSPInstance());
     dspInstance->init (sampleRate);
 
-    // FaustMidi midi_handler = FaustMidi();
-    // // auto midi_interface = std::make_unique<MidiUI>(&midi_handler);
-    // MidiUI midi_interface(&midi_handler);
-    // dspInstance->buildUserInterface(&midi_interface);
-    faustInterface = std::make_unique<APIUI>();
-    dspInstance->buildUserInterface (faustInterface.get());
-
-    if(midi_handler->checkMidi(source)) {
-        DBG("IT WORKED");
+    if(midiOn(source)) {
+        midi_handler = std::make_unique<FaustMidi>();
+        auto midi_interface = std::make_unique<MidiUI>(midi_handler.get());
+        dspInstance->buildUserInterface(midi_interface.get());
     }
+    faustInterface = std::make_unique<APIUI>();
+    dspInstance->buildUserInterface(faustInterface.get());
+}
 
+bool FaustProgram::midiOn(const juce::String & source)
+{
+   return (source.contains("declare options \"[midi:on]\";"));
 }
 
 int FaustProgram::getParamCount()
@@ -165,6 +166,12 @@ void FaustProgram::compute (int samples, const float* const* in, float* const* o
 {
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
 }
+
+void FaustProgram::handleMidi(juce::MidiBuffer& message)
+{
+// TODO: Implement this function
+}
+
 void FaustProgram::setSampleRate (int sr)
 {
     if(sr > 0){

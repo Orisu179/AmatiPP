@@ -6,10 +6,6 @@ FaustMidi::~FaustMidi() {
    FaustMidi::stopMidi();
 }
 
-bool FaustMidi::checkMidi (const juce::String& source) {
-   return (source.contains("declare options \"[midi:on]\";"));
-}
-
 void FaustMidi::encodeBuffer(juce::MidiBuffer & buffer) {
    const juce::ScopedTryLock lock(fMutex);
    if(lock.isLocked()) {
@@ -22,10 +18,8 @@ void FaustMidi::encodeBuffer(juce::MidiBuffer & buffer) {
 }
 
 void FaustMidi::decodeBuffer(juce::MidiBuffer & buffer) {
-  juce::MidiMessage msg;
-   int ignore;
-   for(juce::MidiBuffer::Iterator it(buffer); it.getNextEvent(msg, ignore);)
-   {
+   for(const auto meta : buffer) {
+      const auto msg = meta.getMessage();
       decodeMessages(msg);
    }
    buffer.clear();
