@@ -32,7 +32,6 @@ private:
     juce::FlexBox buttons;
 
     juce::Label statusLabel;
-    juce::Label fileLabel;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File workDir;

@@ -10,7 +10,7 @@ class FaustMidi : public midi_handler, juce::MidiInputCallback
 {
 public:
     FaustMidi();
-    virtual ~FaustMidi();
+    ~FaustMidi() override;
 
     static bool checkMidi(const juce::String&);
     void encodeBuffer(juce::MidiBuffer&);

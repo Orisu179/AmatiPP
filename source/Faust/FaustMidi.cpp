@@ -3,7 +3,7 @@
 FaustMidi::FaustMidi() : midi_handler("JUCE") {}
 
 FaustMidi::~FaustMidi() {
-   stopMidi();
+   FaustMidi::stopMidi();
 }
 
 bool FaustMidi::checkMidi (const juce::String& source) {

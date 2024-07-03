@@ -7,9 +7,6 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
     statusLabel.setText ("Status: Modified", juce::dontSendNotification);
     statusLabel.setFont(font);
 
-    addAndMakeVisible(fileLabel);
-    fileLabel.setText("Whatever.dsp", juce::dontSendNotification);
-
     addAndMakeVisible (&codeEditor);
     compileButton.setComponentID ("compile");
     compileButton.setButtonText ("compile");

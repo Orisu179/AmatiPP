@@ -27,7 +27,6 @@ MidiComponent::MidiComponent() : midiInputListLabel("MIDI Input: "), keyboardCom
         setMidiInput(0);
 
     addAndMakeVisible(midiInputListLabel);
-
     addAndMakeVisible(keyboardComponent);
     keyboardState.addListener(this);
 }
@@ -44,7 +43,6 @@ void MidiComponent::setMidiInput (int index)
 {
     auto list = juce::MidiInput::getAvailableDevices();
     deviceManager.removeMidiInputDeviceCallback(list[lastInputIndex].identifier, this);
-
     auto newInput = list[index];
     if(!deviceManager.isMidiInputDeviceEnabled(newInput.identifier))
         deviceManager.setMidiInputDeviceEnabled(newInput.identifier, true);
@@ -78,8 +76,8 @@ void MidiComponent::resized()
     inputList.flexWrap = fb::Wrap::noWrap;
     inputList.justifyContent = fb::JustifyContent::center;
 
-    inputList.items.add(juce::FlexItem(midiInputListLabel).withMargin(margin).withMinHeight(60).withMinWidth(100));
-    inputList.items.add(juce::FlexItem(midiInputList).withMargin(margin).withMinHeight(30).withMinWidth(getWidth()/2));
+    inputList.items.add(juce::FlexItem(midiInputListLabel).withMargin(static_cast<float>(margin)).withMinHeight(60).withMinWidth(100));
+    inputList.items.add(juce::FlexItem(midiInputList).withMargin(static_cast<float>(margin)).withMinHeight(30).withMinWidth(getWidth()/2));
 
     // midiInputList.setBounds(getWidth()/4, margin, getWidth()/2, margin*2);
     inputList.performLayout(getLocalBounds().removeFromTop(margin*2));
