@@ -23,6 +23,7 @@ private:
     juce::ComboBox midiInputList;
     juce::Label midiInputListLabel;
 
+    juce::FlexBox inputList;
     int lastInputIndex;
     bool isAddingFromMidiInput;
 

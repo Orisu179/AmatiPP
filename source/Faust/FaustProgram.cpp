@@ -87,8 +87,18 @@ void FaustProgram::compileSource (const juce::String& source)
 
     dspInstance.reset (dspFactory->createDSPInstance());
     dspInstance->init (sampleRate);
+
+    // FaustMidi midi_handler = FaustMidi();
+    // // auto midi_interface = std::make_unique<MidiUI>(&midi_handler);
+    // MidiUI midi_interface(&midi_handler);
+    // dspInstance->buildUserInterface(&midi_interface);
     faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
+
+    if(midi_handler->checkMidi(source)) {
+        DBG("IT WORKED");
+    }
+
 }
 
 int FaustProgram::getParamCount()

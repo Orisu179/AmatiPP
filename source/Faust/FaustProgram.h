@@ -21,9 +21,10 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 #include "juce_core/juce_core.h"
-#include <cstring>
+#include "FaustMidi.h"
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
+#include <faust/gui/MidiUI.h>
 
 class FaustProgram
 {
@@ -80,6 +81,7 @@ private:
 
     Backend backend;
 
+    std::unique_ptr<FaustMidi> midi_handler;
     dsp_factory* dspFactory;
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;

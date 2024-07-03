@@ -1,6 +1,6 @@
 #include "MidiComponent.h"
 
-MidiComponent::MidiComponent() : keyboardComponent(keyboardState, juce::KeyboardComponentBase::Orientation::horizontalKeyboard)
+MidiComponent::MidiComponent() : midiInputListLabel("MIDI Input: "), keyboardComponent(keyboardState, juce::KeyboardComponentBase::Orientation::horizontalKeyboard)
 {
     addAndMakeVisible(midiInputList);
     midiInputList.setTextWhenNoChoicesAvailable("No Midi Inputs Enabled");
@@ -26,6 +26,8 @@ MidiComponent::MidiComponent() : keyboardComponent(keyboardState, juce::Keyboard
     if(midiInputList.getSelectedId() == 0)
         setMidiInput(0);
 
+    addAndMakeVisible(midiInputListLabel);
+
     addAndMakeVisible(keyboardComponent);
     keyboardState.addListener(this);
 }
@@ -35,7 +37,6 @@ void MidiComponent::handleIncomingMidiMessage (juce::MidiInput* source, const ju
     juce::ignoreUnused(source);
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
     keyboardState.processNextMidiEvent(message);
-    DBG(message.getDescription());
 }
 
 // listen to selected device, while enabling it if it's disabled
@@ -60,17 +61,27 @@ void MidiComponent::handleNoteOff (juce::MidiKeyboardState*, int midiChannel, in
    {
        auto m = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber, velocity);
        m.setTimeStamp(juce::Time::getMillisecondCounterHiRes());
-       DBG(m.getDescription());
    }
 }
 
 void MidiComponent::handleNoteOn (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) {
     auto m = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
     m.setTimeStamp(juce::Time::getMillisecondCounterHiRes());
-    DBG(m.getDescription());
 }
 
 void MidiComponent::resized()
 {
+    int margin = 10;
+    using fb = juce::FlexBox;
+    inputList.flexDirection = fb::Direction::row;
+    inputList.alignItems = fb::AlignItems::center;
+    inputList.flexWrap = fb::Wrap::noWrap;
+    inputList.justifyContent = fb::JustifyContent::center;
 
+    inputList.items.add(juce::FlexItem(midiInputListLabel).withMargin(margin).withMinHeight(60).withMinWidth(100));
+    inputList.items.add(juce::FlexItem(midiInputList).withMargin(margin).withMinHeight(30).withMinWidth(getWidth()/2));
+
+    // midiInputList.setBounds(getWidth()/4, margin, getWidth()/2, margin*2);
+    inputList.performLayout(getLocalBounds().removeFromTop(margin*2));
+    keyboardComponent.setBounds(margin, margin*4, getWidth() - margin*2, getHeight() - margin*8);
 }

@@ -27,8 +27,8 @@ void ConsoleComponent::resized ()
         (
             margin,
             margin,
-            getWidth  () - 2*margin,
-            getHeight () - 2*margin
+            getWidth() - 2*margin,
+            getHeight() - 2*margin
         );
 }
 
