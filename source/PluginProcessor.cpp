@@ -8,7 +8,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
 {
     juce::NormalisableRange<float> paramRange = juce::NormalisableRange<float>(0.f, 1.f);
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 64; i++)
     {
         auto id = juce::ParameterID (paramIdForIdx (i), 1);
         auto name = juce::String ("Parameter ") + juce::String (i);
@@ -304,7 +304,8 @@ void PluginProcessor::updateDspParameters() {
        juce::String id = paramIdForIdx(i);
        float value = *valueTreeState.getRawParameterValue(id);
        DBG(value);
-//       value = convertNormaliseRange(i, value);
+        // TODO: HERE TO CONVERT THE VALUES BACK
+        // value = faustProgram->convertNormaliseRange(i, value);
        faustProgram->setValue(i, value);
     }
 }

@@ -45,9 +45,6 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
         });
     };
     addAndMakeVisible (exportButton);
-    revertButton.setButtonText ("Revert");
-    addAndMakeVisible (revertButton);
-
     //==========
     codeEditor.setFont (font);
 }
@@ -79,7 +76,6 @@ void EditorComponent::resized()
     addButton (compileButton);
     addButton (importButton);
     addButton (exportButton);
-    addButton (revertButton);
 
 
     buttons.performLayout(bounds.removeFromTop(buttonHeight));

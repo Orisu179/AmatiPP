@@ -3,7 +3,10 @@
 class AmatiSliderParameterAttachment : private juce::Slider::Listener
 {
 public:
-    AmatiSliderParameterAttachment (juce::RangedAudioParameter& parameter, juce::Slider& slider,
+    AmatiSliderParameterAttachment(
+        juce::RangedAudioParameter& parameter,
+        juce::Slider& slider,
+        juce::NormalisableRange<double>& range,
         juce::UndoManager* undoManager = nullptr);
 
     ~AmatiSliderParameterAttachment() override;
@@ -18,6 +21,7 @@ private:
     void sliderDragEnded   (juce::Slider*) override { attachment.endGesture(); }
 
     juce::Slider& slider;
+    juce::NormalisableRange<double> range;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
 };
@@ -25,8 +29,10 @@ private:
 class AmatiSliderAttachment
 {
 public:
-    AmatiSliderAttachment (juce::AudioProcessorValueTreeState& stateToUse,
+    AmatiSliderAttachment (
+        juce::AudioProcessorValueTreeState& stateToUse,
         const juce::String& parameterID,
+        juce::NormalisableRange<double>& range,
         juce::Slider& slider
     );
 

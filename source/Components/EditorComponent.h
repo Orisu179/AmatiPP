@@ -25,7 +25,6 @@ private:
     juce::CodeEditorComponent codeEditor;
 
     juce::TextButton compileButton;
-    juce::TextButton revertButton;
     juce::TextButton importButton;
     juce::TextButton exportButton;
 

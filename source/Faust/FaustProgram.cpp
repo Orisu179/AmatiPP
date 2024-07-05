@@ -49,6 +49,7 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
 
 FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
 {
+    DBG("here is ok");
     compileSource (source);
 }
 
@@ -141,6 +142,11 @@ FaustProgram::Parameter FaustProgram::getParameter (int idx)
     return parameters[idx];
 }
 
+juce::Range<double> FaustProgram::getRange(int idx) const
+{
+    return parameters[idx].range;
+}
+
 float FaustProgram::getValue (int index)
 {
     if (index > 0 || index <= getParamCount())
@@ -157,8 +163,9 @@ void FaustProgram::setValue (int index, float value)
     }
 }
 
-void FaustProgram::compute (int samples, const float* const* in, float* const* out)
+void FaustProgram::compute(int samples, const float* const* in, float* const* out)
 {
+    DBG("we got to this point");
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
 }
 void FaustProgram::setSampleRate (int sr)
@@ -172,4 +179,14 @@ void FaustProgram::setSampleRate (int sr)
 std::vector<FaustProgram::Parameter> FaustProgram::getParameters()
 {
     return parameters;
+}
+
+float FaustProgram::convertNormaliseRange(int index, float value) {
+    if(value >= 1.0f || value <= 0.0f) {
+        jassertfalse;
+    }
+
+    juce::Range<double> range = parameters[index].range;
+    float convertedValue = range.getStart() + value * (range.getEnd() - range.getStart());
+    return convertedValue;
 }
