@@ -67,10 +67,8 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter (int idx);
-    juce::Range<double> getRange(int idx) const;
-    std::vector<Parameter> getParameters();
-    float convertNormaliseRange(int index, float value);
+    Parameter getParameter(unsigned int idx);
+    float convertNormaliseRange(unsigned int index, float value) const;
 
     float getValue(int idx);
     void setValue(int idx, float);

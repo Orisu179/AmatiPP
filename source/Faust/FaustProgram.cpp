@@ -49,8 +49,7 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
 
 FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
 {
-    DBG("here is ok");
-    compileSource (source);
+    compileSource(source);
 }
 
 FaustProgram::~FaustProgram()
@@ -137,17 +136,12 @@ int FaustProgram::getNumOutChannels()
     return dspInstance->getNumOutputs();
 }
 
-FaustProgram::Parameter FaustProgram::getParameter (int idx)
+FaustProgram::Parameter FaustProgram::getParameter(unsigned int idx)
 {
     return parameters[idx];
 }
 
-juce::Range<double> FaustProgram::getRange(int idx) const
-{
-    return parameters[idx].range;
-}
-
-float FaustProgram::getValue (int index)
+float FaustProgram::getValue(int index)
 {
     if (index > 0 || index <= getParamCount())
         return static_cast<float> (faustInterface->getParamRatio (index));
@@ -155,7 +149,7 @@ float FaustProgram::getValue (int index)
         return 0.0;
 }
 
-void FaustProgram::setValue (int index, float value)
+void FaustProgram::setValue(int index, float value)
 {
     if (index > 0 || index <= getParamCount())
     {
@@ -165,9 +159,9 @@ void FaustProgram::setValue (int index, float value)
 
 void FaustProgram::compute(int samples, const float* const* in, float* const* out)
 {
-    DBG("we got to this point");
-    dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
+    dspInstance->compute(samples, const_cast<float**> (in), const_cast<float**> (out));
 }
+
 void FaustProgram::setSampleRate (int sr)
 {
     if(sr > 0){
@@ -176,17 +170,13 @@ void FaustProgram::setSampleRate (int sr)
         jassertfalse;
     }
 }
-std::vector<FaustProgram::Parameter> FaustProgram::getParameters()
-{
-    return parameters;
-}
 
-float FaustProgram::convertNormaliseRange(int index, float value) {
+float FaustProgram::convertNormaliseRange(unsigned int index, float value) const {
     if(value >= 1.0f || value <= 0.0f) {
         jassertfalse;
     }
 
-    juce::Range<double> range = parameters[index].range;
-    float convertedValue = range.getStart() + value * (range.getEnd() - range.getStart());
+    const juce::Range<double> range = parameters[index].range;
+    const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
     return convertedValue;
 }
