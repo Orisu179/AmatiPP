@@ -52,7 +52,6 @@ public:
     bool compileSource(const juce::String&);
     juce::String getSourceCode();
     void setBackend(FaustProgram::Backend);
-    void updateValueTreeState();
 
     struct FaustParameter {
         juce::String id;

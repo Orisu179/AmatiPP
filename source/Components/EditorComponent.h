@@ -19,7 +19,6 @@ public:
     void setStatus(const juce::String&, juce::NotificationType);
 private:
     FaustTokeniser tokeniser;
-
     // Source code HAVE to be declared before codeEditor
     juce::CodeDocument sourceCode;
     juce::CodeEditorComponent codeEditor;
@@ -29,9 +28,7 @@ private:
     juce::TextButton exportButton;
 
     juce::FlexBox buttons;
-
     juce::Label statusLabel;
-    juce::Label fileLabel;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File workDir;
