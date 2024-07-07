@@ -1,8 +1,8 @@
 #pragma once
+#include "../AmatiLookAndFeel.h"
+#include "../Faust/FaustTokeniser.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "juce_gui_extra/juce_gui_extra.h"
-#include "FaustTokeniser.h"
-#include "AmatiLookAndFeel.h"
 
 class EditorComponent : public juce::Component
 {
@@ -19,20 +19,16 @@ public:
     void setStatus(const juce::String&, juce::NotificationType);
 private:
     FaustTokeniser tokeniser;
-
     // Source code HAVE to be declared before codeEditor
     juce::CodeDocument sourceCode;
     juce::CodeEditorComponent codeEditor;
 
     juce::TextButton compileButton;
-    juce::TextButton revertButton;
     juce::TextButton importButton;
     juce::TextButton exportButton;
 
     juce::FlexBox buttons;
-
     juce::Label statusLabel;
-    juce::Label fileLabel;
 
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::File workDir;

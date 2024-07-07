@@ -1,8 +1,6 @@
 
 /*
-    Copyright (C) 2020 by Grégoire Locqueville <gregoireloc@gmail.com>
-    Copyright (C) 2022 by Kamil Kisiel <kamil@kamilkisiel.net>
-
+    Copyright (C) 2020 by Grégoire Locqueville <gregoireloc@gmail.com> Copyright (C) 2022 by Kamil Kisiel <kamil@kamilkisiel.net>
 This file is part of Amati.
 
     Amati is free software: you can redistribute it and/or modify it
@@ -44,11 +42,16 @@ public:
 };
 
 //==============================================================================
-AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (juce::RangedAudioParameter& param,
+AmatiSliderParameterAttachment::AmatiSliderParameterAttachment(
+    juce::RangedAudioParameter& param,
     juce::Slider& s,
+    juce::NormalisableRange<double>& r,
     juce::UndoManager* um)
-    : slider (s),
-      attachment (param, [this] (float f) { setValue (f); }, um)
+    : slider(s), range(r), attachment(param,
+        [this](float f) {
+            double convertedValue = (f - range.start) / (range.end - range.start);
+        setValue(static_cast<float>(convertedValue));
+    }, um)
 {
     sendInitialUpdate();
     slider.valueChanged();
@@ -70,12 +73,11 @@ void AmatiSliderParameterAttachment::setValue (float newValue)
 
 void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
 {
-    if (! ignoreCallbacks)
-        attachment.setValueAsPartOfGesture ((float) slider.getValue());
+    if (!ignoreCallbacks)
+        attachment.setValueAsPartOfGesture (static_cast<float>(slider.getValue()));
 }
 
-ParamEditor::ParamEditor (juce::AudioProcessorValueTreeState& vts) :
-                                                                     valueTreeState(vts) {}
+ParamEditor::ParamEditor(juce::AudioProcessorValueTreeState& vts) : valueTreeState(vts) {}
 
 ParamEditor::~ParamEditor() noexcept {
     sliderAttachments.clear();
@@ -84,13 +86,12 @@ ParamEditor::~ParamEditor() noexcept {
     components.clear();
 }
 
-void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParameter>& params) {
+void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParameter>& params)
+{
     sliderAttachments.clear();
     buttonAttachments.clear();
     labels.clear();
     components.clear();
-
-    // change the value tree state parameters
 
     using Type = FaustProgram::ItemType;
     for (const auto& param : params) {
@@ -98,21 +99,26 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
         const auto& p = param.programParameter;
         switch (p.type) {
             case Type::Slider: {
-                auto *slider = new juce::Slider();
-                slider->setNormalisableRange({p.range, p.step});
+                // auto *slider = new juce::Slider();
+                auto slider = std::make_unique<juce::Slider>();
+                auto range = juce::NormalisableRange(p.range, p.step);
+                slider->setNormalisableRange(range);
+
 
                 auto *attachment = new AmatiSliderAttachment(
-                    valueTreeState, param.id, *slider);
+                    valueTreeState, param.id, range, *slider);
+
+                slider->setValue(p.init, juce::dontSendNotification);
 
                 auto *label = new juce::Label();
-                label->attachToComponent(slider, false);
+                label->attachToComponent(slider.get(), false);
                 label->setText(p.label, juce::dontSendNotification);
 
-                component = slider;
+                component = slider.get();
                 labels.add(label);
                 sliderAttachments.add(attachment);
 
-                addAndMakeVisible(slider);
+                addAndMakeVisible(slider.get());
                 addAndMakeVisible(label);
                 break;
             }
@@ -174,20 +180,15 @@ void ParamEditor::resized ()
         );
     }
 }
-void ParamEditor::createParameter (const PluginProcessor::FaustParameter& parameter, juce::AudioProcessorValueTreeState& stateToUse)
-{
-   if(!stateToUse.getParameter(parameter.id)){
-       juce::String name = juce::String("Parameter") + juce::String(parameter.id);
-       stateToUse.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(parameter.id, name, 0.f, 1.f, 0.f));
-   }
-}
 
 AmatiSliderAttachment::AmatiSliderAttachment(
     juce::AudioProcessorValueTreeState &stateToUse,
     const juce::String &parameterID,
-    juce::Slider &slider) {
+    juce::NormalisableRange<double> &range,
+    juce::Slider &attachedSlider) {
     if (juce::RangedAudioParameter* parameter = stateToUse.getParameter(parameterID)) {
-        attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, slider, stateToUse.undoManager);
+        // Do something here to make sure the parameters are normalised
+        attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, attachedSlider, range, stateToUse.undoManager);
     } else {
         jassertfalse;
     }

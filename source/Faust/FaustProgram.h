@@ -20,10 +20,10 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
+#include "juce_core/juce_core.h"
 #include <cstring>
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
-#include <juce_core/juce_core.h>
 
 class FaustProgram
 {
@@ -67,7 +67,8 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter (int idx);
+    Parameter getParameter(unsigned int idx);
+    float convertNormaliseRange(unsigned int index, float value) const;
 
     float getValue(int idx);
     void setValue(int idx, float);
@@ -83,6 +84,7 @@ private:
     dsp_factory* dspFactory;
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
+    std::vector<Parameter> parameters;
 
     int sampleRate;
 };

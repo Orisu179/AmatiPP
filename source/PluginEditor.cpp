@@ -1,7 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeState& vts)
+PluginEditor::PluginEditor(PluginProcessor& p, juce::AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p),
       processorRef (p),
       valueTreeState(vts),
@@ -15,7 +15,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     juce::LookAndFeel_V4::setDefaultLookAndFeel(&amatiLookAndFeel);
     setSize (800, 600);
     setResizable(true, true);
-    setResizeLimits(100, 100, 1920, 1080);
+    setResizeLimits(800, 600, 1920, 1080);
 
     addAndMakeVisible (inspectButton);
     // this chunk of code instantiates and opens the melatonin inspector
@@ -36,10 +36,6 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     tabbedComponent.addTab ("Parameters", tabColour, &paramEditor, false);
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
     tabbedComponent.addTab("Settings", tabColour, &settingsComponent, false);
-
-    setResizable (true, true);
-    setResizeLimits (100, 100, std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-
     //---------------------------------------------------------------------------
 
     editorComponent.onCompile = [&] {
@@ -77,7 +73,6 @@ void PluginEditor::paint(juce::Graphics& g)
 
 void PluginEditor::resized()
 {
-//    // layout the positions of your child components here
     int margin = 10;
     auto bounds = getLocalBounds();
 
@@ -87,7 +82,6 @@ void PluginEditor::resized()
 }
 void PluginEditor::updateParameters()
 {
-//    processorRef.updateValueTreeState();
     paramEditor.updateParameters(processorRef.getFaustParameter());
 }
 

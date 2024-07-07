@@ -1,9 +1,12 @@
 #pragma once
-#include "PluginProcessor.h"
+#include "../PluginProcessor.h"
 class AmatiSliderParameterAttachment : private juce::Slider::Listener
 {
 public:
-    AmatiSliderParameterAttachment (juce::RangedAudioParameter& parameter, juce::Slider& slider,
+    AmatiSliderParameterAttachment(
+        juce::RangedAudioParameter& parameter,
+        juce::Slider& slider,
+        juce::NormalisableRange<double>& range,
         juce::UndoManager* undoManager = nullptr);
 
     ~AmatiSliderParameterAttachment() override;
@@ -18,6 +21,7 @@ private:
     void sliderDragEnded   (juce::Slider*) override { attachment.endGesture(); }
 
     juce::Slider& slider;
+    juce::NormalisableRange<double> range;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
 };
@@ -25,8 +29,10 @@ private:
 class AmatiSliderAttachment
 {
 public:
-    AmatiSliderAttachment (juce::AudioProcessorValueTreeState& stateToUse,
+    AmatiSliderAttachment (
+        juce::AudioProcessorValueTreeState& stateToUse,
         const juce::String& parameterID,
+        juce::NormalisableRange<double>& range,
         juce::Slider& slider
     );
 
@@ -39,11 +45,11 @@ private:
 class ParamEditor : public juce::Component
 {
 public:
-    ParamEditor (juce::AudioProcessorValueTreeState&);
-    ~ParamEditor () noexcept override;
+    ParamEditor(juce::AudioProcessorValueTreeState&);
+    ~ParamEditor() noexcept override;
 
-    void paint (juce::Graphics&) override {}
-    void resized () override;
+    void paint(juce::Graphics&) override {}
+    void resized() override;
 
     void updateParameters(const std::vector<PluginProcessor::FaustParameter>&);
 
@@ -53,8 +59,6 @@ private:
     juce::OwnedArray<juce::Label> labels{};
     juce::OwnedArray<AmatiSliderAttachment> sliderAttachments{};
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachments{};
-
-    static void createParameter(const PluginProcessor::FaustParameter&, juce::AudioProcessorValueTreeState &stateToUse);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamEditor)
 };
