@@ -100,8 +100,7 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
         const auto& p = param.programParameter;
         switch (p.type) {
             case Type::Slider: {
-                // auto *slider = new juce::Slider();
-                auto slider = std::make_unique<juce::Slider>();
+                auto *slider = new juce::Slider();
                 auto range = juce::NormalisableRange(p.range, p.step);
                 slider->setNormalisableRange(range);
                 slider->setValue(p.init, juce::dontSendNotification);
@@ -109,14 +108,14 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
                 auto *attachment = new AmatiSliderAttachment(p.init, valueTreeState, param.id, range, *slider);
 
                 auto *label = new juce::Label();
-                label->attachToComponent(slider.get(), false);
+                label->attachToComponent(slider, false);
                 label->setText(p.label, juce::dontSendNotification);
 
-                component = slider.get();
+                component = slider;
                 labels.add(label);
                 sliderAttachments.add(attachment);
 
-                addAndMakeVisible(slider.get());
+                addAndMakeVisible(slider);
                 addAndMakeVisible(label);
                 break;
             }
@@ -188,12 +187,6 @@ AmatiSliderAttachment::AmatiSliderAttachment(
     if (juce::RangedAudioParameter* parameter = stateToUse.getParameter(parameterID)) {
         const double value = convertTo0to1(initalValue, range);
         parameter->setValueNotifyingHost(static_cast<float>(value));
-        DBG(initalValue);
-        DBG(parameter->getValue());
-        // juce::Value state = valueTreeState.state.getPropertyAsValue(param.id, nullptr, true);
-        // state = p.init;
-        // DBG("The param is: " << param.id);
-        // DBG("the state is: " << state.toString());
         attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, attachedSlider, range, stateToUse.undoManager);
     } else {
         jassertfalse;

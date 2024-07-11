@@ -144,7 +144,7 @@ FaustProgram::Parameter FaustProgram::getParameter(unsigned int idx)
 float FaustProgram::getValue(int index)
 {
     if (index > 0 || index <= getParamCount())
-        return static_cast<float> (faustInterface->getParamRatio (index));
+        return static_cast<float> (faustInterface->getParamRatio(index));
     else
         return 0.0;
 }
@@ -173,14 +173,15 @@ void FaustProgram::setSampleRate (int sr)
 
 // Convert from 0 to 1 to expected range
 void FaustProgram::convertNormaliseRange(const int index, const float value) const {
-    if(value >= 1.0f || value < 0.0f) {
+    if(value > 1.0f || value < 0.0f) {
         jassertfalse;
     }
-    const juce::Range<double> range = parameters[index].range;
-    const double convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-    DBG("the converted value is: " << convertedValue);
+
     if (index > 0 && index <= parameters.size())
     {
+        const juce::Range<double> range = parameters[index].range;
+        const double convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
+        // DBG("the converted value is: " << convertedValue);
         faustInterface->setParamRatio(index, convertedValue);
     }
 }

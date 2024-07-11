@@ -301,7 +301,7 @@ bool PluginProcessor::compileSource (const juce::String& source) {
 
 void PluginProcessor::updateDspParameters()
 {
-    int paramCount = faustProgram->getParamCount();
+    auto paramCount = faustProgram->getParamCount();
     for (int i = 0; i < paramCount; ++i) {
         juce::String id = paramIdForIdx(i);
         float value = *valueTreeState.getRawParameterValue(id);
