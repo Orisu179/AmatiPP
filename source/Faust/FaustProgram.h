@@ -28,7 +28,6 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 class FaustProgram
 {
 public:
-public:
     class CompileError : public std::runtime_error
     {
     public:
@@ -68,7 +67,7 @@ public:
         double step;
     };
     Parameter getParameter(unsigned int idx);
-    float convertNormaliseRange(unsigned int index, float value) const;
+    void convertNormaliseRange(int index, float value) const;
 
     float getValue(int idx);
     void setValue(int idx, float);

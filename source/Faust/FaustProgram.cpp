@@ -106,10 +106,10 @@ void FaustProgram::compileSource (const juce::String& source)
         throw CompileError (errorString);
     }
 
-    dspInstance.reset (dspFactory->createDSPInstance());
-    dspInstance->init (sampleRate);
+    dspInstance.reset(dspFactory->createDSPInstance());
+    dspInstance->init(sampleRate);
     faustInterface = std::make_unique<APIUI>();
-    dspInstance->buildUserInterface (faustInterface.get());
+    dspInstance->buildUserInterface(faustInterface.get());
     for(int i{0}; i<getParamCount(); i++) {
         parameters.push_back(
             { juce::String (faustInterface->getParamLabel (i)),
@@ -151,9 +151,9 @@ float FaustProgram::getValue(int index)
 
 void FaustProgram::setValue(int index, float value)
 {
-    if (index > 0 || index <= getParamCount())
+    if (index > 0 && index <= getParamCount())
     {
-        faustInterface->setParamRatio (index, value);
+        faustInterface->setParamRatio(index, value);
     }
 }
 
@@ -171,12 +171,16 @@ void FaustProgram::setSampleRate (int sr)
     }
 }
 
-float FaustProgram::convertNormaliseRange(unsigned int index, float value) const {
-    if(value >= 1.0f || value <= 0.0f) {
+// Convert from 0 to 1 to expected range
+void FaustProgram::convertNormaliseRange(const int index, const float value) const {
+    if(value >= 1.0f || value < 0.0f) {
         jassertfalse;
     }
-
     const juce::Range<double> range = parameters[index].range;
-    const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-    return convertedValue;
+    const double convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
+    DBG("the converted value is: " << convertedValue);
+    if (index > 0 && index <= parameters.size())
+    {
+        faustInterface->setParamRatio(index, convertedValue);
+    }
 }
