@@ -70,11 +70,10 @@ void AmatiSliderParameterAttachment::setValue(float newValue)
 
 void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
 {
-    const double sliderValue = slider.getValue();
-    double convertedValue = (sliderValue - range.start) / (range.end - range.start);
+    float convertedValue = (slider.getValue() - range.start) / (range.end - range.start);
     if (!ignoreCallbacks){
-        DBG(convertedValue);
-        attachment.setValueAsPartOfGesture(static_cast<float>(convertedValue));
+        DBG("new value is: " << slider.getValue());
+        attachment.setValueAsPartOfGesture(convertedValue);
     }
 }
 

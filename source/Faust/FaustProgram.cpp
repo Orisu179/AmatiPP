@@ -96,7 +96,7 @@ void FaustProgram::compileSource (const juce::String& source)
         default:
         {
             juce::String message ("Invalid backend: ");
-            message += int (backend);
+            message += static_cast<int>(backend);
             throw CompileError (message);
         }
     }
@@ -181,7 +181,6 @@ void FaustProgram::convertNormaliseRange(const int index, const float value) con
     {
         const juce::Range<double> range = parameters[index].range;
         const double convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-        // DBG("the converted value is: " << convertedValue);
         faustInterface->setParamRatio(index, convertedValue);
     }
 }
