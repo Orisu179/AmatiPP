@@ -116,13 +116,14 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     tmpBufferIn  = juce::AudioBuffer<float> (numChannelsIn,  samplesPerBlock);
     tmpBufferOut = juce::AudioBuffer<float> (numChannelsOut, samplesPerBlock);
     compileSource(sourceCode);
-    playing = true;
+    readyToPlay = true;
 }
 
 void PluginProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    readyToPlay = false;
     playing = false;
     faustProgram.reset(nullptr);
 }
@@ -149,9 +150,7 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 #endif
 }
 
-void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-    juce::MidiBuffer& midiMessages)
-{
+void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
     juce::ignoreUnused (midiMessages);
     int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
@@ -165,7 +164,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    if(!faustProgram){
+    if(!faustProgram || !playing) {
         // clears output channels that doesn't contain any input data
         for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
             buffer.clear (i, 0, buffer.getNumSamples());
@@ -261,15 +260,15 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
 }
 //==============================================================================
 // This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
     return new PluginProcessor();
 }
 
 bool PluginProcessor::compileSource (const juce::String& source) {
-    if(!playing) {
+    if(!readyToPlay) {
         return false;
     }
+
     switch(backend) {
         case FaustProgram::Backend::LLVM:
             juce::Logger::writeToLog("Compiling with LLVM backend...");
@@ -278,6 +277,7 @@ bool PluginProcessor::compileSource (const juce::String& source) {
             juce::Logger::writeToLog("Compiling with Interpreter backend...");
             break;
     }
+
     try {
         faustProgram = std::make_unique<FaustProgram>(source, backend, static_cast<int>(sampRate));
         juce::Logger::getCurrentLogger()->writeToLog("Compilation Complete! Using new program.");
@@ -299,8 +299,7 @@ bool PluginProcessor::compileSource (const juce::String& source) {
 }
 
 
-void PluginProcessor::updateDspParameters()
-{
+void PluginProcessor::updateDspParameters() const {
     auto paramCount = faustProgram->getParamCount();
     for (int i = 0; i < paramCount; ++i) {
         juce::String id = paramIdForIdx(i);
@@ -309,13 +308,17 @@ void PluginProcessor::updateDspParameters()
     }
 }
 
-void PluginProcessor::setBackend (FaustProgram::Backend newBackend) {
+void PluginProcessor::setBackend (const FaustProgram::Backend newBackend) {
     backend = newBackend;
     compileSource(sourceCode);
 }
 
+void PluginProcessor::setPlayingState(const bool state) {
+    playing = state;
+}
+
 std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter() const {
-    std::vector<PluginProcessor::FaustParameter> params;
+    std::vector<FaustParameter> params;
     if(!faustProgram) {
         return params;
     }
@@ -336,3 +339,4 @@ void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juc
     }
 //    DBG("property change: " << tree.getType() << " " << property);
 }
+

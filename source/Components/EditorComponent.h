@@ -16,6 +16,7 @@ public:
     void setSource(const juce::String&);
     std::function<void(void)> onCompile;
     std::function<void(void)> onEnable;
+    std::function<void(void)> onDisable;
     void setStatus(const juce::String&, juce::NotificationType);
 private:
     FaustTokeniser tokeniser;

@@ -20,13 +20,23 @@ buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBo
     addAndMakeVisible (compileButton);
 
     enableButton.setComponentID("enable");
-    enableButton.setButtonText("enable");
+    enableButton.setButtonText("start");
     enableButton.onClick = [this] {
-        if(onEnable)
+        if(onEnable && onDisable)
         {
-            onEnable();
+            if(enableButton.getButtonText().equalsIgnoreCase("start"))
+            {
+                onEnable();
+                enableButton.setButtonText("stop");
+            } else
+            {
+                onDisable();
+               enableButton.setButtonText("start");
+            }
         }
     };
+    addAndMakeVisible(enableButton);
+
     importButton.setButtonText ("Import");
     importButton.onClick = [this] {
         fileChooser = std::make_unique<juce::FileChooser> ("Please select the DSP file you want to load..", workDir, "*.dsp");
@@ -74,6 +84,7 @@ void EditorComponent::resized()
                            withFlex(1));
     };
     addButton(compileButton);
+    addButton(enableButton);
     addButton(importButton);
     addButton(exportButton);
 

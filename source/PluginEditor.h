@@ -26,6 +26,7 @@ private:
     juce::AudioProcessorValueTreeState& valueTreeState;
     juce::ValueTree settingTree;
     AmatiLookAndFeel amatiLookAndFeel;
+    bool isCompiled { false };
 
     void updateParameters();
     void updateEditor();
