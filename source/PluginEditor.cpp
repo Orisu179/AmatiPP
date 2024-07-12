@@ -50,10 +50,6 @@ PluginEditor::PluginEditor(PluginProcessor& p, juce::AudioProcessorValueTreeStat
             tabbedComponent.setCurrentTabIndex(2);
         }
     };
-    editorComponent.onRevert = [&] {
-        updateEditor();
-    };
-
     updateEditor(); // set editor to display the processor's source code
     updateParameters(); // set the right display for the parameters
 
