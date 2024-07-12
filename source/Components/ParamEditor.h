@@ -30,6 +30,7 @@ class AmatiSliderAttachment
 {
 public:
     AmatiSliderAttachment (
+        double initalValue,
         juce::AudioProcessorValueTreeState& stateToUse,
         const juce::String& parameterID,
         juce::NormalisableRange<double>& range,
@@ -38,6 +39,8 @@ public:
 
 private:
     std::unique_ptr<AmatiSliderParameterAttachment> attachment;
+
+    static double convertTo0to1(double, juce::NormalisableRange<double>);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmatiSliderAttachment)
 };
 
@@ -55,11 +58,10 @@ public:
 
 private:
     juce::AudioProcessorValueTreeState& valueTreeState;
-    juce::OwnedArray<juce::Component> components{};
+    juce::OwnedArray<Component> components{};
     juce::OwnedArray<juce::Label> labels{};
     juce::OwnedArray<AmatiSliderAttachment> sliderAttachments{};
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachments{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamEditor)
 };
-

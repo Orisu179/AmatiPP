@@ -76,6 +76,5 @@ private:
     double sampRate {};
 
     void updateDspParameters();
-    float convertNormaliseRange(int, float);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };

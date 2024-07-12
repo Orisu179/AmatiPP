@@ -1,6 +1,5 @@
 
-/*
-    Copyright (C) 2020 by Grégoire Locqueville <gregoireloc@gmail.com> Copyright (C) 2022 by Kamil Kisiel <kamil@kamilkisiel.net>
+/* Copyright (C) 2020 by Grégoire Locqueville <gregoireloc@gmail.com> Copyright (C) 2022 by Kamil Kisiel <kamil@kamilkisiel.net>
 This file is part of Amati.
 
     Amati is free software: you can redistribute it and/or modify it
@@ -47,11 +46,7 @@ AmatiSliderParameterAttachment::AmatiSliderParameterAttachment(
     juce::Slider& s,
     juce::NormalisableRange<double>& r,
     juce::UndoManager* um)
-    : slider(s), range(r), attachment(param,
-        [this](float f) {
-            double convertedValue = (f - range.start) / (range.end - range.start);
-        setValue(static_cast<float>(convertedValue));
-    }, um)
+    : slider(s), range(r), attachment(param, [this](float f) { setValue(f); }, um)
 {
     sendInitialUpdate();
     slider.valueChanged();
@@ -65,16 +60,21 @@ AmatiSliderParameterAttachment::~AmatiSliderParameterAttachment()
 
 void AmatiSliderParameterAttachment::sendInitialUpdate() { attachment.sendInitialUpdate(); }
 
-void AmatiSliderParameterAttachment::setValue (float newValue)
+void AmatiSliderParameterAttachment::setValue(float newValue)
 {
+    // Sets the value back from the actual value to 0 to 1 range
+    // double convertedValue = (newValue - range.start) / (range.end - range.start);
     const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-    slider.setValue (newValue, juce::sendNotificationSync);
+    slider.setValue(newValue, juce::sendNotificationSync);
 }
 
 void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
 {
-    if (!ignoreCallbacks)
-        attachment.setValueAsPartOfGesture (static_cast<float>(slider.getValue()));
+    float convertedValue = (slider.getValue() - range.start) / (range.end - range.start);
+    if (!ignoreCallbacks){
+        DBG("new value is: " << slider.getValue());
+        attachment.setValueAsPartOfGesture(convertedValue);
+    }
 }
 
 ParamEditor::ParamEditor(juce::AudioProcessorValueTreeState& vts) : valueTreeState(vts) {}
@@ -95,30 +95,26 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
 
     using Type = FaustProgram::ItemType;
     for (const auto& param : params) {
-        juce::Component* component;
+        juce::Component* component = nullptr;
         const auto& p = param.programParameter;
         switch (p.type) {
             case Type::Slider: {
-                // auto *slider = new juce::Slider();
-                auto slider = std::make_unique<juce::Slider>();
+                auto *slider = new juce::Slider();
                 auto range = juce::NormalisableRange(p.range, p.step);
                 slider->setNormalisableRange(range);
-
-
-                auto *attachment = new AmatiSliderAttachment(
-                    valueTreeState, param.id, range, *slider);
-
                 slider->setValue(p.init, juce::dontSendNotification);
 
+                auto *attachment = new AmatiSliderAttachment(p.init, valueTreeState, param.id, range, *slider);
+
                 auto *label = new juce::Label();
-                label->attachToComponent(slider.get(), false);
+                label->attachToComponent(slider, false);
                 label->setText(p.label, juce::dontSendNotification);
 
-                component = slider.get();
+                component = slider;
                 labels.add(label);
                 sliderAttachments.add(attachment);
 
-                addAndMakeVisible(slider.get());
+                addAndMakeVisible(slider);
                 addAndMakeVisible(label);
                 break;
             }
@@ -152,7 +148,6 @@ void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParam
         components.add(component);
         component->getProperties().set("type", static_cast<int>(p.type));
     }
-
     resized();
 }
 
@@ -166,6 +161,7 @@ void ParamEditor::resized ()
     for (int i = 0; i < components.size(); ++i)
     {
         auto* comp = components[i];
+        DBG(comp->getDescription());
         const auto& props = comp->getProperties();
         auto type = static_cast<Type>(static_cast<int>(props.getWithDefault("type", 0)));
         auto width = getWidth () - sideMargin*2;
@@ -182,14 +178,21 @@ void ParamEditor::resized ()
 }
 
 AmatiSliderAttachment::AmatiSliderAttachment(
+    double initalValue,
     juce::AudioProcessorValueTreeState &stateToUse,
     const juce::String &parameterID,
     juce::NormalisableRange<double> &range,
     juce::Slider &attachedSlider) {
     if (juce::RangedAudioParameter* parameter = stateToUse.getParameter(parameterID)) {
-        // Do something here to make sure the parameters are normalised
+        const double value = convertTo0to1(initalValue, range);
+        parameter->setValueNotifyingHost(static_cast<float>(value));
         attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, attachedSlider, range, stateToUse.undoManager);
     } else {
         jassertfalse;
     }
+}
+
+double AmatiSliderAttachment::convertTo0to1(const double value, const juce::NormalisableRange<double> range)
+{
+    return (value- range.start) / (range.end - range.start);
 }

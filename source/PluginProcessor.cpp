@@ -289,8 +289,9 @@ bool PluginProcessor::compileSource (const juce::String& source) {
     }
     sourceCode = source;
     // Update internal buffers
-    int inChans  = faustProgram->getNumInChannels  ();
-    int outChans = faustProgram->getNumOutChannels ();
+    int inChans  = faustProgram->getNumInChannels();
+    int outChans = faustProgram->getNumOutChannels();
+
 
     tmpBufferIn.setSize(inChans,  tmpBufferIn.getNumSamples());
     tmpBufferOut.setSize(outChans, tmpBufferOut.getNumSamples());
@@ -298,15 +299,13 @@ bool PluginProcessor::compileSource (const juce::String& source) {
 }
 
 
-void PluginProcessor::updateDspParameters() {
-    int paramCount = faustProgram->getParamCount();
+void PluginProcessor::updateDspParameters()
+{
+    auto paramCount = faustProgram->getParamCount();
     for (int i = 0; i < paramCount; ++i) {
-       juce::String id = paramIdForIdx(i);
-       float value = *valueTreeState.getRawParameterValue(id);
-       DBG(value);
-        // TODO: HERE TO CONVERT THE VALUES BACK
-        // value = faustProgram->convertNormaliseRange(i, value);
-       faustProgram->setValue(i, value);
+        juce::String id = paramIdForIdx(i);
+        float value = *valueTreeState.getRawParameterValue(id);
+        faustProgram->convertNormaliseRange(i, value);
     }
 }
 
@@ -322,7 +321,6 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     }
     for(unsigned int i = 0; i <faustProgram->getParamCount(); i++) {
         params.push_back({ paramIdForIdx(static_cast<int>(i)), faustProgram->getParameter(i)});
-//        DBG(paramIdForIdx(i));
     }
     return params;
 }
@@ -337,8 +335,4 @@ void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juc
         setBackend(static_cast<FaustProgram::Backend>(newBackend - 1));
     }
 //    DBG("property change: " << tree.getType() << " " << property);
-}
-float PluginProcessor::convertNormaliseRange (int index, float value)
-{
-    return static_cast<float>(index) * value;
 }
