@@ -40,25 +40,19 @@ PluginEditor::PluginEditor(PluginProcessor &p, juce::AudioProcessorValueTreeStat
         consoleComponent.clearMessages();
         if (processorRef.compileSource(editorComponent.getSource())) {
             editorComponent.setStatus("Status: Compiled", juce::sendNotification);
-            updateParameters();
-            isCompiled = true;
-            editorComponent.enableStartButton(true);
             processorRef.setPlayingState(false);
+            updateParameters();
+            editorComponent.setStartButtonEnabled(true);
         } else {
             editorComponent.setStatus("Status: Error", juce::sendNotification);
             tabbedComponent.setCurrentTabIndex(2);
-            isCompiled = false;
+            editorComponent.setStartButtonEnabled(false);
         }
     };
 
     editorComponent.onStart = [&] {
-        if (isCompiled) {
-            editorComponent.setStatus("Status: Running", juce::sendNotification);
-            processorRef.setPlayingState(true);
-        } else {
-            editorComponent.setStatus("Status: Error", juce::sendNotification);
-            tabbedComponent.setCurrentTabIndex(2);
-        }
+        editorComponent.setStatus("Status: Running", juce::sendNotification);
+        processorRef.setPlayingState(true);
     };
 
     editorComponent.onStop = [&] {

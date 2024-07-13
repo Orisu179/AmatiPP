@@ -92,7 +92,7 @@ void EditorComponent::resized()
     buttons.performLayout(bounds.removeFromTop(buttonHeight));
     statusLabel.setBounds(getWidth() / 60, -5, textWidth, textHeight);
 
-    codeEditor.setBounds (
+    codeEditor.setBounds(
         margin,
         2 * margin + buttonHeight,
         getWidth() - 2 * margin,
@@ -106,14 +106,14 @@ juce::String EditorComponent::getSource()
 
 void EditorComponent::setSource (const juce::String& source)
 {
-    sourceCode.replaceAllContent (source);
+    sourceCode.replaceAllContent(source);
 }
 
-void EditorComponent::setStatus (const juce::String& status, juce::NotificationType notice)
+void EditorComponent::setStatus (const juce::String& status, const juce::NotificationType notice)
 {
-    statusLabel.setText (status, notice);
+    statusLabel.setText(status, notice);
 }
 
-void EditorComponent::enableStartButton(bool state) {
+void EditorComponent::setStartButtonEnabled(const bool state) {
     startButton.setEnabled(state);
 }
