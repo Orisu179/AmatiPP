@@ -20,6 +20,8 @@ private:
     void sliderDragStarted (juce::Slider*) override { attachment.beginGesture(); }
     void sliderDragEnded   (juce::Slider*) override { attachment.endGesture(); }
 
+    static double convertFrom0to1(double value, juce::NormalisableRange<double>);
+
     juce::Slider& slider;
     juce::NormalisableRange<double> range;
     juce::ParameterAttachment attachment;
@@ -41,7 +43,7 @@ private:
     std::unique_ptr<AmatiSliderParameterAttachment> attachment;
 
     static double convertTo0to1(double, juce::NormalisableRange<double>);
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmatiSliderAttachment)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AmatiSliderAttachment)
 };
 
 

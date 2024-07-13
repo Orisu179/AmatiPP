@@ -8,8 +8,7 @@ PluginEditor::PluginEditor(PluginProcessor &p, juce::AudioProcessorValueTreeStat
       settingTree(vts.state.getOrCreateChildWithName("settings", nullptr)),
       settingsComponent(settingTree),
       paramEditor(vts),
-      tabbedComponent(juce::TabbedButtonBar::TabsAtTop)
-{
+      tabbedComponent(juce::TabbedButtonBar::TabsAtTop) {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     juce::LookAndFeel_V4::setDefaultLookAndFeel(&amatiLookAndFeel);

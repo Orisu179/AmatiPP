@@ -177,10 +177,11 @@ void FaustProgram::convertNormaliseRange(const int index, const float value) con
         jassertfalse;
     }
 
-    if (index > 0 && index <= parameters.size())
+    if (index >= 0 && index < parameters.size())
     {
         const juce::Range<double> range = parameters[index].range;
-        const double convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-        faustInterface->setParamRatio(index, convertedValue);
+        const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
+        faustInterface->setParamValue(index, convertedValue);
+        // faustInterface->setParamRatio(index, convertedValue);
     }
 }
