@@ -44,13 +44,25 @@ PluginEditor::PluginEditor(PluginProcessor &p, juce::AudioProcessorValueTreeStat
     editorComponent.onCompile = [&] {
         consoleComponent.clearMessages();
         if (processorRef.compileSource(editorComponent.getSource())) {
-            editorComponent.setStatus("Status: Running", juce::sendNotification);
+            editorComponent.setStatus("Status: Compiled", juce::sendNotification);
+            processorRef.setPlayingState(false);
             updateParameters();
-            tabbedComponent.setCurrentTabIndex(1);
+            editorComponent.setStartButtonEnabled(true);
         } else {
             editorComponent.setStatus("Status: Error", juce::sendNotification);
             tabbedComponent.setCurrentTabIndex(2);
+            editorComponent.setStartButtonEnabled(false);
         }
+    };
+
+    editorComponent.onStart = [&] {
+        editorComponent.setStatus("Status: Running", juce::sendNotification);
+        processorRef.setPlayingState(true);
+    };
+
+    editorComponent.onStop = [&] {
+        editorComponent.setStatus("Status: Stopped", juce::sendNotification);
+        processorRef.setPlayingState(false);
     };
 
     updateEditor(); // set editor to display the processor's source code

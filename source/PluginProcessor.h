@@ -53,6 +53,7 @@ public:
     bool compileSource(const juce::String&);
     juce::String getSourceCode();
     void setBackend(FaustProgram::Backend);
+    void setPlayingState(bool);
 
     struct FaustParameter {
         juce::String id;
@@ -69,6 +70,7 @@ private:
     FaustProgram::Backend backend {};
     std::unique_ptr<FaustProgram> faustProgram {};
     bool playing { false };
+    bool readyToPlay { false };
     juce::AudioProcessorValueTreeState valueTreeState;
 
     // used to copy the input buffers
@@ -76,6 +78,6 @@ private:
     juce::AudioBuffer<float> tmpBufferOut;
     double sampRate {};
 
-    void updateDspParameters();
+    void updateDspParameters() const;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };

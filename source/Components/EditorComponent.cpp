@@ -17,8 +17,27 @@ buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBo
             onCompile();
         }
     };
-
     addAndMakeVisible (compileButton);
+
+    startButton.setComponentID("start");
+    startButton.setButtonText("start");
+    startButton.setEnabled(false);
+    startButton.onClick = [this] {
+        if(onStart && onStop)
+        {
+            if(startButton.getButtonText().equalsIgnoreCase("start"))
+            {
+                onStart();
+                startButton.setButtonText("stop");
+            } else
+            {
+                onStop();
+               startButton.setButtonText("start");
+            }
+        }
+    };
+    addAndMakeVisible(startButton);
+
     importButton.setButtonText ("Import");
     importButton.onClick = [this] {
         fileChooser = std::make_unique<juce::FileChooser> ("Please select the DSP file you want to load..", workDir, "*.dsp");
@@ -66,13 +85,14 @@ void EditorComponent::resized()
                            withFlex(1));
     };
     addButton(compileButton);
+    addButton(startButton);
     addButton(importButton);
     addButton(exportButton);
 
     buttons.performLayout(bounds.removeFromTop(buttonHeight));
     statusLabel.setBounds(getWidth() / 60, -5, textWidth, textHeight);
 
-    codeEditor.setBounds (
+    codeEditor.setBounds(
         margin,
         2 * margin + buttonHeight,
         getWidth() - 2 * margin,
@@ -86,10 +106,14 @@ juce::String EditorComponent::getSource()
 
 void EditorComponent::setSource (const juce::String& source)
 {
-    sourceCode.replaceAllContent (source);
+    sourceCode.replaceAllContent(source);
 }
 
-void EditorComponent::setStatus (const juce::String& status, juce::NotificationType notice)
+void EditorComponent::setStatus (const juce::String& status, const juce::NotificationType notice)
 {
-    statusLabel.setText (status, notice);
+    statusLabel.setText(status, notice);
+}
+
+void EditorComponent::setStartButtonEnabled(const bool state) {
+    startButton.setEnabled(state);
 }

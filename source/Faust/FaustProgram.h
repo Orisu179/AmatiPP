@@ -68,10 +68,10 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter(unsigned int idx);
+    Parameter getParameter(int idx);
     void convertNormaliseRange(int index, float value) const;
 
-    float getValue(int idx);
+    float getValue(int index);
     void setValue(int idx, float);
     void setSampleRate(int);
 

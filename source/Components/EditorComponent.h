@@ -15,7 +15,10 @@ public:
     juce::String getSource();
     void setSource(const juce::String&);
     std::function<void(void)> onCompile;
+    std::function<void(void)> onStart;
+    std::function<void(void)> onStop;
     void setStatus(const juce::String&, juce::NotificationType);
+    void setStartButtonEnabled(bool);
 private:
     FaustTokeniser tokeniser;
     // Source code HAVE to be declared before codeEditor
@@ -23,6 +26,7 @@ private:
     juce::CodeEditorComponent codeEditor;
 
     juce::TextButton compileButton;
+    juce::TextButton startButton;
     juce::TextButton importButton;
     juce::TextButton exportButton;
 
