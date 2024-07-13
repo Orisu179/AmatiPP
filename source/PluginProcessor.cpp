@@ -322,8 +322,8 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     if(!faustProgram) {
         return params;
     }
-    for(unsigned int i = 0; i <faustProgram->getParamCount(); i++) {
-        params.push_back({ paramIdForIdx(static_cast<int>(i)), faustProgram->getParameter(i)});
+    for(int i = 0; i <faustProgram->getParamCount(); i++) {
+        params.push_back({ paramIdForIdx(i), faustProgram->getParameter(i)});
     }
     return params;
 }

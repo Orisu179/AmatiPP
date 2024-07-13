@@ -27,11 +27,9 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 
 
-static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
-{
+static FaustProgram::ItemType apiToItemType(APIUI::ItemType type) {
     using ItemType = FaustProgram::ItemType;
-    switch (type)
-    {
+    switch (type) {
         case APIUI::kButton:
             return ItemType::Button;
         case APIUI::kCheckButton:
@@ -47,37 +45,32 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
-FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
-{
+FaustProgram::FaustProgram(const juce::String &source, Backend b, int sampRate) : backend(b), sampleRate(sampRate) {
     compileSource(source);
 }
 
-FaustProgram::~FaustProgram()
-{
+FaustProgram::~FaustProgram() {
     // Delete in order.
-    faustInterface.reset (nullptr);
-    dspInstance.reset (nullptr);
+    faustInterface.reset(nullptr);
+    dspInstance.reset(nullptr);
 
-    switch (backend)
-    {
+    switch (backend) {
         case FaustProgram::Backend::LLVM:
-            deleteDSPFactory (static_cast<llvm_dsp_factory*> (dspFactory));
+            deleteDSPFactory(static_cast<llvm_dsp_factory *>(dspFactory));
             break;
         case FaustProgram::Backend::Interpreter:
-            deleteInterpreterDSPFactory (static_cast<interpreter_dsp_factory*> (dspFactory));
+            deleteInterpreterDSPFactory(static_cast<interpreter_dsp_factory *>(dspFactory));
             break;
     }
 }
 
-void FaustProgram::compileSource (const juce::String& source)
-{
-    const char* argv[] = { "" }; // compilation arguments
+void FaustProgram::compileSource(const juce::String &source) {
+    const char *argv[] = {""}; // compilation arguments
     std::string errorString;
 
-    switch (backend)
-    {
+    switch (backend) {
         case Backend::LLVM:
-            dspFactory = createDSPFactoryFromString (
+            dspFactory = createDSPFactoryFromString(
                 "faust", // program name
                 source.toStdString(),
                 0, // number of arguments
@@ -86,85 +79,79 @@ void FaustProgram::compileSource (const juce::String& source)
                 errorString);
             break;
         case Backend::Interpreter:
-            dspFactory = createInterpreterDSPFactoryFromString (
+            dspFactory = createInterpreterDSPFactoryFromString(
                 "faust", // program name
                 source.toStdString(),
                 0, // number of arguments
                 argv,
                 errorString);
             break;
-        default:
-        {
-            juce::String message ("Invalid backend: ");
+        default: {
+            juce::String message("Invalid backend: ");
             message += static_cast<int>(backend);
-            throw CompileError (message);
+            throw CompileError(message);
         }
     }
 
-    if (!dspFactory)
-    {
-        throw CompileError (errorString);
+    if (!dspFactory) {
+        throw CompileError(errorString);
     }
 
     dspInstance.reset(dspFactory->createDSPInstance());
     dspInstance->init(sampleRate);
     faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface(faustInterface.get());
-    for(int i{0}; i<getParamCount(); i++) {
+    for (int i{0}; i < getParamCount(); i++) {
         parameters.push_back(
-            { juce::String (faustInterface->getParamLabel (i)),
-              apiToItemType (faustInterface->getParamItemType (i)),
-              { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
-              faustInterface->getParamInit (i),
-              faustInterface->getParamStep (i) }
-            );
+            {
+                juce::String(faustInterface->getParamLabel(i)),
+                apiToItemType(faustInterface->getParamItemType(i)),
+                {faustInterface->getParamMin(i), faustInterface->getParamMax(i)},
+                faustInterface->getParamInit(i),
+                faustInterface->getParamStep(i)
+            }
+        );
     }
 }
 
-int FaustProgram::getParamCount()
-{
+int FaustProgram::getParamCount() {
     return faustInterface->getParamsCount();
 }
 
-int FaustProgram::getNumInChannels()
-{
+int FaustProgram::getNumInChannels() {
     return dspInstance->getNumInputs();
 }
 
-int FaustProgram::getNumOutChannels()
-{
+int FaustProgram::getNumOutChannels() {
     return dspInstance->getNumOutputs();
 }
 
-FaustProgram::Parameter FaustProgram::getParameter(unsigned int idx)
-{
+FaustProgram::Parameter FaustProgram::getParameter(const int idx) {
+    if (idx < 0) {
+        jassertfalse;
+    }
     return parameters[idx];
 }
 
-float FaustProgram::getValue(int index)
-{
+float FaustProgram::getValue(const int index) {
     if (index > 0 || index <= getParamCount())
-        return static_cast<float> (faustInterface->getParamRatio(index));
+        return static_cast<float>(faustInterface->getParamRatio(index));
     else
         return 0.0;
 }
 
-void FaustProgram::setValue(int index, float value)
-{
-    if (index > 0 && index <= getParamCount())
-    {
+void FaustProgram::setValue(int index, float value) {
+    if (index > 0 && index <= getParamCount()) {
         faustInterface->setParamRatio(index, value);
     }
 }
 
-void FaustProgram::compute(int samples, const float* const* in, float* const* out)
-{
-    dspInstance->compute(samples, const_cast<float**> (in), const_cast<float**> (out));
+void FaustProgram::compute(const int samples, const float *const*in, float *const*out) {
+    dspInstance->compute(samples, const_cast<float **>(in), const_cast<float **>(out));
 }
 
-void FaustProgram::setSampleRate (int sr)
-{
-    if(sr > 0){
+void FaustProgram::setSampleRate(const int sr) {
+    if (sr > 0) {
         sampleRate = sr;
     } else {
         jassertfalse;
@@ -173,12 +160,11 @@ void FaustProgram::setSampleRate (int sr)
 
 // Convert from 0 to 1 to expected range
 void FaustProgram::convertNormaliseRange(const int index, const float value) const {
-    if(value > 1.0f || value < 0.0f) {
+    if (value > 1.0f || value < 0.0f) {
         jassertfalse;
     }
 
-    if (index >= 0 && index < parameters.size())
-    {
+    if (index >= 0 && index < parameters.size()) {
         const juce::Range<double> range = parameters[index].range;
         const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
         faustInterface->setParamValue(index, convertedValue);

@@ -19,23 +19,24 @@ buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBo
     };
     addAndMakeVisible (compileButton);
 
-    enableButton.setComponentID("enable");
-    enableButton.setButtonText("start");
-    enableButton.onClick = [this] {
-        if(onEnable && onDisable)
+    startButton.setComponentID("start");
+    startButton.setButtonText("start");
+    startButton.setEnabled(false);
+    startButton.onClick = [this] {
+        if(onStart && onStop)
         {
-            if(enableButton.getButtonText().equalsIgnoreCase("start"))
+            if(startButton.getButtonText().equalsIgnoreCase("start"))
             {
-                onEnable();
-                enableButton.setButtonText("stop");
+                onStart();
+                startButton.setButtonText("stop");
             } else
             {
-                onDisable();
-               enableButton.setButtonText("start");
+                onStop();
+               startButton.setButtonText("start");
             }
         }
     };
-    addAndMakeVisible(enableButton);
+    addAndMakeVisible(startButton);
 
     importButton.setButtonText ("Import");
     importButton.onClick = [this] {
@@ -84,7 +85,7 @@ void EditorComponent::resized()
                            withFlex(1));
     };
     addButton(compileButton);
-    addButton(enableButton);
+    addButton(startButton);
     addButton(importButton);
     addButton(exportButton);
 
@@ -111,4 +112,8 @@ void EditorComponent::setSource (const juce::String& source)
 void EditorComponent::setStatus (const juce::String& status, juce::NotificationType notice)
 {
     statusLabel.setText (status, notice);
+}
+
+void EditorComponent::enableStartButton(bool state) {
+    startButton.setEnabled(state);
 }
