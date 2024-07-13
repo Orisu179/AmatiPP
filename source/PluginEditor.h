@@ -6,6 +6,7 @@
 #include "Components/EditorComponent.h"
 #include "Components/ParamEditor.h"
 #include "Components/SettingsComponent.h"
+#include "Components/MidiComponent.h"
 #include "PluginProcessor.h"
 #include "melatonin_inspector/melatonin_inspector.h"
 
