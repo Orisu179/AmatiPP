@@ -3,6 +3,7 @@
 #include "Faust/FaustProgram.h"
 #include <faust/dsp/llvm-dsp.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <clap-juce-extensions/clap-juce-extensions.h>
 
 #if (MSVC)
     #include "ipps.h"
@@ -14,7 +15,8 @@ inline juce::String paramIdForIdx(size_t idx) {
     return paramIdForIdx(static_cast<int>(idx));
 }
 
-class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener
+class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener,
+                        public clap_juce_extensions::clap_juce_audio_processor_capabilities
 {
 public:
     PluginProcessor();
@@ -51,7 +53,6 @@ public:
     bool compileSource(const juce::String&);
     juce::String getSourceCode();
     void setBackend(FaustProgram::Backend);
-    void updateValueTreeState();
 
     struct FaustParameter {
         juce::String id;
@@ -60,6 +61,7 @@ public:
     std::vector<FaustParameter> getFaustParameter() const;
 
 private:
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void valueTreePropertyChanged (
         juce::ValueTree& tree,
         const juce::Identifier& property) override;

@@ -4,14 +4,15 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParameterLayout()
 {
+    juce::NormalisableRange<float> paramRange = juce::NormalisableRange<float>(0.f, 1.f);
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 64; i++)
     {
         auto id = juce::ParameterID (paramIdForIdx (i), 1);
         auto name = juce::String ("Parameter ") + juce::String (i);
-        layout.add (std::make_unique<juce::AudioParameterFloat> (id, name, 0.f, 1.f, 0.f));
+        layout.add (std::make_unique<juce::AudioParameterFloat> (id, name, paramRange, 0.f));
     }
     return layout;
 }
@@ -218,8 +219,8 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
     //Add source code
     juce::XmlElement* sourceTag = preset.createNewChildElement("source");
     sourceTag->addTextElement(sourceCode);
-   auto state = valueTreeState.copyState().createXml();
-   preset.addChildElement(new juce::XmlElement(*state.get()));
+    auto state = valueTreeState.copyState().createXml();
+    preset.addChildElement(new juce::XmlElement(*state.get()));
     // stores tree on desk
     copyXmlToBinary(preset, destData);
 }
@@ -288,8 +289,9 @@ bool PluginProcessor::compileSource (const juce::String& source) {
     }
     sourceCode = source;
     // Update internal buffers
-    int inChans  = faustProgram->getNumInChannels  ();
-    int outChans = faustProgram->getNumOutChannels ();
+    int inChans  = faustProgram->getNumInChannels();
+    int outChans = faustProgram->getNumOutChannels();
+
 
     tmpBufferIn.setSize(inChans,  tmpBufferIn.getNumSamples());
     tmpBufferOut.setSize(outChans, tmpBufferOut.getNumSamples());
@@ -297,12 +299,13 @@ bool PluginProcessor::compileSource (const juce::String& source) {
 }
 
 
-void PluginProcessor::updateDspParameters() {
-    int paramCount = faustProgram->getParamCount();
+void PluginProcessor::updateDspParameters()
+{
+    auto paramCount = faustProgram->getParamCount();
     for (int i = 0; i < paramCount; ++i) {
-       juce::String id = paramIdForIdx(i);
-       float value = *valueTreeState.getRawParameterValue(id);
-       faustProgram->setValue(i, value);
+        juce::String id = paramIdForIdx(i);
+        float value = *valueTreeState.getRawParameterValue(id);
+        faustProgram->convertNormaliseRange(i, value);
     }
 }
 
@@ -316,9 +319,8 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     if(!faustProgram) {
         return params;
     }
-    for(int i = 0; i<faustProgram->getParamCount(); i++) {
-        params.push_back({ paramIdForIdx(i), faustProgram->getParameter(i)});
-//        DBG(paramIdForIdx(i));
+    for(unsigned int i = 0; i <faustProgram->getParamCount(); i++) {
+        params.push_back({ paramIdForIdx(static_cast<int>(i)), faustProgram->getParameter(i)});
     }
     return params;
 }
@@ -333,22 +335,3 @@ void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juc
         setBackend(static_cast<FaustProgram::Backend>(newBackend - 1));
     }
 //    DBG("property change: " << tree.getType() << " " << property);
-}
-void PluginProcessor::updateValueTreeState()
-{
-    auto params = getFaustParameter();
-    juce::AudioProcessorValueTreeState::ParameterLayout layout;
-//    if(!valueTreeState.getParameter(static_cast<juce::String>(params.size() - 1))) {
-        juce::String tempName;
-        for(const auto& param: params) {
-            tempName = juce::String("Parameter ")  + param.id;
-            layout.add(std::make_unique<juce::AudioParameterFloat>(param.id, tempName, 0.f, 1.f, 0.f));
-            DBG(tempName);
-        }
-        auto tempValueTreeState = juce::AudioProcessorValueTreeState(*this, nullptr, "parameters", createParameterLayout());
-        auto state = tempValueTreeState.copyState().createXml();
-        valueTreeState.replaceState(juce::ValueTree::fromXml(*state));
-        DBG("changed state is: ");
-        DBG(valueTreeState.state.toXmlString());
-//    }
-}

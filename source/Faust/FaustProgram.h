@@ -68,7 +68,8 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter (int idx);
+    Parameter getParameter(unsigned int idx);
+    void convertNormaliseRange(int index, float value) const;
 
     float getValue(int idx);
     void setValue(int idx, float);
@@ -90,6 +91,6 @@ private:
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
     std::unique_ptr<FaustMidi> midi_handler;
+    std::vector<Parameter> parameters;
 
     int sampleRate;
-};
