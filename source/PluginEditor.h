@@ -4,9 +4,9 @@
 #include "BinaryData.h"
 #include "Components/ConsoleComponent.h"
 #include "Components/EditorComponent.h"
+#include "Components/MidiComponent.h"
 #include "Components/ParamEditor.h"
 #include "Components/SettingsComponent.h"
-#include "Components/MidiComponent.h"
 #include "PluginProcessor.h"
 #include "melatonin_inspector/melatonin_inspector.h"
 

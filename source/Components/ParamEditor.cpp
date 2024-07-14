@@ -19,174 +19,198 @@ This file is part of Amati.
 #include "ParamEditor.h"
 
 // https://forum.juce.com/t/how-to-get-parameterchanged-to-be-called-for-push-button/29052/17?u=kisielk
-class MomentaryButton : public juce::TextButton {
+class MomentaryButton : public juce::TextButton
+{
 public:
-    MomentaryButton(const juce::String &label) : juce::TextButton(label) {
+    MomentaryButton (const juce::String& label) : juce::TextButton (label)
+    {
     }
 
-    void mouseDown(const juce::MouseEvent &) override {
-        setState(Button::buttonDown);
+    void mouseDown (const juce::MouseEvent&) override
+    {
+        setState (Button::buttonDown);
 
         if (!getToggleState())
-            setToggleState(true, juce::sendNotification);
+            setToggleState (true, juce::sendNotification);
     }
 
-    void mouseUp(const juce::MouseEvent &) override {
-        setState(Button::buttonOver);
+    void mouseUp (const juce::MouseEvent&) override
+    {
+        setState (Button::buttonOver);
 
         if (getToggleState())
-            setToggleState(false, juce::sendNotification);
+            setToggleState (false, juce::sendNotification);
     }
 };
 
 //==============================================================================
-AmatiSliderParameterAttachment::AmatiSliderParameterAttachment(
-    juce::RangedAudioParameter &param,
-    juce::Slider &s,
-    juce::NormalisableRange<double> &r,
-    juce::UndoManager *um)
-    : slider(s), range(r), attachment(param, [this](float f) { setValue(f); }, um) {
+AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (
+    juce::RangedAudioParameter& param,
+    juce::Slider& s,
+    juce::NormalisableRange<double>& r,
+    juce::UndoManager* um)
+    : slider (s), range (r), attachment (param, [this] (float f) { setValue (f); }, um)
+{
     sendInitialUpdate();
     slider.valueChanged();
-    slider.addListener(this);
+    slider.addListener (this);
 }
 
-AmatiSliderParameterAttachment::~AmatiSliderParameterAttachment() {
-    slider.removeListener(this);
+AmatiSliderParameterAttachment::~AmatiSliderParameterAttachment()
+{
+    slider.removeListener (this);
 }
 
 void AmatiSliderParameterAttachment::sendInitialUpdate() { attachment.sendInitialUpdate(); }
 
-void AmatiSliderParameterAttachment::setValue(const float newValue) {
+void AmatiSliderParameterAttachment::setValue (const float newValue)
+{
     // sets the value from 0 to 1 back to the original value
-    const double convertedValue = convertFrom0to1(newValue, range);
-    const juce::ScopedValueSetter<bool> svs(ignoreCallbacks, true);
-    slider.setValue(convertedValue, juce::sendNotificationSync);
+    const double convertedValue = convertFrom0to1 (newValue, range);
+    const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    slider.setValue (convertedValue, juce::sendNotificationSync);
 }
 
-void AmatiSliderParameterAttachment::sliderValueChanged(juce::Slider *) {
+void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
+{
     const float convertedValue = (slider.getValue() - range.start) / (range.end - range.start);
-    if (!ignoreCallbacks) {
-        attachment.setValueAsPartOfGesture(convertedValue);
+    if (!ignoreCallbacks)
+    {
+        attachment.setValueAsPartOfGesture (convertedValue);
     }
 }
 
-ParamEditor::ParamEditor(juce::AudioProcessorValueTreeState &vts) : valueTreeState(vts) {
+ParamEditor::ParamEditor (juce::AudioProcessorValueTreeState& vts) : valueTreeState (vts)
+{
 }
 
-ParamEditor::~ParamEditor() noexcept {
+ParamEditor::~ParamEditor() noexcept
+{
     sliderAttachments.clear();
     buttonAttachments.clear();
     labels.clear();
     components.clear();
 }
 
-void ParamEditor::updateParameters(const std::vector<PluginProcessor::FaustParameter> &params) {
+void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustParameter>& params)
+{
     sliderAttachments.clear();
     buttonAttachments.clear();
     labels.clear();
     components.clear();
 
     using Type = FaustProgram::ItemType;
-    for (const auto &param: params) {
-        juce::Component *component = nullptr;
-        const auto &p = param.programParameter;
-        switch (p.type) {
-            case Type::Slider: {
-                auto *slider = new juce::Slider();
-                auto range = juce::NormalisableRange(p.range, p.step);
-                slider->setNormalisableRange(range);
-                slider->setValue(p.init, juce::dontSendNotification);
-                auto *attachment = new AmatiSliderAttachment(p.init, valueTreeState, param.id, range, *slider);
+    for (const auto& param : params)
+    {
+        juce::Component* component = nullptr;
+        const auto& p = param.programParameter;
+        switch (p.type)
+        {
+            case Type::Slider:
+            {
+                auto* slider = new juce::Slider();
+                auto range = juce::NormalisableRange (p.range, p.step);
+                slider->setNormalisableRange (range);
+                slider->setValue (p.init, juce::dontSendNotification);
+                auto* attachment = new AmatiSliderAttachment (p.init, valueTreeState, param.id, range, *slider);
 
-                auto *label = new juce::Label();
-                label->attachToComponent(slider, false);
-                label->setText(p.label, juce::dontSendNotification);
+                auto* label = new juce::Label();
+                label->attachToComponent (slider, false);
+                label->setText (p.label, juce::dontSendNotification);
 
                 component = slider;
-                labels.add(label);
-                sliderAttachments.add(attachment);
+                labels.add (label);
+                sliderAttachments.add (attachment);
 
-                addAndMakeVisible(slider);
-                addAndMakeVisible(label);
+                addAndMakeVisible (slider);
+                addAndMakeVisible (label);
                 break;
             }
-            case Type::Button: {
-                auto *button = new MomentaryButton(p.label);
-                button->setClickingTogglesState(true);
-                auto *attachment = new juce::AudioProcessorValueTreeState::ButtonAttachment(
+            case Type::Button:
+            {
+                auto* button = new MomentaryButton (p.label);
+                button->setClickingTogglesState (true);
+                auto* attachment = new juce::AudioProcessorValueTreeState::ButtonAttachment (
                     valueTreeState, param.id, *button);
 
                 component = button;
-                buttonAttachments.add(attachment);
+                buttonAttachments.add (attachment);
 
-                addAndMakeVisible(button);
+                addAndMakeVisible (button);
                 break;
             }
-            case Type::CheckButton: {
-                auto *button = new juce::TextButton(p.label);
-                button->setClickingTogglesState(true);
-                auto *attachment = new juce::AudioProcessorValueTreeState::ButtonAttachment(
+            case Type::CheckButton:
+            {
+                auto* button = new juce::TextButton (p.label);
+                button->setClickingTogglesState (true);
+                auto* attachment = new juce::AudioProcessorValueTreeState::ButtonAttachment (
                     valueTreeState, param.id, *button);
 
                 component = button;
-                buttonAttachments.add(attachment);
+                buttonAttachments.add (attachment);
 
-                addAndMakeVisible(button);
+                addAndMakeVisible (button);
                 break;
             }
             case Type::Unavailable:
                 continue;
         }
-        components.add(component);
-        component->getProperties().set("type", static_cast<int>(p.type));
+        components.add (component);
+        component->getProperties().set ("type", static_cast<int> (p.type));
     }
     resized();
 }
 
-void ParamEditor::resized() {
+void ParamEditor::resized()
+{
     const int margin = 50;
     const int sliderHeight = 30;
     const int sideMargin = 10;
 
     using Type = FaustProgram::ItemType;
-    for (int i = 0; i < components.size(); ++i) {
-        auto *comp = components[i];
-        const auto &props = comp->getProperties();
-        auto type = static_cast<Type>(static_cast<int>(props.getWithDefault("type", 0)));
+    for (int i = 0; i < components.size(); ++i)
+    {
+        auto* comp = components[i];
+        const auto& props = comp->getProperties();
+        auto type = static_cast<Type> (static_cast<int> (props.getWithDefault ("type", 0)));
         auto width = getWidth() - sideMargin * 2;
-        if (type == Type::Button || type == Type::CheckButton) {
+        if (type == Type::Button || type == Type::CheckButton)
+        {
             width = 100;
         }
-        comp->setBounds(
+        comp->setBounds (
             sideMargin,
             (1 + i) * margin + i * sliderHeight,
             width,
-            sliderHeight
-        );
+            sliderHeight);
     }
 }
 
-AmatiSliderAttachment::AmatiSliderAttachment(
+AmatiSliderAttachment::AmatiSliderAttachment (
     double initalValue,
-    juce::AudioProcessorValueTreeState &stateToUse,
-    const juce::String &parameterID,
-    juce::NormalisableRange<double> &range,
-    juce::Slider &attachedSlider) {
-    if (juce::RangedAudioParameter *parameter = stateToUse.getParameter(parameterID)) {
-        const double value = convertTo0to1(initalValue, range);
-        parameter->setValueNotifyingHost(static_cast<float>(value));
-        attachment = std::make_unique<AmatiSliderParameterAttachment>(*parameter, attachedSlider, range,
-                                                                      stateToUse.undoManager);
-    } else {
+    juce::AudioProcessorValueTreeState& stateToUse,
+    const juce::String& parameterID,
+    juce::NormalisableRange<double>& range,
+    juce::Slider& attachedSlider)
+{
+    if (juce::RangedAudioParameter* parameter = stateToUse.getParameter (parameterID))
+    {
+        const double value = convertTo0to1 (initalValue, range);
+        parameter->setValueNotifyingHost (static_cast<float> (value));
+        attachment = std::make_unique<AmatiSliderParameterAttachment> (*parameter, attachedSlider, range, stateToUse.undoManager);
+    }
+    else
+    {
         jassertfalse;
     }
 }
 
-double AmatiSliderAttachment::convertTo0to1(const double value, const juce::NormalisableRange<double> range) {
+double AmatiSliderAttachment::convertTo0to1 (const double value, const juce::NormalisableRange<double> range)
+{
     return (value - range.start) / (range.end - range.start);
 }
 
-double AmatiSliderParameterAttachment::convertFrom0to1(const double value, const juce::NormalisableRange<double> range) {
+double AmatiSliderParameterAttachment::convertFrom0to1 (const double value, const juce::NormalisableRange<double> range)
+{
     return (range.end - range.start) * value + range.start;
 }

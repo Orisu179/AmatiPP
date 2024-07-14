@@ -15,6 +15,7 @@ public:
     bool startMidi() override;
     void stopMidi() override;
 
+    // Standard MIDI API
     MapUI* keyOn(double, int channel, int pitch, int velocity) override;
     void keyOff(double, int channel, int pitch, int velocity) override;
     void ctrlChange(int channel, int ctrl, int value) override;
@@ -24,6 +25,7 @@ public:
     void pitchWheel(double, int channel, int wheel) override;
     void ctrlChange14bits(double, int channel, int ctrl, int value) override;
     void startSync(double date) override;
+    // Midi sync
     void stopSync(double date) override;
     void clock(double date) override;
     void sysEx(double, std::vector<unsigned char> &message) override;

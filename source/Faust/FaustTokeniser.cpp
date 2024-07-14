@@ -9,40 +9,43 @@
     ==============================================================================
 */
 
-
 #include "FaustTokeniser.h"
 
 struct FaustTokeniserFunctions
 {
     static bool isPrimitive (juce::String::CharPointerType token, const int tokenLength) noexcept
     {
-        static const char* const primitives3Char[] =
-            { "mem", "int", "cos", "sin", "tan", "exp", "log", "pow", "abs", "min", "max", "seq", "par", "sum", nullptr };
+        static const char* const primitives3Char[] = { "mem", "int", "cos", "sin", "tan", "exp", "log", "pow", "abs", "min", "max", "seq", "par", "sum", nullptr };
 
-        static const char* const primitives4Char[] =
-            { "acos", "asin", "atan", "fmod", "ceil", "rint", "sqrt", "with", "case", "prod", nullptr };
+        static const char* const primitives4Char[] = { "acos", "asin", "atan", "fmod", "ceil", "rint", "sqrt", "with", "case", "prod", nullptr };
 
-        static const char* const primitives5Char[] =
-            {  "float", "log10", "floor", "atan2", nullptr };
+        static const char* const primitives5Char[] = { "float", "log10", "floor", "atan2", nullptr };
 
-        static const char* const primitives6Char[] =
-            { "prefix", "button", "nentry", "vgroup", "hgroup", "tgroup", "attach", "import", nullptr};
+        static const char* const primitives6Char[] = { "prefix", "button", "nentry", "vgroup", "hgroup", "tgroup", "attach", "import", nullptr };
 
-        static const char* const primitives7Char[] =
-            { "rdtable", "rwtable", "select2", "select3", "vslider", "hslider", "process", "library", "declare", nullptr};
+        static const char* const primitives7Char[] = { "rdtable", "rwtable", "select2", "select3", "vslider", "hslider", "process", "library", "declare", nullptr };
 
-        static const char* const primitivesOther[] =
-            { "remainder", "checkbox", "vbargraph", "hbargraph", "ffunction", "fconstant", "fvariable", "component", "environment", nullptr };
+        static const char* const primitivesOther[] = { "remainder", "checkbox", "vbargraph", "hbargraph", "ffunction", "fconstant", "fvariable", "component", "environment", nullptr };
 
         const char* const* k;
 
         switch (tokenLength)
         {
-            case 3:   k = primitives3Char; break;
-            case 4:   k = primitives4Char; break;
-            case 5:   k = primitives5Char; break;
-            case 6:   k = primitives6Char; break;
-            case 7:   k = primitives7Char; break;
+            case 3:
+                k = primitives3Char;
+                break;
+            case 4:
+                k = primitives4Char;
+                break;
+            case 5:
+                k = primitives5Char;
+                break;
+            case 6:
+                k = primitives6Char;
+                break;
+            case 7:
+                k = primitives7Char;
+                break;
 
             default:
                 if (tokenLength < 3 || tokenLength > 9)
@@ -104,7 +107,7 @@ struct FaustTokeniserFunctions
     static int parseIdentifier (Iterator& source) noexcept
     {
         int tokenLength = 0;
-        juce::String::CharPointerType::CharType possibleIdentifier [100];
+        juce::String::CharPointerType::CharType possibleIdentifier[100];
         juce::String::CharPointerType possible (possibleIdentifier);
 
         while (juce::CppTokeniserFunctions::isIdentifierBody (source.peekNextChar()))
@@ -143,8 +146,16 @@ struct FaustTokeniserFunctions
             case 0:
                 break;
 
-            case '0':   case '1':   case '2':   case '3':   case '4':
-            case '5':   case '6':   case '7':   case '8':   case '9':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
             case '.':
             {
                 int result = juce::CppTokeniserFunctions::parseNumber (source);
@@ -169,14 +180,17 @@ struct FaustTokeniserFunctions
                 source.skip();
                 return FaustTokeniser::tokenType_operator;
 
-            case '(':   case ')':
-            case '{':   case '}':
-            case '[':   case ']':
+            case '(':
+            case ')':
+            case '{':
+            case '}':
+            case '[':
+            case ']':
                 source.skip();
                 return FaustTokeniser::tokenType_bracket;
 
             case '"':
-                juce::CppTokeniserFunctions::skipQuotedString(source);
+                juce::CppTokeniserFunctions::skipQuotedString (source);
                 return FaustTokeniser::tokenType_string;
 
             case '\'':
@@ -216,8 +230,10 @@ struct FaustTokeniserFunctions
                 return juce::CPlusPlusCodeTokeniser::tokenType_operator;
             }
 
-            case '*':   case '%':
-            case '=':   case '!':
+            case '*':
+            case '%':
+            case '=':
+            case '!':
                 source.skip();
                 juce::CppTokeniserFunctions::skipIfNextCharMatches (source, '=');
                 return FaustTokeniser::tokenType_operator;
@@ -227,8 +243,11 @@ struct FaustTokeniserFunctions
                 source.skip();
                 return FaustTokeniser::tokenType_operator;
 
-            case '<':   case '>':
-            case '|':   case '&':   case '^':
+            case '<':
+            case '>':
+            case '|':
+            case '&':
+            case '^':
                 source.skip();
                 juce::CppTokeniserFunctions::skipIfNextCharMatches (source, firstChar);
                 juce::CppTokeniserFunctions::skipIfNextCharMatches (source, '=');
@@ -258,20 +277,20 @@ int FaustTokeniser::readNextToken (juce::CodeDocument::Iterator& source)
 juce::CodeEditorComponent::ColourScheme FaustTokeniser::getDefaultColourScheme()
 {
     static const juce::CodeEditorComponent::ColourScheme::TokenType types[] = {
-        { "Error",          oneDarkMidGrey }, // white
-        { "Comment",        oneDarkMidGrey },
-        { "Primitive",      oneDarkPurple }, //orange
-        { "Operator",       oneDarkTeal },
-        { "Identifier",     oneDarkLightGrey },
-        { "Integer",        oneDarkYellow },
-        { "Float",          oneDarkYellow },
-        { "String",         oneDarkGreen },
-        { "Bracket",        oneDarkLightGrey },
-        { "Punctuation",    oneDarkLightGrey }
+        { "Error", oneDarkMidGrey }, // white
+        { "Comment", oneDarkMidGrey },
+        { "Primitive", oneDarkPurple }, //orange
+        { "Operator", oneDarkTeal },
+        { "Identifier", oneDarkLightGrey },
+        { "Integer", oneDarkYellow },
+        { "Float", oneDarkYellow },
+        { "String", oneDarkGreen },
+        { "Bracket", oneDarkLightGrey },
+        { "Punctuation", oneDarkLightGrey }
     };
     juce::CodeEditorComponent::ColourScheme cs;
 
-    for(unsigned int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
+    for (unsigned int i = 0; i < sizeof (types) / sizeof (types[0]); ++i) // (NB: numElementsInArray doesn't work here in GCC4.2)
         cs.set (types[i].name, types[i].colour);
 
     return cs;

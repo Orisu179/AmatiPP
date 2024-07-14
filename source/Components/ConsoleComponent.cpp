@@ -8,7 +8,7 @@ ConsoleComponent::ConsoleComponent()
 
     // Use monospaced font
     juce::Font font;
-    font.setTypefaceName (juce::Font::getDefaultMonospacedFontName ());
+    font.setTypefaceName (juce::Font::getDefaultMonospacedFontName());
     console.setFont (font);
 
     addAndMakeVisible (&console);
@@ -16,28 +16,27 @@ ConsoleComponent::ConsoleComponent()
 
 ConsoleComponent::~ConsoleComponent()
 {
-   juce::Logger::setCurrentLogger(nullptr);
+    setCurrentLogger (nullptr);
 }
 
-void ConsoleComponent::resized ()
+void ConsoleComponent::resized()
 {
-    int margin = 10;
+    constexpr int margin = 10;
 
-    console.setBounds
-        (
-            margin,
-            margin,
-            getWidth() - 2*margin,
-            getHeight() - 2*margin
-        );
+    console.setBounds (
+        margin,
+        margin,
+        getWidth() - 2 * margin,
+        getHeight() - 2 * margin);
 }
 
-void ConsoleComponent::clearMessages() {
+void ConsoleComponent::clearMessages()
+{
     console.clear();
 }
 
 void ConsoleComponent::logMessage (const juce::String& message)
 {
-    console.setCaretPosition (console.getTotalNumChars ());
+    console.setCaretPosition (console.getTotalNumChars());
     console.insertTextAtCaret (message + "\n");
 }

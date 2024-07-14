@@ -27,15 +27,17 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <faust/gui/MidiUI.h>
 #include <faust/gui/GUI.h>
 
-class FaustProgram {
+class FaustProgram final : public GUI {
 public:
-    class CompileError : public std::runtime_error
+    class CompileError final : public std::runtime_error
     {
     public:
         explicit CompileError (const char* message) : std::runtime_error (message) {}
         explicit CompileError (const std::string& message) : std::runtime_error (message) {}
         explicit CompileError (const juce::String& message) : CompileError (message.toStdString()) {}
     };
+    std::list<GUI*> guiList;
+    ztimedmap zoneMap;
 
     enum class ItemType {
         // Unavailabe is for when we don't/can't include the UI element;
@@ -53,7 +55,7 @@ public:
     /// Construct a Faust Program.
     /// @throws CompileError
     FaustProgram (const juce::String& source, Backend, int sampRate);
-    ~FaustProgram();
+    ~FaustProgram() override;
 
     [[nodiscard]] int getParamCount() const;
     [[nodiscard]] int getNumInChannels() const;
@@ -76,18 +78,16 @@ public:
 
     void compute (int sampleCount, const float* const* input, float* const* output) const;
 
-    void handleMidi(juce::MidiBuffer&);
+    void handleMidi(juce::MidiBuffer&) const;
 
 private:
-    // std::list<GUI*> GUI::fGuiList;
-    // ztimedmap GUI::gTimedZoneMap;
     void compileSource (const juce::String&);
 
     static bool midiOn(const juce::String&);
 
     Backend backend;
 
-    dsp_factory* dspFactory;
+    dsp_factory* dspFactory{};
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
     std::unique_ptr<FaustMidi> midi_handler;
