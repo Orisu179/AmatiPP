@@ -12,7 +12,7 @@ public:
     void paint(juce::Graphics&) override {}
     void resized() override;
 
-    juce::String getSource();
+    juce::String getSource() const;
     void setSource(const juce::String&);
     std::function<void(void)> onCompile;
     std::function<void(void)> onStart;

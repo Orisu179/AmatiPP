@@ -1,13 +1,8 @@
 #pragma once
-
 #include "Faust/FaustProgram.h"
-#include <faust/dsp/llvm-dsp.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <clap-juce-extensions/clap-juce-extensions.h>
 
-#if (MSVC)
-    #include "ipps.h"
-#endif
 inline juce::String paramIdForIdx(int idx) {
     return juce::String("Param") + juce::String(idx);
 }

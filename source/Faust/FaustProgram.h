@@ -25,10 +25,9 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
 #include <faust/gui/MidiUI.h>
-#include <faust/gui//GUI.h>
+#include <faust/gui/GUI.h>
 
-class FaustProgram
-{
+class FaustProgram {
 public:
     class CompileError : public std::runtime_error
     {
@@ -56,9 +55,9 @@ public:
     FaustProgram (const juce::String& source, Backend, int sampRate);
     ~FaustProgram();
 
-    int getParamCount();
-    int getNumInChannels();
-    int getNumOutChannels();
+    [[nodiscard]] int getParamCount() const;
+    [[nodiscard]] int getNumInChannels() const;
+    [[nodiscard]] int getNumOutChannels() const;
 
     struct Parameter
     {
@@ -71,11 +70,12 @@ public:
     Parameter getParameter(int idx);
     void convertNormaliseRange(int index, float value) const;
 
-    float getValue(int index);
-    void setValue(int idx, float);
+    [[nodiscard]] float getValue(int index) const;
+    void setValue(int idx, float) const;
     void setSampleRate(int);
 
-    void compute (int sampleCount, const float* const* input, float* const* output);
+    void compute (int sampleCount, const float* const* input, float* const* output) const;
+
     void handleMidi(juce::MidiBuffer&);
 
 private:
@@ -94,3 +94,4 @@ private:
     std::vector<Parameter> parameters;
 
     int sampleRate;
+};

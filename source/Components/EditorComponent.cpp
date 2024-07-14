@@ -1,88 +1,86 @@
 #include "EditorComponent.h"
-EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
-buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBox::AlignContent::center, juce::FlexBox::AlignItems::flexStart, juce::FlexBox::JustifyContent::flexEnd),
-                                     workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory)),
-                                     font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain)
-{
-    addAndMakeVisible (statusLabel);
-    statusLabel.setText ("Status: Modified", juce::dontSendNotification);
+
+EditorComponent::EditorComponent() : codeEditor(sourceCode, &tokeniser),
+                                     buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap,
+                                             juce::FlexBox::AlignContent::center, juce::FlexBox::AlignItems::flexStart,
+                                             juce::FlexBox::JustifyContent::flexEnd),
+                                     workDir(juce::File::getSpecialLocation(juce::File::userHomeDirectory)),
+                                     font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain) {
+    addAndMakeVisible(statusLabel);
+    statusLabel.setText("Status: Modified", juce::dontSendNotification);
     statusLabel.setFont(font);
 
-    addAndMakeVisible (&codeEditor);
-    compileButton.setComponentID ("compile");
-    compileButton.setButtonText ("compile");
+    addAndMakeVisible(&codeEditor);
+    compileButton.setComponentID("compile");
+    compileButton.setButtonText("compile");
     compileButton.onClick = [this] {
-        if (onCompile)
-        {
+        if (onCompile) {
             onCompile();
         }
     };
-    addAndMakeVisible (compileButton);
+    addAndMakeVisible(compileButton);
 
     startButton.setComponentID("start");
     startButton.setButtonText("start");
     startButton.setEnabled(false);
     startButton.onClick = [this] {
-        if(onStart && onStop)
-        {
-            if(startButton.getButtonText().equalsIgnoreCase("start"))
-            {
+        if (onStart && onStop) {
+            if (startButton.getButtonText().equalsIgnoreCase("start")) {
                 onStart();
                 startButton.setButtonText("stop");
-            } else
-            {
+            } else {
                 onStop();
-               startButton.setButtonText("start");
+                startButton.setButtonText("start");
             }
         }
     };
     addAndMakeVisible(startButton);
 
-    importButton.setButtonText ("Import");
+    importButton.setButtonText("Import");
     importButton.onClick = [this] {
-        fileChooser = std::make_unique<juce::FileChooser> ("Please select the DSP file you want to load..", workDir, "*.dsp");
+        fileChooser = std::make_unique<juce::FileChooser>("Please select the DSP file you want to load..", workDir,
+                                                          "*.dsp");
 
         auto chooserFlag = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
-        fileChooser->launchAsync (chooserFlag, [this] (const juce::FileChooser& chooser) {
+        fileChooser->launchAsync(chooserFlag, [this](const juce::FileChooser &chooser) {
             auto sourceFile = chooser.getResult();
-            setSource (sourceFile.loadFileAsString());
+            setSource(sourceFile.loadFileAsString());
             workDir = sourceFile.getParentDirectory();
         });
     };
-    addAndMakeVisible (importButton);
-    exportButton.setButtonText ("export");
+    addAndMakeVisible(importButton);
+    exportButton.setButtonText("export");
     exportButton.onClick = [this] {
-        fileChooser = std::make_unique<juce::FileChooser> ("Chose where to save DSP file", workDir, "*.dsp");
+        fileChooser = std::make_unique<juce::FileChooser>("Chose where to save DSP file", workDir, "*.dsp");
         auto chooserFlag = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles;
-        fileChooser->launchAsync (chooserFlag, [this] (const juce::FileChooser& chooser) {
+        fileChooser->launchAsync(chooserFlag, [this](const juce::FileChooser &chooser) {
             auto sourceFile = chooser.getResult();
-            auto outputStream = juce::FileOutputStream (sourceFile);
-            sourceCode.writeToStream (outputStream);
+            auto outputStream = juce::FileOutputStream(sourceFile);
+            sourceCode.writeToStream(outputStream);
             workDir = sourceFile.getParentDirectory();
         });
     };
-    addAndMakeVisible (exportButton);
+    addAndMakeVisible(exportButton);
     //==========
-    codeEditor.setFont (font);
+    codeEditor.setFont(font);
 }
 
-void EditorComponent::resized()
-{
+void EditorComponent::resized() {
     auto bounds = getLocalBounds();
-    float margin = 10;
-    int buttonHeight = getHeight() / 15; // 30
-    int buttonWidth = getWidth() / 12; // 75
-    float textHeight = 60; // 60
-    float textWidth = 100; // 100
+    constexpr float margin = 10;
+    const float buttonHeight = static_cast<float>(getHeight()) / 15; // 30
+    const float buttonWidth = static_cast<float>(getWidth()) / 12; // 75
+    constexpr float textHeight = 60; // 60
+    constexpr float textWidth = 100; // 100
 
-    auto addButton = [&] (auto& button) {
+    auto addButton = [&](auto &button) {
         button.changeWidthToFitText();
-        buttons.items.add (juce::FlexItem(button).
-                           withMargin(margin).
-                           withMinHeight(buttonHeight).
-                           withMinWidth(buttonWidth).
-                           withMaxWidth(buttonWidth).
-                           withFlex(1));
+        buttons.items.add(juce::FlexItem(button).
+            withMargin(margin).
+            withMinHeight(buttonHeight).
+            withMinWidth(buttonWidth).
+            withMaxWidth(buttonWidth).
+            withFlex(1));
     };
     addButton(compileButton);
     addButton(startButton);
@@ -99,18 +97,15 @@ void EditorComponent::resized()
         getHeight() - 3 * margin - buttonHeight);
 }
 
-juce::String EditorComponent::getSource()
-{
+juce::String EditorComponent::getSource() const {
     return sourceCode.getAllContent();
 }
 
-void EditorComponent::setSource (const juce::String& source)
-{
+void EditorComponent::setSource(const juce::String &source) {
     sourceCode.replaceAllContent(source);
 }
 
-void EditorComponent::setStatus (const juce::String& status, const juce::NotificationType notice)
-{
+void EditorComponent::setStatus(const juce::String &status, const juce::NotificationType notice) {
     statusLabel.setText(status, notice);
 }
 

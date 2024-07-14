@@ -20,13 +20,11 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "FaustProgram.h"
-
 #include <faust/dsp/interpreter-dsp.h>
 #include <faust/dsp/llvm-dsp.h>
+#include <faust/dsp/dsp.h>
 
 #include <memory>
-
-
 static FaustProgram::ItemType apiToItemType(APIUI::ItemType type) {
     using ItemType = FaustProgram::ItemType;
     switch (type) {
@@ -55,10 +53,10 @@ FaustProgram::~FaustProgram() {
     dspInstance.reset(nullptr);
 
     switch (backend) {
-        case FaustProgram::Backend::LLVM:
+        case Backend::LLVM:
             deleteDSPFactory(static_cast<llvm_dsp_factory *>(dspFactory));
             break;
-        case FaustProgram::Backend::Interpreter:
+        case Backend::Interpreter:
             deleteInterpreterDSPFactory(static_cast<interpreter_dsp_factory *>(dspFactory));
             break;
     }
@@ -114,15 +112,15 @@ void FaustProgram::compileSource(const juce::String &source) {
     }
 }
 
-int FaustProgram::getParamCount() {
+int FaustProgram::getParamCount() const {
     return faustInterface->getParamsCount();
 }
 
-int FaustProgram::getNumInChannels() {
+int FaustProgram::getNumInChannels() const {
     return dspInstance->getNumInputs();
 }
 
-int FaustProgram::getNumOutChannels() {
+int FaustProgram::getNumOutChannels() const {
     return dspInstance->getNumOutputs();
 }
 
@@ -133,30 +131,28 @@ FaustProgram::Parameter FaustProgram::getParameter(const int idx) {
     return parameters[idx];
 }
 
-float FaustProgram::getValue(const int index) {
+float FaustProgram::getValue(const int index) const {
     if (index > 0 || index <= getParamCount())
         return static_cast<float>(faustInterface->getParamRatio(index));
     else
         return 0.0;
 }
 
-void FaustProgram::setValue(int index, float value) {
+void FaustProgram::setValue(int index, float value) const {
     if (index > 0 && index <= getParamCount()) {
         faustInterface->setParamRatio(index, value);
     }
 }
 
-void FaustProgram::compute(const int samples, const float *const*in, float *const*out) {
+void FaustProgram::compute(const int samples, const float *const*in, float *const*out) const {
     dspInstance->compute(samples, const_cast<float **>(in), const_cast<float **>(out));
 }
 
-void FaustProgram::handleMidi(juce::MidiBuffer& message)
-{
+void FaustProgram::handleMidi(juce::MidiBuffer& message) {
 // TODO: Implement this function
 }
 
-void FaustProgram::setSampleRate (int sr)
-{
+void FaustProgram::setSampleRate (const int sr) {
     if(sr > 0){
         sampleRate = sr;
     } else {
