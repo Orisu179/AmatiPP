@@ -1,12 +1,12 @@
 #include "EditorComponent.h"
 EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
-buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBox::AlignContent::center, juce::FlexBox::AlignItems::flexStart, juce::FlexBox::JustifyContent::flexEnd),
+                                     buttons (juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBox::AlignContent::center, juce::FlexBox::AlignItems::flexStart, juce::FlexBox::JustifyContent::flexEnd),
                                      workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory)),
-                                     font(juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain)
+                                     font (juce::Font::getDefaultMonospacedFontName(), 18.0, juce::Font::plain)
 {
     addAndMakeVisible (statusLabel);
     statusLabel.setText ("Status: Modified", juce::dontSendNotification);
-    statusLabel.setFont(font);
+    statusLabel.setFont (font);
 
     addAndMakeVisible (&codeEditor);
     compileButton.setComponentID ("compile");
@@ -19,24 +19,25 @@ buttons(juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBo
     };
     addAndMakeVisible (compileButton);
 
-    startButton.setComponentID("start");
-    startButton.setButtonText("start");
-    startButton.setEnabled(false);
+    startButton.setComponentID ("start");
+    startButton.setButtonText ("start");
+    startButton.setEnabled (false);
     startButton.onClick = [this] {
-        if(onStart && onStop)
+        if (onStart && onStop)
         {
-            if(startButton.getButtonText().equalsIgnoreCase("start"))
+            if (startButton.getButtonText().equalsIgnoreCase ("start"))
             {
                 onStart();
-                startButton.setButtonText("stop");
-            } else
+                startButton.setButtonText ("stop");
+            }
+            else
             {
                 onStop();
-               startButton.setButtonText("start");
+                startButton.setButtonText ("start");
             }
         }
     };
-    addAndMakeVisible(startButton);
+    addAndMakeVisible (startButton);
 
     importButton.setButtonText ("Import");
     importButton.onClick = [this] {
@@ -77,22 +78,17 @@ void EditorComponent::resized()
 
     auto addButton = [&] (auto& button) {
         button.changeWidthToFitText();
-        buttons.items.add (juce::FlexItem(button).
-                           withMargin(margin).
-                           withMinHeight(buttonHeight).
-                           withMinWidth(buttonWidth).
-                           withMaxWidth(buttonWidth).
-                           withFlex(1));
+        buttons.items.add (juce::FlexItem (button).withMargin (margin).withMinHeight (buttonHeight).withMinWidth (buttonWidth).withMaxWidth (buttonWidth).withFlex (1));
     };
-    addButton(compileButton);
-    addButton(startButton);
-    addButton(importButton);
-    addButton(exportButton);
+    addButton (compileButton);
+    addButton (startButton);
+    addButton (importButton);
+    addButton (exportButton);
 
-    buttons.performLayout(bounds.removeFromTop(buttonHeight));
-    statusLabel.setBounds(getWidth() / 60, -5, textWidth, textHeight);
+    buttons.performLayout (bounds.removeFromTop (buttonHeight));
+    statusLabel.setBounds (getWidth() / 60, -5, textWidth, textHeight);
 
-    codeEditor.setBounds(
+    codeEditor.setBounds (
         margin,
         2 * margin + buttonHeight,
         getWidth() - 2 * margin,
@@ -106,14 +102,15 @@ juce::String EditorComponent::getSource()
 
 void EditorComponent::setSource (const juce::String& source)
 {
-    sourceCode.replaceAllContent(source);
+    sourceCode.replaceAllContent (source);
 }
 
 void EditorComponent::setStatus (const juce::String& status, const juce::NotificationType notice)
 {
-    statusLabel.setText(status, notice);
+    statusLabel.setText (status, notice);
 }
 
-void EditorComponent::setStartButtonEnabled(const bool state) {
-    startButton.setEnabled(state);
+void EditorComponent::setStartButtonEnabled (const bool state)
+{
+    startButton.setEnabled (state);
 }

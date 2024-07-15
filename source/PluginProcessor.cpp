@@ -1,12 +1,12 @@
 #include "PluginProcessor.h"
 
-#include <memory>
 #include "PluginEditor.h"
+#include <memory>
 
 //==============================================================================
 juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParameterLayout()
 {
-    juce::NormalisableRange<float> paramRange = juce::NormalisableRange<float>(0.f, 1.f);
+    juce::NormalisableRange<float> paramRange = juce::NormalisableRange<float> (0.f, 1.f);
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     for (int i = 0; i < 64; i++)
     {
@@ -17,10 +17,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     return layout;
 }
 
-namespace Id {
-    const juce::Identifier sourceCode("source_code");
-    const juce::Identifier settings("settings");
-    const juce::Identifier backend("backend");
+namespace Id
+{
+    const juce::Identifier sourceCode ("source_code");
+    const juce::Identifier settings ("settings");
+    const juce::Identifier backend ("backend");
 }
 
 PluginProcessor::PluginProcessor() :
@@ -110,12 +111,12 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     // (and probably equal to 0),
     // but we get both just in case
 
-    int numChannelsIn  = tmpBufferIn.getNumChannels();
+    int numChannelsIn = tmpBufferIn.getNumChannels();
     int numChannelsOut = tmpBufferOut.getNumChannels();
 
-    tmpBufferIn  = juce::AudioBuffer<float> (numChannelsIn,  samplesPerBlock);
+    tmpBufferIn = juce::AudioBuffer<float> (numChannelsIn, samplesPerBlock);
     tmpBufferOut = juce::AudioBuffer<float> (numChannelsOut, samplesPerBlock);
-    compileSource(sourceCode);
+    compileSource (sourceCode);
     readyToPlay = true;
 }
 
@@ -125,7 +126,7 @@ void PluginProcessor::releaseResources()
     // spare memory, etc.
     readyToPlay = false;
     playing = false;
-    faustProgram.reset(nullptr);
+    faustProgram.reset (nullptr);
 }
 
 bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -150,25 +151,30 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 #endif
 }
 
-void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
     juce::ignoreUnused (midiMessages);
     int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
     // If it does, we resize our internal buffers
-    if(numSamples > tmpBufferIn.getNumSamples()) {
-        tmpBufferIn.setSize(tmpBufferIn.getNumChannels(), numSamples);
-        tmpBufferOut.setSize(tmpBufferOut.getNumChannels(), numSamples);
+    if (numSamples > tmpBufferIn.getNumSamples())
+    {
+        tmpBufferIn.setSize (tmpBufferIn.getNumChannels(), numSamples);
+        tmpBufferOut.setSize (tmpBufferOut.getNumChannels(), numSamples);
     }
 
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    if(!faustProgram || !playing) {
+    if (!faustProgram || !playing)
+    {
         // clears output channels that doesn't contain any input data
         for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
             buffer.clear (i, 0, buffer.getNumSamples());
-    } else {
+    }
+    else
+    {
         updateDspParameters();
 
         // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
@@ -181,15 +187,16 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
 
         // clear remaining channels
         for (int chan = totalNumInputChannels; chan < tmpBufferIn.getNumChannels(); ++chan)
-            tmpBufferIn.clear(chan, 0, numSamples);
+            tmpBufferIn.clear (chan, 0, numSamples);
 
-        faustProgram->compute(numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
-        for(int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan) {
-            buffer.copyFrom(chan, 0, tmpBufferOut, chan, 0, numSamples);
+        faustProgram->compute (numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
+        for (int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan)
+        {
+            buffer.copyFrom (chan, 0, tmpBufferOut, chan, 0, numSamples);
         }
 
-        for(int chan = tmpBufferOut.getNumChannels(); chan < totalNumOutputChannels; ++chan)
-            buffer.clear(chan, 0, numSamples);
+        for (int chan = tmpBufferOut.getNumChannels(); chan < totalNumOutputChannels; ++chan)
+            buffer.clear (chan, 0, numSamples);
     }
 }
 
@@ -210,18 +217,18 @@ void PluginProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::Logger::getCurrentLogger()->writeToLog("Saving preset");
+    juce::Logger::getCurrentLogger()->writeToLog ("Saving preset");
 
     //create parent element
-    juce::XmlElement preset = juce::XmlElement("amati_preset");
+    juce::XmlElement preset = juce::XmlElement ("amati_preset");
 
     //Add source code
-    juce::XmlElement* sourceTag = preset.createNewChildElement("source");
-    sourceTag->addTextElement(sourceCode);
+    juce::XmlElement* sourceTag = preset.createNewChildElement ("source");
+    sourceTag->addTextElement (sourceCode);
     auto state = valueTreeState.copyState().createXml();
-    preset.addChildElement(new juce::XmlElement(*state.get()));
+    preset.addChildElement (new juce::XmlElement (*state.get()));
     // stores tree on desk
-    copyXmlToBinary(preset, destData);
+    copyXmlToBinary (preset, destData);
 }
 
 void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -229,114 +236,131 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     auto* logger = juce::Logger::getCurrentLogger();
-    logger->writeToLog("Loading preset");
+    logger->writeToLog ("Loading preset");
 
-    std::unique_ptr<juce::XmlElement> preset(getXmlFromBinary(data, sizeInBytes));
+    std::unique_ptr<juce::XmlElement> preset (getXmlFromBinary (data, sizeInBytes));
 
-    if(!preset.get()) {
-        logger->writeToLog("Invalid preset: invalid XML");
+    if (!preset.get())
+    {
+        logger->writeToLog ("Invalid preset: invalid XML");
         return;
     }
-    DBG(preset->toString());
+    DBG (preset->toString());
 
-    if(!preset->hasTagName("amati_preset")){
-        logger->writeToLog("Invalid preset: wrong root tag");
+    if (!preset->hasTagName ("amati_preset"))
+    {
+        logger->writeToLog ("Invalid preset: wrong root tag");
         return;
     }
-    auto* parameters = preset->getChildByName(valueTreeState.state.getType());
-    if (!parameters) {
-        logger->writeToLog("Invalid preset: missing parameters");
-        return;
-    }
-
-    auto* source = preset->getChildByName("source");
-    if (!source) {
-        logger->writeToLog("Invalid preset: missing source");
+    auto* parameters = preset->getChildByName (valueTreeState.state.getType());
+    if (!parameters)
+    {
+        logger->writeToLog ("Invalid preset: missing parameters");
         return;
     }
 
-    valueTreeState.replaceState(juce::ValueTree::fromXml(*parameters));
+    auto* source = preset->getChildByName ("source");
+    if (!source)
+    {
+        logger->writeToLog ("Invalid preset: missing source");
+        return;
+    }
+
+    valueTreeState.replaceState (juce::ValueTree::fromXml (*parameters));
     sourceCode = source->getAllSubText();
 }
 //==============================================================================
 // This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
     return new PluginProcessor();
 }
 
-bool PluginProcessor::compileSource (const juce::String& source) {
-    if(!readyToPlay) {
+bool PluginProcessor::compileSource (const juce::String& source)
+{
+    if (!readyToPlay)
+    {
         return false;
     }
 
-    switch(backend) {
+    switch (backend)
+    {
         case FaustProgram::Backend::LLVM:
-            juce::Logger::writeToLog("Compiling with LLVM backend...");
+            juce::Logger::writeToLog ("Compiling with LLVM backend...");
             break;
         case FaustProgram::Backend::Interpreter:
-            juce::Logger::writeToLog("Compiling with Interpreter backend...");
+            juce::Logger::writeToLog ("Compiling with Interpreter backend...");
             break;
     }
 
-    try {
-        faustProgram = std::make_unique<FaustProgram>(source, backend, static_cast<int>(sampRate));
-        juce::Logger::getCurrentLogger()->writeToLog("Compilation Complete! Using new program.");
-    } catch(FaustProgram::CompileError& e) {
+    try
+    {
+        faustProgram = std::make_unique<FaustProgram> (source, backend, static_cast<int> (sampRate));
+        juce::Logger::getCurrentLogger()->writeToLog ("Compilation Complete! Using new program.");
+    } catch (FaustProgram::CompileError& e)
+    {
         auto* logger = juce::Logger::getCurrentLogger();
-        logger->writeToLog("Compilation Failed");
-        logger->writeToLog(e.what());
+        logger->writeToLog ("Compilation Failed");
+        logger->writeToLog (e.what());
         return false;
     }
     sourceCode = source;
     // Update internal buffers
-    int inChans  = faustProgram->getNumInChannels();
+    int inChans = faustProgram->getNumInChannels();
     int outChans = faustProgram->getNumOutChannels();
 
-
-    tmpBufferIn.setSize(inChans,  tmpBufferIn.getNumSamples());
-    tmpBufferOut.setSize(outChans, tmpBufferOut.getNumSamples());
+    tmpBufferIn.setSize (inChans, tmpBufferIn.getNumSamples());
+    tmpBufferOut.setSize (outChans, tmpBufferOut.getNumSamples());
     return true;
 }
 
-
-void PluginProcessor::updateDspParameters() const {
+void PluginProcessor::updateDspParameters() const
+{
     auto paramCount = faustProgram->getParamCount();
-    for (int i = 0; i < paramCount; ++i) {
-        juce::String id = paramIdForIdx(i);
-        float value = *valueTreeState.getRawParameterValue(id);
-        faustProgram->convertNormaliseRange(i, value);
+    for (int i = 0; i < paramCount; ++i)
+    {
+        juce::String id = paramIdForIdx (i);
+        float value = *valueTreeState.getRawParameterValue (id);
+        faustProgram->convertNormaliseRange (i, value);
     }
 }
 
-void PluginProcessor::setBackend (const FaustProgram::Backend newBackend) {
+void PluginProcessor::setBackend (const FaustProgram::Backend newBackend)
+{
     backend = newBackend;
-    compileSource(sourceCode);
+    compileSource (sourceCode);
 }
 
-void PluginProcessor::setPlayingState(const bool state) {
+void PluginProcessor::setPlayingState (const bool state)
+{
     playing = state;
 }
 
-std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter() const {
+std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter() const
+{
     std::vector<FaustParameter> params;
-    if(!faustProgram) {
+    if (!faustProgram)
+    {
         return params;
     }
-    for(int i = 0; i <faustProgram->getParamCount(); i++) {
-        params.push_back({ paramIdForIdx(i), faustProgram->getParameter(i)});
+    for (int i = 0; i < faustProgram->getParamCount(); i++)
+    {
+        params.push_back ({ paramIdForIdx (i), faustProgram->getParameter (i) });
     }
     return params;
 }
 
-juce::String PluginProcessor::getSourceCode() {
+juce::String PluginProcessor::getSourceCode()
+{
     return sourceCode;
 }
 
-void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifier& property) {
-    if(property == Id::backend) {
+void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifier& property)
+{
+    if (property == Id::backend)
+    {
         int newBackend = tree[property];
-        setBackend(static_cast<FaustProgram::Backend>(newBackend - 1));
+        setBackend (static_cast<FaustProgram::Backend> (newBackend - 1));
     }
-//    DBG("property change: " << tree.getType() << " " << property);
+    //    DBG("property change: " << tree.getType() << " " << property);
 }
-
