@@ -66,12 +66,12 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter(unsigned int idx);
-    void convertNormaliseRange(int index, float value) const;
+    Parameter getParameter (int idx);
+    void convertNormaliseRange (int index, float value) const;
 
-    float getValue(int idx);
-    void setValue(int idx, float);
-    void setSampleRate(int);
+    float getValue (int index);
+    void setValue (int idx, float);
+    void setSampleRate (int);
 
     void compute (int sampleCount, const float* const* input, float* const* output);
 

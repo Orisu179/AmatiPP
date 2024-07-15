@@ -1,21 +1,22 @@
 #pragma once
 
 #include "Faust/FaustProgram.h"
-#include <juce_audio_processors/juce_audio_processors.h>
 #include <clap-juce-extensions/clap-juce-extensions.h>
+#include <juce_audio_processors/juce_audio_processors.h>
 
 #if (MSVC)
     #include "ipps.h"
 #endif
-inline juce::String paramIdForIdx(int idx) {
-    return juce::String("Param") + juce::String(idx);
+inline juce::String paramIdForIdx (int idx)
+{
+    return juce::String ("Param") + juce::String (idx);
 }
-inline juce::String paramIdForIdx(size_t idx) {
-    return paramIdForIdx(static_cast<int>(idx));
+inline juce::String paramIdForIdx (size_t idx)
+{
+    return paramIdForIdx (static_cast<int> (idx));
 }
 
-class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener,
-                        public clap_juce_extensions::clap_juce_audio_processor_capabilities
+class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities
 {
 public:
     PluginProcessor();
@@ -47,13 +48,14 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-
     // For compiling faust program ---------
-    bool compileSource(const juce::String&);
+    bool compileSource (const juce::String&);
     juce::String getSourceCode();
-    void setBackend(FaustProgram::Backend);
+    void setBackend (FaustProgram::Backend);
+    void setPlayingState (bool);
 
-    struct FaustParameter {
+    struct FaustParameter
+    {
         juce::String id;
         FaustProgram::Parameter programParameter;
     };
@@ -68,6 +70,7 @@ private:
     FaustProgram::Backend backend {};
     std::unique_ptr<FaustProgram> faustProgram {};
     bool playing { false };
+    bool readyToPlay { false };
     juce::AudioProcessorValueTreeState valueTreeState;
 
     // used to copy the input buffers
@@ -75,6 +78,6 @@ private:
     juce::AudioBuffer<float> tmpBufferOut;
     double sampRate {};
 
-    void updateDspParameters();
+    void updateDspParameters() const;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };
