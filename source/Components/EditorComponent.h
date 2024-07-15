@@ -15,7 +15,6 @@ public:
     juce::String getSource();
     void setSource(const juce::String&);
     std::function<void(void)> onCompile;
-    std::function<void(void)> onRevert;
     void setStatus(const juce::String&, juce::NotificationType);
 private:
     FaustTokeniser tokeniser;
