@@ -94,7 +94,7 @@ void PluginEditor::resized()
 
 void PluginEditor::updateParameters()
 {
-    paramEditor.updateParameters (processorRef.getFaustParameter(), processorRef.ratioToValue, processorRef.valueToRatio);
+    paramEditor.updateParameters (processorRef.getFaustParameter(), processorRef.valueToRatio, processorRef.ratioToValue);
 }
 
 void PluginEditor::updateEditor()

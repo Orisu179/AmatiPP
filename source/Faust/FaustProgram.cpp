@@ -112,7 +112,8 @@ void FaustProgram::compileSource (const juce::String& source)
     for (int i { 0 }; i < getParamCount(); i++)
     {
         parameters.push_back (
-            { juce::String (faustInterface->getParamLabel (i)),
+            { i,
+                juce::String (faustInterface->getParamLabel (i)),
                 apiToItemType (faustInterface->getParamItemType (i)),
                 { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
                 faustInterface->getParamInit (i),

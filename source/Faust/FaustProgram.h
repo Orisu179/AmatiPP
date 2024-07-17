@@ -60,6 +60,7 @@ public:
 
     struct Parameter
     {
+        int index;
         juce::String label;
         ItemType type;
         juce::Range<double> range;

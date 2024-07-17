@@ -6,10 +6,10 @@ public:
     AmatiSliderParameterAttachment (
         juce::RangedAudioParameter& parameter,
         juce::Slider& slider,
-        juce::UndoManager* undoManager = nullptr,
         int index,
         const std::function<double (int, double)>&,
-        const std::function<double (int, double)>&);
+        const std::function<double (int, double)>&,
+        juce::UndoManager* undoManager = nullptr);
 
     ~AmatiSliderParameterAttachment() override;
 

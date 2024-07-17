@@ -47,10 +47,11 @@ public:
 AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (
     juce::RangedAudioParameter& parameter,
     juce::Slider& s,
-    juce::UndoManager* undoManager,
     const int index,
     const std::function<double (int, double)>& valueToRatio,
-    const std::function<double (int, double)>& ratioToValue)
+    const std::function<double (int, double)>& ratioToValue,
+    juce::UndoManager* undoManager
+    )
     : value2Ratio (valueToRatio), ratio2Value (ratioToValue), slider (s), attachment (parameter, [this] (const float f) { setValue (f); }, undoManager), index (index)
 {
     sendInitialUpdate();
@@ -125,7 +126,7 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
                 auto range = juce::NormalisableRange (p.range, p.step);
                 slider->setNormalisableRange (range);
                 slider->setValue (p.init, juce::dontSendNotification);
-                auto* attachment = new AmatiSliderAttachment (p.init, valueTreeState, param.id, *slider, 1, valueToRatio, ratioToValue);
+                auto* attachment = new AmatiSliderAttachment (p.init, valueTreeState, param.id, *slider, p.index, valueToRatio, ratioToValue);
 
                 auto* label = new juce::Label();
                 label->attachToComponent (slider, false);
@@ -176,9 +177,9 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
 
 void ParamEditor::resized()
 {
-    const int margin = 50;
-    const int sliderHeight = 30;
-    const int sideMargin = 10;
+    constexpr int margin = 50;
+    constexpr int sliderHeight = 30;
+    constexpr int sideMargin = 10;
 
     using Type = FaustProgram::ItemType;
     for (int i = 0; i < components.size(); ++i)
@@ -208,11 +209,11 @@ AmatiSliderAttachment::AmatiSliderAttachment (
     const std::function<double (int, double)>& valueToRatio,
     const std::function<double (int, double)>& ratioToValue)
 {
-    if (juce::RangedAudioParameter* parameter = stateToUse.getParameter (parameterID))
+    if (juce::RangedAudioParameter* parameter = stateToUse.getParameter (parameterID); parameter && valueToRatio && ratioToValue)
     {
         const double value = valueToRatio (index, initalValue);
         parameter->setValueNotifyingHost (static_cast<float> (value));
-        attachment = std::make_unique<AmatiSliderParameterAttachment> (*parameter, slider, stateToUse.undoManager, index, valueToRatio, ratioToValue);
+        attachment = std::make_unique<AmatiSliderParameterAttachment> (*parameter, slider, index, valueToRatio, ratioToValue, stateToUse.undoManager);
     }
     else
     {
