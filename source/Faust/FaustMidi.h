@@ -1,8 +1,10 @@
 #pragma once
-#include "faust/midi/midi.h"
+#include <faust/midi/midi.h>
+#include <faust/gui/GUI.h>
 #include "juce_core/juce_core.h"
 #include "juce_audio_basics/juce_audio_basics.h"
 #include "juce_audio_devices/juce_audio_devices.h"
+
 
 class FaustMidi : public midi_handler, juce::MidiInputCallback
 {

@@ -36,8 +36,6 @@ public:
         explicit CompileError (const std::string& message) : std::runtime_error (message) {}
         explicit CompileError (const juce::String& message) : CompileError (message.toStdString()) {}
     };
-    std::list<GUI*> guiList;
-    ztimedmap zoneMap;
 
     enum class ItemType {
         // Unavailabe is for when we don't/can't include the UI element;

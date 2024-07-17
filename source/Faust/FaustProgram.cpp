@@ -25,6 +25,9 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <faust/dsp/llvm-dsp.h>
 #include <memory>
 
+std::list<GUI*> GUI::fGuiList;
+ztimedmap GUI::gTimedZoneMap;
+
 static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
 {
     using ItemType = FaustProgram::ItemType;
@@ -197,8 +200,9 @@ void FaustProgram::convertNormaliseRange (const int index, const float value) co
     {
         jassertfalse;
     }
+    const int size = static_cast<int>(parameters.size());
 
-    if (index >= 0 && index < parameters.size())
+    if (index >= 0 && index < size)
     {
         const juce::Range<double> range = parameters[index].range;
         const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
