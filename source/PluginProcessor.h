@@ -60,6 +60,8 @@ public:
         FaustProgram::Parameter programParameter;
     };
     std::vector<FaustParameter> getFaustParameter() const;
+    double valueToRatio(int, double) const;
+    double ratioToValue(int, double) const;
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

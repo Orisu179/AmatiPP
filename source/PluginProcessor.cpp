@@ -6,7 +6,7 @@
 //==============================================================================
 juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParameterLayout()
 {
-    juce::NormalisableRange<float> paramRange = juce::NormalisableRange<float> (0.f, 1.f);
+    auto paramRange = juce::NormalisableRange<float> (0.f, 1.f);
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     for (int i = 0; i < 64; i++)
     {
@@ -306,8 +306,8 @@ bool PluginProcessor::compileSource (const juce::String& source)
     }
     sourceCode = source;
     // Update internal buffers
-    int inChans = faustProgram->getNumInChannels();
-    int outChans = faustProgram->getNumOutChannels();
+    const int inChans = faustProgram->getNumInChannels();
+    const int outChans = faustProgram->getNumOutChannels();
 
     tmpBufferIn.setSize (inChans, tmpBufferIn.getNumSamples());
     tmpBufferOut.setSize (outChans, tmpBufferOut.getNumSamples());
@@ -320,8 +320,8 @@ void PluginProcessor::updateDspParameters() const
     for (int i = 0; i < paramCount; ++i)
     {
         juce::String id = paramIdForIdx (i);
-        float value = *valueTreeState.getRawParameterValue (id);
-        faustProgram->convertNormaliseRange (i, value);
+        const float value = *valueTreeState.getRawParameterValue (id);
+        faustProgram->setValue (i, value);
     }
 }
 
@@ -349,6 +349,15 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     }
     return params;
 }
+double PluginProcessor::valueToRatio (const int index, const double value) const
+{
+    return faustProgram->value2Ratio (index, value);
+}
+
+double PluginProcessor::ratioToValue (const int index, const double value) const
+{
+    return faustProgram->ratio2Value (index, value);
+}
 
 juce::String PluginProcessor::getSourceCode()
 {
@@ -362,5 +371,4 @@ void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juc
         int newBackend = tree[property];
         setBackend (static_cast<FaustProgram::Backend> (newBackend - 1));
     }
-    //    DBG("property change: " << tree.getType() << " " << property);
 }

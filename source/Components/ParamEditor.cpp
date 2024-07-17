@@ -45,11 +45,13 @@ public:
 
 //==============================================================================
 AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (
-    juce::RangedAudioParameter& param,
+    juce::RangedAudioParameter& parameter,
     juce::Slider& s,
-    juce::NormalisableRange<double>& r,
-    juce::UndoManager* um)
-    : slider (s), range (r), attachment (param, [this] (float f) { setValue (f); }, um)
+    juce::UndoManager* undoManager,
+    const int index,
+    const std::function<double (int, double)>& valueToRatio,
+    const std::function<double (int, double)>& ratioToValue)
+    : value2Ratio (valueToRatio), ratio2Value (ratioToValue), slider (s), attachment (parameter, [this] (const float f) { setValue (f); }, undoManager), index (index)
 {
     sendInitialUpdate();
     slider.valueChanged();
@@ -66,16 +68,24 @@ void AmatiSliderParameterAttachment::sendInitialUpdate() { attachment.sendInitia
 void AmatiSliderParameterAttachment::setValue (const float newValue)
 {
     // sets the value from 0 to 1 back to the original value
-    const double convertedValue = convertFrom0to1 (newValue, range);
-    const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-    slider.setValue (convertedValue, juce::sendNotificationSync);
+    if (ratio2Value)
+    {
+        const double convertedValue = ratio2Value (index, newValue);
+        const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+        slider.setValue (convertedValue, juce::sendNotificationSync);
+    }
+    else
+    {
+        jassertfalse;
+    }
 }
 
 void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
 {
-    const float convertedValue = (slider.getValue() - range.start) / (range.end - range.start);
-    if (!ignoreCallbacks)
+    // convert from original to 0 to 1
+    if (value2Ratio && !ignoreCallbacks)
     {
+        const auto convertedValue = static_cast<float> (ratio2Value (index, slider.getValue()));
         attachment.setValueAsPartOfGesture (convertedValue);
     }
 }
@@ -92,7 +102,10 @@ ParamEditor::~ParamEditor() noexcept
     components.clear();
 }
 
-void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustParameter>& params)
+//TODO Need to get index somehow
+void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustParameter>& params,
+    const std::function<double (int, double)>& valueToRatio,
+    const std::function<double (int, double)>& ratioToValue)
 {
     sliderAttachments.clear();
     buttonAttachments.clear();
@@ -112,7 +125,7 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
                 auto range = juce::NormalisableRange (p.range, p.step);
                 slider->setNormalisableRange (range);
                 slider->setValue (p.init, juce::dontSendNotification);
-                auto* attachment = new AmatiSliderAttachment (p.init, valueTreeState, param.id, range, *slider);
+                auto* attachment = new AmatiSliderAttachment (p.init, valueTreeState, param.id, *slider, 1, valueToRatio, ratioToValue);
 
                 auto* label = new juce::Label();
                 label->attachToComponent (slider, false);
@@ -187,30 +200,22 @@ void ParamEditor::resized()
 }
 
 AmatiSliderAttachment::AmatiSliderAttachment (
-    double initalValue,
-    juce::AudioProcessorValueTreeState& stateToUse,
+    const double initalValue,
+    const juce::AudioProcessorValueTreeState& stateToUse,
     const juce::String& parameterID,
-    juce::NormalisableRange<double>& range,
-    juce::Slider& attachedSlider)
+    juce::Slider& slider,
+    const int index,
+    const std::function<double (int, double)>& valueToRatio,
+    const std::function<double (int, double)>& ratioToValue)
 {
     if (juce::RangedAudioParameter* parameter = stateToUse.getParameter (parameterID))
     {
-        const double value = convertTo0to1 (initalValue, range);
+        const double value = valueToRatio (index, initalValue);
         parameter->setValueNotifyingHost (static_cast<float> (value));
-        attachment = std::make_unique<AmatiSliderParameterAttachment> (*parameter, attachedSlider, range, stateToUse.undoManager);
+        attachment = std::make_unique<AmatiSliderParameterAttachment> (*parameter, slider, stateToUse.undoManager, index, valueToRatio, ratioToValue);
     }
     else
     {
         jassertfalse;
     }
-}
-
-double AmatiSliderAttachment::convertTo0to1 (const double value, const juce::NormalisableRange<double> range)
-{
-    return (value - range.start) / (range.end - range.start);
-}
-
-double AmatiSliderParameterAttachment::convertFrom0to1 (const double value, const juce::NormalisableRange<double> range)
-{
-    return (range.end - range.start) * value + range.start;
 }

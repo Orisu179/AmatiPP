@@ -28,7 +28,7 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 class FaustProgram
 {
 public:
-    class CompileError : public std::runtime_error
+    class CompileError final : public std::runtime_error
     {
     public:
         explicit CompileError (const char* message) : std::runtime_error (message) {}
@@ -54,9 +54,9 @@ public:
     FaustProgram (const juce::String& source, Backend, int sampRate);
     ~FaustProgram();
 
-    int getParamCount();
-    int getNumInChannels();
-    int getNumOutChannels();
+    [[nodiscard]] int getParamCount() const;
+    [[nodiscard]] int getNumInChannels() const;
+    [[nodiscard]] int getNumOutChannels() const;
 
     struct Parameter
     {
@@ -66,14 +66,15 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter (int idx);
-    void convertNormaliseRange (int index, float value) const;
+    Parameter getParameter (int);
 
-    float getValue (int index);
-    void setValue (int idx, float);
+    [[nodiscard]] float getValue (int) const;
+    void setValue (int, float) const;
     void setSampleRate (int);
 
-    void compute (int sampleCount, const float* const* input, float* const* output);
+    void compute (int sampleCount, const float* const* input, float* const* output) const;
+    [[nodiscard]] double ratio2Value(int, double) const;
+    [[nodiscard]] double value2Ratio(int, double) const;
 
 private:
     void compileSource (const juce::String&);

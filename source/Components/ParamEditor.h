@@ -1,13 +1,15 @@
 #pragma once
 #include "../PluginProcessor.h"
-class AmatiSliderParameterAttachment : private juce::Slider::Listener
+class AmatiSliderParameterAttachment final : private juce::Slider::Listener
 {
 public:
     AmatiSliderParameterAttachment (
         juce::RangedAudioParameter& parameter,
         juce::Slider& slider,
-        juce::NormalisableRange<double>& range,
-        juce::UndoManager* undoManager = nullptr);
+        juce::UndoManager* undoManager = nullptr,
+        int index,
+        const std::function<double (int, double)>&,
+        const std::function<double (int, double)>&);
 
     ~AmatiSliderParameterAttachment() override;
 
@@ -19,13 +21,13 @@ private:
 
     void sliderDragStarted (juce::Slider*) override { attachment.beginGesture(); }
     void sliderDragEnded (juce::Slider*) override { attachment.endGesture(); }
-
-    static double convertFrom0to1 (double value, juce::NormalisableRange<double>);
+    std::function<double (int, double)> value2Ratio;
+    std::function<double (int, double)> ratio2Value;
 
     juce::Slider& slider;
-    juce::NormalisableRange<double> range;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
+    int index;
 };
 
 class AmatiSliderAttachment
@@ -33,28 +35,31 @@ class AmatiSliderAttachment
 public:
     AmatiSliderAttachment (
         double initalValue,
-        juce::AudioProcessorValueTreeState& stateToUse,
+        const juce::AudioProcessorValueTreeState& stateToUse,
         const juce::String& parameterID,
-        juce::NormalisableRange<double>& range,
-        juce::Slider& slider);
+        juce::Slider& slider,
+        int index,
+        const std::function<double (int, double)>&,
+        const std::function<double (int, double)>&);
 
 private:
     std::unique_ptr<AmatiSliderParameterAttachment> attachment;
 
-    static double convertTo0to1 (double, juce::NormalisableRange<double>);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AmatiSliderAttachment)
 };
 
-class ParamEditor : public juce::Component
+class ParamEditor final : public juce::Component
 {
 public:
-    ParamEditor (juce::AudioProcessorValueTreeState&);
+    explicit ParamEditor (juce::AudioProcessorValueTreeState&);
     ~ParamEditor() noexcept override;
 
     void paint (juce::Graphics&) override {}
     void resized() override;
 
-    void updateParameters (const std::vector<PluginProcessor::FaustParameter>&);
+    void updateParameters (const std::vector<PluginProcessor::FaustParameter>&,
+        const std::function<double (int, double)>&,
+        const std::function<double (int, double)>&);
 
 private:
     juce::AudioProcessorValueTreeState& valueTreeState;

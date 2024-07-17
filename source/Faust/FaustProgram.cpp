@@ -120,31 +120,31 @@ void FaustProgram::compileSource (const juce::String& source)
     }
 }
 
-int FaustProgram::getParamCount()
+int FaustProgram::getParamCount() const
 {
     return faustInterface->getParamsCount();
 }
 
-int FaustProgram::getNumInChannels()
+int FaustProgram::getNumInChannels() const
 {
     return dspInstance->getNumInputs();
 }
 
-int FaustProgram::getNumOutChannels()
+int FaustProgram::getNumOutChannels() const
 {
     return dspInstance->getNumOutputs();
 }
 
-FaustProgram::Parameter FaustProgram::getParameter (const int idx)
+FaustProgram::Parameter FaustProgram::getParameter (const int index)
 {
-    if (idx < 0)
+    if (index < 0)
     {
         jassertfalse;
     }
-    return parameters[idx];
+    return parameters[index];
 }
 
-float FaustProgram::getValue (const int index)
+float FaustProgram::getValue (const int index) const
 {
     if (index > 0 || index <= getParamCount())
         return static_cast<float> (faustInterface->getParamRatio (index));
@@ -152,17 +152,32 @@ float FaustProgram::getValue (const int index)
         return 0.0;
 }
 
-void FaustProgram::setValue (int index, float value)
+void FaustProgram::setValue (const int index, const float value) const
 {
-    if (index > 0 && index <= getParamCount())
+    if (value > 1.0f || value < 0.0f)
+    {
+        jassertfalse;
+    }
+
+    if (index >= 0 && index < parameters.size())
     {
         faustInterface->setParamRatio (index, value);
     }
 }
 
-void FaustProgram::compute (const int samples, const float* const* in, float* const* out)
+void FaustProgram::compute (const int samples, const float* const* in, float* const* out) const
 {
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
+}
+
+double FaustProgram::ratio2Value (const int index, const double value) const
+{
+    return faustInterface->ratio2value (index, value);
+}
+
+double FaustProgram::value2Ratio (const int index, const double value) const
+{
+    return faustInterface->value2ratio (index, value);
 }
 
 void FaustProgram::setSampleRate (const int sr)
@@ -174,22 +189,5 @@ void FaustProgram::setSampleRate (const int sr)
     else
     {
         jassertfalse;
-    }
-}
-
-// Convert from 0 to 1 to expected range
-void FaustProgram::convertNormaliseRange (const int index, const float value) const
-{
-    if (value > 1.0f || value < 0.0f)
-    {
-        jassertfalse;
-    }
-
-    if (index >= 0 && index < parameters.size())
-    {
-        const juce::Range<double> range = parameters[index].range;
-        const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-        faustInterface->setParamValue (index, convertedValue);
-        // faustInterface->setParamRatio(index, convertedValue);
     }
 }

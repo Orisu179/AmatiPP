@@ -85,7 +85,7 @@ void PluginEditor::paint (juce::Graphics& g)
 
 void PluginEditor::resized()
 {
-    int margin = 10;
+    constexpr int margin = 10;
     auto bounds = getLocalBounds();
 
     inspectButton.setBounds (bounds.removeFromBottom (30));
@@ -94,7 +94,7 @@ void PluginEditor::resized()
 
 void PluginEditor::updateParameters()
 {
-    paramEditor.updateParameters (processorRef.getFaustParameter());
+    paramEditor.updateParameters (processorRef.getFaustParameter(), processorRef.ratioToValue, processorRef.valueToRatio);
 }
 
 void PluginEditor::updateEditor()
