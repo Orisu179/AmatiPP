@@ -110,11 +110,15 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance.reset (dspFactory->createDSPInstance());
     dspInstance->init (sampleRate);
     faustInterface = std::make_unique<APIUI>();
-    midi_handler = std::make_unique<FaustMidi>();
-
-    MidiUI midi_interface (midi_handler.get());
     dspInstance->buildUserInterface (faustInterface.get());
-    dspInstance->buildUserInterface (&midi_interface);
+
+    if(midiOn (source))
+    {
+        midi_handler = std::make_unique<FaustMidi>();
+        MidiUI midi_interface (midi_handler.get());
+        dspInstance->buildUserInterface (&midi_interface);
+    }
+
     for (int i { 0 }; i < getParamCount(); i++)
     {
         parameters.push_back (
@@ -127,8 +131,9 @@ void FaustProgram::compileSource (const juce::String& source)
     updateAllGuis();
 }
 
-bool FaustProgram::midiOn (const juce::String&)
+bool FaustProgram::midiOn (const juce::String& source)
 {
+    return source.contains ("declare options \"[midi:on]\";");
 }
 
 int FaustProgram::getParamCount() const
@@ -178,7 +183,10 @@ void FaustProgram::compute (const int samples, const float* const* in, float* co
 
 void FaustProgram::handleMidi (juce::MidiBuffer& message) const
 {
-    midi_handler->decodeBuffer (message);
+    if(!message.isEmpty())
+    {
+        midi_handler->decodeBuffer (message);
+    }
 }
 
 void FaustProgram::setSampleRate (const int sr)
@@ -190,22 +198,5 @@ void FaustProgram::setSampleRate (const int sr)
     else
     {
         jassertfalse;
-    }
-}
-
-// Convert from 0 to 1 to expected range
-void FaustProgram::convertNormaliseRange (const int index, const float value) const
-{
-    if (value > 1.0f || value < 0.0f)
-    {
-        jassertfalse;
-    }
-    const int size = static_cast<int>(parameters.size());
-
-    if (index >= 0 && index < size)
-    {
-        const juce::Range<double> range = parameters[index].range;
-        const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-        faustInterface->setParamValue (index, convertedValue);
     }
 }

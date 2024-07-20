@@ -320,7 +320,8 @@ void PluginProcessor::updateDspParameters() const
     {
         juce::String id = paramIdForIdx (i);
         const float value = *valueTreeState.getRawParameterValue (id);
-        faustProgram->convertNormaliseRange (i, value);
+        faustProgram->setValue (i, value);
+        // faustProgram->convertNormaliseRange (i, value);
     }
 }
 

@@ -68,7 +68,6 @@ public:
         double step;
     };
     Parameter getParameter(int idx);
-    void convertNormaliseRange(int index, float value) const;
 
     [[nodiscard]] float getValue(int index) const;
     void setValue(int idx, float) const;
