@@ -13,8 +13,7 @@ FaustMidi::~FaustMidi()
 
 void FaustMidi::encodeBuffer (juce::MidiBuffer& buffer)
 {
-    const juce::ScopedTryLock lock (fMutex);
-    if (lock.isLocked())
+    if (const juce::ScopedTryLock lock (fMutex); lock.isLocked())
     {
         buffer.swapWith (fOutputBuffer);
         fOutputBuffer.clear();

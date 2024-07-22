@@ -26,6 +26,7 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include <faust/gui/APIUI.h>
 #include <faust/gui/MidiUI.h>
 #include <faust/gui/GUI.h>
+#include <faust/midi/juce-midi.h>
 
 class FaustProgram final : public GUI {
 public:
@@ -83,7 +84,7 @@ private:
     dsp_factory* dspFactory{};
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
-    std::unique_ptr<FaustMidi> midi_handler;
+    std::unique_ptr<juce_midi> midi_handler;
     std::vector<Parameter> parameters;
 
     int sampleRate;
