@@ -1,6 +1,6 @@
 #include "MidiComponent.h"
 
-MidiComponent::MidiComponent() : midiInputListLabel ("MIDI Input"), keyboardComponent (keyboardState, juce::KeyboardComponentBase::Orientation::horizontalKeyboard)
+MidiComponent::MidiComponent () : midiInputListLabel ("MIDI Input"), keyboardComponent (keyboardState, juce::KeyboardComponentBase::Orientation::horizontalKeyboard)
 {
     addAndMakeVisible (midiInputList);
     midiInputList.setTextWhenNoChoicesAvailable ("No Midi Inputs Enabled");
@@ -45,9 +45,9 @@ void MidiComponent::handleIncomingMidiMessage (juce::MidiInput* source, const ju
 // listen to selected device, while enabling it if it's disabled
 void MidiComponent::setMidiInput (int index)
 {
-    auto list = juce::MidiInput::getAvailableDevices();
+    const auto list = juce::MidiInput::getAvailableDevices();
     deviceManager.removeMidiInputDeviceCallback (list[lastInputIndex].identifier, this);
-    auto newInput = list[index];
+    const auto newInput = list[index];
     if (!deviceManager.isMidiInputDeviceEnabled (newInput.identifier))
         deviceManager.setMidiInputDeviceEnabled (newInput.identifier, true);
 
@@ -59,23 +59,37 @@ void MidiComponent::setMidiInput (int index)
 
 void MidiComponent::handleNoteOff (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {
-    if (!isAddingFromMidiInput)
+    if (!isAddingFromMidiInput && handleMidi)
     {
         auto m = juce::MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity);
         m.setTimeStamp (juce::Time::getMillisecondCounterHiRes());
+        handleMidi (m);
+    }
+}
+void MidiComponent::setHandleMidiHandler (const std::function<void (juce::MidiMessage&)>& midiHandler)
+{
+    if(midiHandler)
+    {
+        handleMidi = midiHandler;
+    } else
+    {
+        jassertfalse;
     }
 }
 
-void MidiComponent::handleNoteOn (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
+void MidiComponent::handleNoteOn (juce::MidiKeyboardState*, const int midiChannel, const int midiNoteNumber, const float velocity)
 {
-    auto m = juce::MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity);
-    m.setTimeStamp (juce::Time::getMillisecondCounterHiRes());
-    // DBG(m.getDescription());
+    if(handleMidi)
+    {
+        auto m = juce::MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity);
+        m.setTimeStamp (juce::Time::getMillisecondCounterHiRes());
+        handleMidi(m);
+    }
 }
 
 void MidiComponent::resized()
 {
-    int margin = 10;
+    constexpr int margin = 10;
     using fb = juce::FlexBox;
     inputList.flexDirection = fb::Direction::row;
     inputList.alignItems = fb::AlignItems::center;

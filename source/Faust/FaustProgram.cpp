@@ -111,8 +111,9 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance->init (sampleRate);
     faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
+    midiIsOn = source.contains ("declare options \"[midi:on]\";");
 
-    if(midiOn (source))
+    if(midiIsOn)
     {
         midi_handler = std::make_unique<FaustMidi>();
         MidiUI midi_interface (midi_handler.get());
@@ -129,11 +130,6 @@ void FaustProgram::compileSource (const juce::String& source)
                 faustInterface->getParamStep (i) });
     }
     updateAllGuis();
-}
-
-bool FaustProgram::midiOn (const juce::String& source)
-{
-    return source.contains ("declare options \"[midi:on]\";");
 }
 
 int FaustProgram::getParamCount() const
@@ -183,7 +179,7 @@ void FaustProgram::compute (const int samples, const float* const* in, float* co
 
 void FaustProgram::handleMidi (juce::MidiBuffer& message) const
 {
-    if(!message.isEmpty())
+    if (!message.isEmpty() && midiIsOn)
     {
         midi_handler->decodeBuffer (message);
     }

@@ -72,15 +72,11 @@ public:
     [[nodiscard]] float getValue(int index) const;
     void setValue(int idx, float) const;
     void setSampleRate(int);
-
     void compute (int sampleCount, const float* const* input, float* const* output) const;
-
     void handleMidi(juce::MidiBuffer&) const;
 
 private:
     void compileSource (const juce::String&);
-
-    static bool midiOn(const juce::String&);
 
     Backend backend;
 
@@ -91,4 +87,5 @@ private:
     std::vector<Parameter> parameters;
 
     int sampleRate;
+    bool midiIsOn {false};
 };

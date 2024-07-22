@@ -11,7 +11,7 @@
 #include "melatonin_inspector/melatonin_inspector.h"
 
 //==============================================================================
-class PluginEditor : public juce::AudioProcessorEditor,
+class PluginEditor final : public juce::AudioProcessorEditor,
                      public juce::ValueTree::Listener
 {
 public:
@@ -30,6 +30,7 @@ private:
 
     void updateParameters();
     void updateEditor();
+    void onCompile();
 
     SettingsComponent settingsComponent;
     ConsoleComponent consoleComponent;

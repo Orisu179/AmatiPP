@@ -132,7 +132,6 @@ void FaustMidi::decodeMessages (const juce::MidiMessage& message)
     const juce::uint8* data = message.getRawData();
     const int channel = message.getChannel() - 1;
     const double time = message.getTimeStamp();
-
     if (message.isNoteOff())
     {
         handleKeyOff (time, channel, data[1], data[2]);

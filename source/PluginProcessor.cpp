@@ -74,6 +74,16 @@ double PluginProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
+void PluginProcessor::handleMidi (const juce::MidiMessage& message)
+{
+    if(faustProgram)
+    {
+        const auto timestamp = message.getTimeStamp();
+        const auto sampleNumber = static_cast<int>(timestamp * sampRate);
+        midiBuffer.addEvent (message, sampleNumber);
+        faustProgram->handleMidi (midiBuffer);
+    }
+}
 
 int PluginProcessor::getNumPrograms()
 {
@@ -153,7 +163,7 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 
 void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    int numSamples = buffer.getNumSamples();
+    const int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
     // If it does, we resize our internal buffers
     if (numSamples > tmpBufferIn.getNumSamples())
@@ -163,8 +173,8 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
 
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    const auto totalNumInputChannels = getTotalNumInputChannels();
+    const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     if (!faustProgram || !playing)
     {

@@ -31,7 +31,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
 
     addAndMakeVisible (&tabbedComponent);
 
-    juce::Colour tabColour = getLookAndFeel().findColour (juce::TabbedComponent::backgroundColourId);
+    const juce::Colour tabColour = getLookAndFeel().findColour (juce::TabbedComponent::backgroundColourId);
     tabbedComponent.addTab ("Editor", tabColour, &editorComponent, false);
     tabbedComponent.addTab ("Parameters", tabColour, &paramEditor, false);
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
@@ -44,20 +44,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     //---------------------------------------------------------------------------
 
     editorComponent.onCompile = [&] {
-        consoleComponent.clearMessages();
-        if (processorRef.compileSource (editorComponent.getSource()))
-        {
-            editorComponent.setStatus ("Status: Compiled", juce::sendNotification);
-            processorRef.setPlayingState (false);
-            updateParameters();
-            editorComponent.setStartButtonEnabled (true);
-        }
-        else
-        {
-            editorComponent.setStatus ("Status: Error", juce::sendNotification);
-            tabbedComponent.setCurrentTabIndex (2);
-            editorComponent.setStartButtonEnabled (false);
-        }
+        onCompile();
     };
 
     editorComponent.onStart = [&] {
@@ -105,4 +92,25 @@ void PluginEditor::updateParameters()
 void PluginEditor::updateEditor()
 {
     editorComponent.setSource (processorRef.getSourceCode());
+}
+
+void PluginEditor::onCompile()
+{
+    consoleComponent.clearMessages();
+    if (processorRef.compileSource (editorComponent.getSource()))
+    {
+        editorComponent.setStatus ("Status: Compiled", juce::sendNotification);
+        processorRef.setPlayingState (false);
+        updateParameters();
+        editorComponent.setStartButtonEnabled (true);
+        midiComponent.setHandleMidiHandler ([&](const juce::MidiMessage& message) {
+          processorRef.handleMidi (message);
+        });
+    }
+    else
+    {
+        editorComponent.setStatus ("Status: Error", juce::sendNotification);
+        tabbedComponent.setCurrentTabIndex (2);
+        editorComponent.setStartButtonEnabled (false);
+    }
 }
