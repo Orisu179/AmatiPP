@@ -4,12 +4,13 @@ class AmatiSliderParameterAttachment final : private juce::Slider::Listener
 {
 public:
     AmatiSliderParameterAttachment (
-        juce::RangedAudioParameter& parameter,
-        juce::Slider& slider,
-        int index,
+        int idx,
+        juce::RangedAudioParameter& param,
+        juce::Slider& s,
         const std::function<double (int, double)>&,
         const std::function<double (int, double)>&,
-        juce::UndoManager* undoManager = nullptr);
+        juce::UndoManager* undoManager = nullptr
+        );
 
     ~AmatiSliderParameterAttachment() override;
 
@@ -21,24 +22,23 @@ private:
 
     void sliderDragStarted (juce::Slider*) override { attachment.beginGesture(); }
     void sliderDragEnded (juce::Slider*) override { attachment.endGesture(); }
-    std::function<double (int, double)> value2Ratio;
-    std::function<double (int, double)> ratio2Value;
 
+    const int index;
     juce::Slider& slider;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
-    int index;
+    const std::function<double (int, double)>& valueToRatio;
+    const std::function<double (int, double)>& ratioToValue;
 };
 
 class AmatiSliderAttachment
 {
 public:
     AmatiSliderAttachment (
-        double initalValue,
+        int index,
         const juce::AudioProcessorValueTreeState& stateToUse,
         const juce::String& parameterID,
         juce::Slider& slider,
-        int index,
         const std::function<double (int, double)>&,
         const std::function<double (int, double)>&);
 
