@@ -51,7 +51,10 @@ bool FaustMidi::startMidi()
 
 void FaustMidi::stopMidi()
 {
-    fMidiIn->stop();
+    if(fMidiIn)
+    {
+        fMidiIn->stop();
+    }
 }
 
 MapUI* FaustMidi::keyOn (double x, int channel, int pitch, int velocity)

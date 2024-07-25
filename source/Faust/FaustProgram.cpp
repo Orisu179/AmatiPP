@@ -57,8 +57,11 @@ FaustProgram::~FaustProgram()
 {
     // Delete in order.
     faustInterface.reset (nullptr);
-    dspInstance.reset (nullptr);
+    if(midiIsOn) {
+        midiInterface.reset (nullptr);
+    }
 
+    dspInstance.reset (nullptr);
     switch (backend)
     {
         case Backend::LLVM:
@@ -115,9 +118,9 @@ void FaustProgram::compileSource (const juce::String& source)
 
     if(midiIsOn)
     {
-        midi_handler = std::make_unique<juce_midi>();
-        MidiUI midi_interface (midi_handler.get());
-        dspInstance->buildUserInterface (&midi_interface);
+        midi_handler = std::make_unique<FaustMidi>();
+        midiInterface = std::make_unique<MidiUI>(midi_handler.get());
+        dspInstance->buildUserInterface (midiInterface.get());
     }
 
     for (int i { 0 }; i < getParamCount(); i++)

@@ -84,7 +84,8 @@ private:
     dsp_factory* dspFactory{};
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
-    std::unique_ptr<juce_midi> midi_handler;
+    std::unique_ptr<FaustMidi> midi_handler;
+    std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
 
     int sampleRate;

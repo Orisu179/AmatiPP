@@ -6,7 +6,7 @@
 #include "juce_audio_devices/juce_audio_devices.h"
 
 
-class FaustMidi : public midi_handler, juce::MidiInputCallback
+class FaustMidi final : public midi_handler, juce::MidiInputCallback
 {
 public:
     FaustMidi();
