@@ -23,12 +23,12 @@ private:
     void sliderDragStarted (juce::Slider*) override { attachment.beginGesture(); }
     void sliderDragEnded (juce::Slider*) override { attachment.endGesture(); }
 
-    const int index;
     juce::Slider& slider;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
     const std::function<double (int, double)>& valueToRatio;
     const std::function<double (int, double)>& ratioToValue;
+    const int index;
 };
 
 class AmatiSliderAttachment

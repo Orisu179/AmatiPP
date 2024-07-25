@@ -46,6 +46,11 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
+static FaustProgram::MetaData apiToMetaDataType (std::map<const char*, const char*>)
+{
+
+}
+
 FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
 {
     compileSource (source);

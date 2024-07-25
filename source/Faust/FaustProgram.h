@@ -44,6 +44,19 @@ public:
         CheckButton,
     };
 
+    enum class MetaData {
+        tooltip,
+        hidden,
+        unit,
+        scale,
+        style,
+        acc,
+        gyr,
+        screencolor,
+        midi
+    };
+
+
     enum class Backend {
         LLVM,
         Interpreter,
@@ -66,6 +79,7 @@ public:
         juce::Range<double> range;
         double init;
         double step;
+        std::unordered_map<MetaData, juce::String> metaData;
     };
     Parameter getParameter (int);
 
@@ -74,8 +88,8 @@ public:
     void setSampleRate (int);
 
     void compute (int sampleCount, const float* const* input, float* const* output) const;
-    [[nodiscard]] double ratio2Value(int, double) const;
-    [[nodiscard]] double value2Ratio(int, double) const;
+    [[nodiscard]] double ratio2Value (int, double) const;
+    [[nodiscard]] double value2Ratio (int, double) const;
 
 private:
     void compileSource (const juce::String&);

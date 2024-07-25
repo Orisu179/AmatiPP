@@ -50,7 +50,11 @@ AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (
     juce::Slider& s,
     const std::function<double (int, double)>& value2Ratio,
     const std::function<double (int, double)>& ratio2Value,
-    juce::UndoManager* undoManager) : index (idx), slider (s), attachment (param, [this] (const float f) { setValue (f); }, undoManager), valueToRatio (value2Ratio), ratioToValue (ratio2Value)
+    juce::UndoManager* undoManager) : slider (s),
+                                    attachment (param, [this] (const float f) { setValue (f); }, undoManager),
+                                    valueToRatio (value2Ratio),
+                                    ratioToValue (ratio2Value),
+                                    index (idx)
 {
     sendInitialUpdate();
     slider.valueChanged();
@@ -67,9 +71,12 @@ void AmatiSliderParameterAttachment::sendInitialUpdate() { attachment.sendInitia
 void AmatiSliderParameterAttachment::setValue (const float newValue)
 {
     // sets the value from 0 to 1 back to the original value
-    const double convertedValue = ratioToValue (index, newValue);
-    const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-    slider.setValue (convertedValue, juce::sendNotificationSync);
+    if(ratioToValue)
+    {
+        const double convertedValue = ratioToValue (index, newValue);
+        const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+        slider.setValue (convertedValue, juce::sendNotificationSync);
+    }
 }
 
 void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
@@ -77,9 +84,9 @@ void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
     // convert from original to 0 to 1
     if (!ignoreCallbacks)
     {
-        const auto convertedValue = valueToRatio (index, slider.getValue());
-        const auto testBreak = slider.getValue();
-        attachment.setValueAsPartOfGesture (static_cast<float> (convertedValue));
+        // const auto value = slider.getValue();
+        // const auto convertedValue = valueToRatio (index, value);
+        // attachment.setValueAsPartOfGesture (static_cast<float> (convertedValue));
     }
 }
 
