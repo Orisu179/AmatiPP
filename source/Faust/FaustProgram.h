@@ -79,7 +79,7 @@ public:
         juce::Range<double> range;
         double init;
         double step;
-        std::unordered_map<MetaData, juce::String> metaData;
+        std::map<juce::String, juce::String> metaData;
     };
     Parameter getParameter (int);
 

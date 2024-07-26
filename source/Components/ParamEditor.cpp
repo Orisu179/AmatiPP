@@ -90,7 +90,7 @@ void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
     }
 }
 
-ParamEditor::ParamEditor (juce::AudioProcessorValueTreeState& vts) : valueTreeState (vts)
+ParamEditor::ParamEditor (juce::AudioProcessorValueTreeState& vts) : valueTreeState (vts), builder (vts)
 {
 }
 
@@ -120,12 +120,10 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
         {
             case Type::Slider:
             {
-                auto* slider = new juce::Slider();
-                const auto range = juce::NormalisableRange (p.range, p.step);
-                slider->setNormalisableRange (range);
-                slider->setValue (p.init, juce::dontSendNotification);
-                auto* attachment = new AmatiSliderAttachment (p.index, valueTreeState, param.id, *slider, valueToRatio, ratioToValue);
-
+                builder.setParameterData (p);
+                auto* slider = builder.getSlider();
+                // auto* attachment = new AmatiSliderAttachment (p.index, valueTreeState, param.id, *slider, valueToRatio, ratioToValue);
+                auto* attachment = builder.getAttachment (slider, param.id);
                 auto* label = new juce::Label();
                 label->attachToComponent (slider, false);
                 label->setText (p.label, juce::dontSendNotification);

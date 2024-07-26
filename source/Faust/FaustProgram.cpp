@@ -20,10 +20,8 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "FaustProgram.h"
-
 #include <faust/dsp/interpreter-dsp.h>
 #include <faust/dsp/llvm-dsp.h>
-
 #include <memory>
 
 static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
@@ -39,6 +37,7 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
         case APIUI::kHSlider:
         case APIUI::kNumEntry:
             return ItemType::Slider;
+        //TODO: implement BarGraphs
         case APIUI::kHBargraph:
         case APIUI::kVBargraph:
         default:
@@ -46,12 +45,17 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
-static FaustProgram::MetaData apiToMetaDataType (std::map<const char*, const char*>)
+static std::map<juce::String, juce::String> cstringMapToJuceString(std::map<const char*, const char*> cMap)
 {
-
+    std::map<juce::String, juce::String> juceStringMap;
+    for(const auto& [key, value] : cMap)
+    {
+        juceStringMap[juce::String(key)] = juce::String(value);
+    }
+    return juceStringMap;
 }
 
-FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
+FaustProgram::FaustProgram (const juce::String& source, const Backend b, const int sampRate) : backend (b), sampleRate (sampRate)
 {
     compileSource (source);
 }
@@ -122,7 +126,9 @@ void FaustProgram::compileSource (const juce::String& source)
                 apiToItemType (faustInterface->getParamItemType (i)),
                 { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
                 faustInterface->getParamInit (i),
-                faustInterface->getParamStep (i) });
+                faustInterface->getParamStep (i),
+                cstringMapToJuceString (faustInterface->getMetadata (i)),
+            });
     }
 }
 

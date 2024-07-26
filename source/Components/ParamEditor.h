@@ -1,5 +1,6 @@
 #pragma once
 #include "../PluginProcessor.h"
+#include "SliderBuilder.h"
 class AmatiSliderParameterAttachment final : private juce::Slider::Listener
 {
 public:
@@ -41,6 +42,7 @@ public:
         juce::Slider& slider,
         const std::function<double (int, double)>&,
         const std::function<double (int, double)>&);
+    AmatiSliderAttachment (const juce::AudioProcessorValueTreeState& value_tree_state, const juce::String& id, const juce::Slider& slider, std::function<double(double)>, std::function<double(double)>);
 
 private:
     std::unique_ptr<AmatiSliderParameterAttachment> attachment;
@@ -67,6 +69,7 @@ private:
     juce::OwnedArray<juce::Label> labels {};
     juce::OwnedArray<AmatiSliderAttachment> sliderAttachments {};
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachments {};
+    SliderBuilder builder;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamEditor)
 };
