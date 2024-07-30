@@ -16,7 +16,7 @@ ConsoleComponent::ConsoleComponent()
 
 ConsoleComponent::~ConsoleComponent()
 {
-    juce::Logger::setCurrentLogger (nullptr);
+    setCurrentLogger (nullptr);
 }
 
 void ConsoleComponent::resized()

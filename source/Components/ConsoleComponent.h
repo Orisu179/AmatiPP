@@ -1,12 +1,12 @@
 #pragma once
 #include "juce_gui_basics/juce_gui_basics.h"
 
-class ConsoleComponent : public juce::Component,
+class ConsoleComponent final : public juce::Component,
                          public juce::Logger
 {
 public:
     ConsoleComponent();
-    ~ConsoleComponent();
+    ~ConsoleComponent() override;
 
     void paint (juce::Graphics&) override {}
     void resized() override;

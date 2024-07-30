@@ -75,7 +75,7 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
             case Type::Slider:
             {
                 builder.setParameterData (p);
-                auto* slider = builder.getSlider();
+                auto slider = builder.getSlider();
                 // auto* attachment = new AmatiSliderAttachment (p.index, valueTreeState, param.id, *slider, valueToRatio, ratioToValue);
                 AmatiSliderAttachment* attachment = builder.getAttachment (slider, param.id);
                 auto* label = new juce::Label();
@@ -88,6 +88,7 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
 
                 addAndMakeVisible (slider);
                 addAndMakeVisible (label);
+                builder.reset();
                 break;
             }
             case Type::Button:

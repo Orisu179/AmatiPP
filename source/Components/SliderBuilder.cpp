@@ -1,6 +1,6 @@
 #include "SliderBuilder.h"
 
-SliderBuilder::SliderBuilder (juce::AudioProcessorValueTreeState& vts) : curParam(), valueTreeState (vts), attachment (nullptr), attachedSlider (new juce::Slider())
+SliderBuilder::SliderBuilder (juce::AudioProcessorValueTreeState& vts) : curParam(), valueTreeState (vts), attachment (nullptr)
 {
 }
 
@@ -31,7 +31,7 @@ juce::Slider* SliderBuilder::getSlider() const
     return attachedSlider;
 }
 
-AmatiSliderAttachment* SliderBuilder::getAttachment (const juce::Slider* slider, const juce::String& id)
+AmatiSliderAttachment* SliderBuilder::getAttachment (juce::Slider* slider, const juce::String& id)
 {
     attachment = new AmatiSliderAttachment (valueTreeState, id, *slider, fConversion);
     return attachment;
@@ -47,12 +47,11 @@ void SliderBuilder::buildUnit (const juce::String& value) const
    attachedSlider->setTextValueSuffix (" " + value);
 }
 
-void SliderBuilder::buildScale (const juce::String& value)
+void SliderBuilder::buildScale (const juce::String& value = "linear")
 {
    if(value == "log")
    {
        fConversion = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
-       attachedSlider->setSkewFactor(0.2f);
    } else if (value == "exp")
    {
        fConversion = std::make_shared<ExpValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
@@ -61,50 +60,55 @@ void SliderBuilder::buildScale (const juce::String& value)
 
 void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& metaData)
 {
-    reset();
     attachedSlider = new juce::Slider();
     const auto range = juce::NormalisableRange (curParam.range, curParam.step);
     attachedSlider->setNormalisableRange (range);
     attachedSlider->setValue (curParam.init, juce::dontSendNotification);
-    for (const auto& [key, value] : metaData)
+    if (metaData.empty())
     {
-        if(key == "scale")
+        fConversion = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
+    } else
+    {
+        for (const auto& [key, value] : metaData)
         {
-           buildScale (value);
-        } else
-        {
-            fConversion = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
-        }
+            if(key == "scale")
+            {
+               buildScale (value);
+            } else
+            {
+                fConversion = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
+            }
 
-        if(key == "unit")
-        {
-            buildUnit(value);
+            if(key == "unit")
+            {
+                buildUnit(value);
+            }
+            if(key == "hidden")
+            {
+                buildHidden (true);
+            }
+            // switch (key)
+            // {
+                // case "scale":
+                //     buildScale (value);
+                // case "unit":
+                //     buildUnit();
+                // case "hidden":
+                //     buildHidden();
+                // case "tooltip":
+                //     buildTooltip();
+                // case "style":
+                //     buildStyle();
+                // case "acc":
+                //     buildAcc();
+                // case "gyr":
+                //     buildGyr();
+                // case "screencolor":
+                //     buildScreenColor();
+                // case "midi":
+                // default:
+                //     break;
+            // }
         }
-        if(key == "hidden")
-        {
-            buildHidden (true);
-        }
-        // switch (key)
-        // {
-            // case "scale":
-            //     buildScale (value);
-            // case "unit":
-            //     buildUnit();
-            // case "hidden":
-            //     buildHidden();
-            // case "tooltip":
-            //     buildTooltip();
-            // case "style":
-            //     buildStyle();
-            // case "acc":
-            //     buildAcc();
-            // case "gyr":
-            //     buildGyr();
-            // case "screencolor":
-            //     buildScreenColor();
-            // case "midi":
-            // default:
-            //     break;
-        // }
     }
 }

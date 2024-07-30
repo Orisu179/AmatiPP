@@ -12,7 +12,7 @@ public:
     void setParameterData (const FaustProgram::Parameter&);
     void reset();
     [[nodiscard]] juce::Slider* getSlider() const;
-    AmatiSliderAttachment* getAttachment (const juce::Slider* slider, const juce::String& id);
+    AmatiSliderAttachment* getAttachment (juce::Slider* slider, const juce::String& id);
     enum scale
     {
         log,
@@ -24,7 +24,7 @@ private:
     FaustProgram::Parameter curParam;
     juce::AudioProcessorValueTreeState& valueTreeState;
     AmatiSliderAttachment* attachment;
-    mutable juce::Slider* attachedSlider;
+    juce::Slider* attachedSlider;
     void buildHidden(const bool) const;
     void buildUnit(const juce::String& value) const;
     void buildScale (const juce::String& value);
