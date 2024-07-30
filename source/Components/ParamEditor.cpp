@@ -19,6 +19,7 @@ This file is part of Amati.
 #include "ParamEditor.h"
 
 // https://forum.juce.com/t/how-to-get-parameterchanged-to-be-called-for-push-button/29052/17?u=kisielk
+
 class MomentaryButton : public juce::TextButton
 {
 public:
@@ -42,53 +43,6 @@ public:
             setToggleState (false, juce::sendNotification);
     }
 };
-
-//==============================================================================
-AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (
-    const int idx,
-    juce::RangedAudioParameter& param,
-    juce::Slider& s,
-    const std::function<double (int, double)>& value2Ratio,
-    const std::function<double (int, double)>& ratio2Value,
-    juce::UndoManager* undoManager) : slider (s),
-                                    attachment (param, [this] (const float f) { setValue (f); }, undoManager),
-                                    valueToRatio (value2Ratio),
-                                    ratioToValue (ratio2Value),
-                                    index (idx)
-{
-    sendInitialUpdate();
-    slider.valueChanged();
-    slider.addListener (this);
-}
-
-AmatiSliderParameterAttachment::~AmatiSliderParameterAttachment()
-{
-    slider.removeListener (this);
-}
-
-void AmatiSliderParameterAttachment::sendInitialUpdate() { attachment.sendInitialUpdate(); }
-
-void AmatiSliderParameterAttachment::setValue (const float newValue)
-{
-    // sets the value from 0 to 1 back to the original value
-    if(ratioToValue)
-    {
-        const double convertedValue = ratioToValue (index, newValue);
-        const juce::ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-        slider.setValue (convertedValue, juce::sendNotificationSync);
-    }
-}
-
-void AmatiSliderParameterAttachment::sliderValueChanged (juce::Slider*)
-{
-    // convert from original to 0 to 1
-    if (!ignoreCallbacks)
-    {
-        // const auto value = slider.getValue();
-        // const auto convertedValue = valueToRatio (index, value);
-        // attachment.setValueAsPartOfGesture (static_cast<float> (convertedValue));
-    }
-}
 
 ParamEditor::ParamEditor (juce::AudioProcessorValueTreeState& vts) : valueTreeState (vts), builder (vts)
 {
@@ -123,7 +77,7 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
                 builder.setParameterData (p);
                 auto* slider = builder.getSlider();
                 // auto* attachment = new AmatiSliderAttachment (p.index, valueTreeState, param.id, *slider, valueToRatio, ratioToValue);
-                auto* attachment = builder.getAttachment (slider, param.id);
+                AmatiSliderAttachment* attachment = builder.getAttachment (slider, param.id);
                 auto* label = new juce::Label();
                 label->attachToComponent (slider, false);
                 label->setText (p.label, juce::dontSendNotification);
@@ -196,29 +150,3 @@ void ParamEditor::resized()
     }
 }
 
-AmatiSliderAttachment::AmatiSliderAttachment (
-    const int index,
-    const juce::AudioProcessorValueTreeState& stateToUse,
-    const juce::String& parameterID,
-    juce::Slider& slider,
-    const std::function<double (int, double)>& valueToRatio,
-    const std::function<double (int, double)>& ratioToValue)
-{
-    // TODO: Create a new type that inherits RangedAudioParameter and override the convertFrom/To0to1 functions with faust
-    if (juce::RangedAudioParameter* parameter = stateToUse.getParameter (parameterID); parameter && valueToRatio && ratioToValue)
-    {
-        const auto initValue = static_cast<float> (valueToRatio (index, slider.getValue()));
-        parameter->setValueNotifyingHost (initValue);
-        attachment = std::make_unique<AmatiSliderParameterAttachment> (
-            index,
-            *parameter,
-            slider,
-            valueToRatio,
-            ratioToValue,
-            stateToUse.undoManager);
-    }
-    else
-    {
-        jassertfalse;
-    }
-}
