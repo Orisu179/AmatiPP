@@ -4,18 +4,9 @@
 class AmatiSliderParameterAttachment final : private juce::Slider::Listener
 {
 public:
-    // AmatiSliderParameterAttachment (
-    //     int idx,
-    //     juce::RangedAudioParameter& param,
-    //     juce::Slider& s,
-    //     const std::function<double (int, double)>&,
-    //     const std::function<double (int, double)>&,
-    //     juce::UndoManager* undoManager = nullptr
-    //     );
-
     AmatiSliderParameterAttachment (
         juce::RangedAudioParameter& param,
-        juce::Slider& slider,
+        juce::Slider& s,
         std::shared_ptr<ValueConverter> fConverter,
         juce::UndoManager* undoManager = nullptr
         );
@@ -34,8 +25,6 @@ private:
     juce::Slider& slider;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
-    // const std::function<double (int, double)>& valueToRatio;
-    // const std::function<double (int, double)>& ratioToValue;
     const std::shared_ptr<ValueConverter> converter;
 };
 
@@ -46,13 +35,6 @@ private:
 class AmatiSliderAttachment
 {
 public:
-    // AmatiSliderAttachment (
-    //     int index,
-    //     const juce::AudioProcessorValueTreeState& stateToUse,
-    //     const juce::String& parameterID,
-    //     const juce::Slider& slider,
-    //     const std::function<double (int, double)>&,
-    //     const std::function<double (int, double)>&);
     AmatiSliderAttachment (
         const juce::AudioProcessorValueTreeState& value_tree_state,
         const juce::String& parameterID,

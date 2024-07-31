@@ -7,7 +7,11 @@ SliderBuilder::SliderBuilder (juce::AudioProcessorValueTreeState& vts) : curPara
 void SliderBuilder::setParameterData (const FaustProgram::Parameter& param)
 {
     curParam = param;
-    setMetaData (curParam.metaData);
+    attachedSlider = new juce::Slider();
+    const auto range = juce::NormalisableRange (param.range, param.step);
+    attachedSlider->setNormalisableRange (range);
+    attachedSlider->setValue (param.init, juce::dontSendNotification);
+    setMetaData (param.metaData);
 }
 
 void SliderBuilder::reset()
@@ -20,14 +24,7 @@ void SliderBuilder::reset()
 
 juce::Slider* SliderBuilder::getSlider() const
 {
-    if(!attachedSlider)
-    {
-        DBG("not initalized");
-        jassertfalse;
-    }
-    // auto* slider = new juce::Slider();
-    // slider->setNormalisableRange (range);
-    // slider->setValue (curParam.init, juce::dontSendNotification);
+    jassert(attachedSlider);
     return attachedSlider;
 }
 
@@ -49,24 +46,27 @@ void SliderBuilder::buildUnit (const juce::String& value) const
 
 void SliderBuilder::buildScale (const juce::String& value = "linear")
 {
+    if(value == "linear")
+    {
+        const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
+        fConversion = std::dynamic_pointer_cast<LinearValueConverter> (temp);
+    }
    if(value == "log")
    {
-       fConversion = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
+       const auto temp = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
+       fConversion = std::dynamic_pointer_cast<LogValueConverter> (temp);
    } else if (value == "exp")
    {
-       fConversion = std::make_shared<ExpValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
+       const auto temp = std::make_shared<ExpValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
+       fConversion = std::dynamic_pointer_cast<ExpValueConverter> (temp);
    }
 }
 
 void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& metaData)
 {
-    attachedSlider = new juce::Slider();
-    const auto range = juce::NormalisableRange (curParam.range, curParam.step);
-    attachedSlider->setNormalisableRange (range);
-    attachedSlider->setValue (curParam.init, juce::dontSendNotification);
     if (metaData.empty())
     {
-        fConversion = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
+        buildScale ();
     } else
     {
         for (const auto& [key, value] : metaData)
@@ -76,7 +76,7 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
                buildScale (value);
             } else
             {
-                fConversion = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), curParam.range.getStart(), curParam.range.getEnd());
+                buildScale ();
             }
 
             if(key == "unit")
