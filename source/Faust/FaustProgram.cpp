@@ -169,7 +169,7 @@ float FaustProgram::getValue (const int index) const
 
 void FaustProgram::setValue (int index, float value) const
 {
-    if (index > 0 && index <= getParamCount())
+    if (index >= 0 && index <= getParamCount())
     {
         faustInterface->setParamRatio (index, value);
     }
