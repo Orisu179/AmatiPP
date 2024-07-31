@@ -121,6 +121,7 @@ void FaustProgram::compileSource (const juce::String& source)
         midi_handler = std::make_unique<FaustMidi>();
         midiInterface = std::make_unique<MidiUI>(midi_handler.get());
         dspInstance->buildUserInterface (midiInterface.get());
+        midi_handler->startMidi();
     }
 
     for (int i { 0 }; i < getParamCount(); i++)
