@@ -53,8 +53,15 @@ void SliderBuilder::buildScale (const juce::String& value = "linear")
     }
    if(value == "log")
    {
-       const auto temp = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
-       fConversion = std::dynamic_pointer_cast<LogValueConverter> (temp);
+       // const auto temp = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
+       // fConversion = std::dynamic_pointer_cast<LogValueConverter> (temp);
+        const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
+        fConversion = std::dynamic_pointer_cast<LinearValueConverter> (temp);
+        const double min = curParam.range.getStart();
+        const double max = curParam.range.getEnd();
+        const double mid = std::sqrt(max * min);
+        const double skewFactor = std::log2(0.5) / std::log2((mid - min) / (max - min));
+        attachedSlider->setSkewFactor (skewFactor);
    } else if (value == "exp")
    {
        const auto temp = std::make_shared<ExpValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
@@ -87,28 +94,6 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
             {
                 buildHidden (true);
             }
-            // switch (key)
-            // {
-                // case "scale":
-                //     buildScale (value);
-                // case "unit":
-                //     buildUnit();
-                // case "hidden":
-                //     buildHidden();
-                // case "tooltip":
-                //     buildTooltip();
-                // case "style":
-                //     buildStyle();
-                // case "acc":
-                //     buildAcc();
-                // case "gyr":
-                //     buildGyr();
-                // case "screencolor":
-                //     buildScreenColor();
-                // case "midi":
-                // default:
-                //     break;
-            // }
         }
     }
 }
