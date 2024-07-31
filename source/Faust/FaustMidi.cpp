@@ -45,7 +45,10 @@ bool FaustMidi::startMidi()
     {
         return false;
     }
-    fMidiIn->start();
+    if(fMidiIn)
+    {
+        fMidiIn->start();
+    }
     return true;
 }
 
@@ -60,44 +63,65 @@ void FaustMidi::stopMidi()
 MapUI* FaustMidi::keyOn (double x, int channel, int pitch, int velocity)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::noteOn (channel + 1, pitch, static_cast<juce::uint8> (velocity)), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::noteOn (channel + 1, pitch, static_cast<juce::uint8> (velocity)));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::noteOn (channel + 1, pitch, static_cast<juce::uint8> (velocity)));
+    }
     return nullptr;
 }
 
 void FaustMidi::keyOff (double x, int channel, int pitch, int velocity)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::noteOff (channel + 1, pitch, static_cast<juce::uint8> (velocity)), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::noteOff (channel + 1, pitch, static_cast<juce::uint8> (velocity)));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::noteOff (channel + 1, pitch, static_cast<juce::uint8> (velocity)));
+    }
 }
 
 void FaustMidi::ctrlChange (int channel, int ctrl, int value)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::controllerEvent (channel + 1, ctrl, static_cast<juce::uint8> (value)), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::controllerEvent (channel + 1, ctrl, static_cast<juce::uint8> (value)));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::controllerEvent (channel + 1, ctrl, static_cast<juce::uint8> (value)));
+    }
 }
 
 void FaustMidi::chanPress (int channel, int press)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::channelPressureChange (channel + 1, press), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::channelPressureChange (channel + 1, press));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::channelPressureChange (channel + 1, press));
+    }
 }
 
 void FaustMidi::progChange (int channel, int pgm)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::programChange (channel + 1, pgm), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::programChange (channel + 1, pgm));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::programChange (channel + 1, pgm));
+    }
 }
 
 void FaustMidi::keyPress (int channel, int pitch, int press)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::aftertouchChange (channel + 1, pitch, press), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::aftertouchChange (channel + 1, pitch, press));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::aftertouchChange (channel + 1, pitch, press));
+    }
 }
 
 void FaustMidi::pitchWheel (double x, int channel, int wheel)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::pitchWheel (channel + 1, range (0, 16383, wheel)), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::pitchWheel (channel + 1, range (0, 16383, wheel)));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::pitchWheel (channel + 1, range (0, 16383, wheel)));
+    }
 }
 
 void FaustMidi::ctrlChange14bits (double x, int channel, int ctrl, int value)
@@ -108,25 +132,37 @@ void FaustMidi::ctrlChange14bits (double x, int channel, int ctrl, int value)
 void FaustMidi::startSync (double)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::midiStart(), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::midiStart());
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::midiStart());
+    }
 }
 
 void FaustMidi::stopSync (double)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::midiStop(), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::midiStop());
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::midiStop());
+    }
 }
 
 void FaustMidi::clock (double)
 {
     fOutputBuffer.addEvent (juce::MidiMessage::midiClock(), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage::midiClock());
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage::midiClock());
+    }
 }
 
 void FaustMidi::sysEx (double, std::vector<unsigned char>& message)
 {
     fOutputBuffer.addEvent (juce::MidiMessage (message.data(), static_cast<int> (message.size())), 0);
-    fMidiOut->sendMessageNow (juce::MidiMessage (message.data(), static_cast<int> (message.size())));
+    if(fMidiOut)
+    {
+        fMidiOut->sendMessageNow (juce::MidiMessage (message.data(), static_cast<int> (message.size())));
+    }
 }
 
 void FaustMidi::decodeMessages (const juce::MidiMessage& message)
