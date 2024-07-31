@@ -18,7 +18,7 @@ MidiComponent::MidiComponent () : midiInputListLabel ("MIDI Input"), keyboardCom
     midiInputListLabel.setText ("MIDI Input: ", juce::dontSendNotification);
     midiInputListLabel.setColour (juce::Label::textColourId, juce::Colours::white);
     // use the first enabled device as the default
-    for (auto input : midiInputs)
+    for (const auto& input : midiInputs)
     {
         if (deviceManager.isMidiInputDeviceEnabled (input.identifier))
         {
@@ -99,7 +99,9 @@ void MidiComponent::resized()
     inputList.items.add (juce::FlexItem (midiInputListLabel).withMinHeight (60).withMinWidth (100));
     inputList.items.add (juce::FlexItem (midiInputList).withMargin (static_cast<float> (margin)).withMinHeight (30).withMinWidth (getWidth() / 2));
 
-    // midiInputList.setBounds(getWidth()/4, margin, getWidth()/2, margin*2);
+    midiInputList.setBounds(getWidth()/4, margin, getWidth()/2, margin*2);
     inputList.performLayout (getLocalBounds().removeFromTop (margin * 4));
+    keyboardComponent.setKeyWidth (static_cast<float>(getWidth()) / 20.0f);
+    keyboardComponent.setScrollButtonWidth (margin * 2);
     keyboardComponent.setBounds (margin, margin * 4, getWidth() - margin * 2, getHeight() - margin * 8);
 }

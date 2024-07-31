@@ -74,7 +74,7 @@ double PluginProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
-void PluginProcessor::handleMidi (const juce::MidiMessage& message)
+auto PluginProcessor::handleMidi (const juce::MidiMessage& message) -> void
 {
     if(faustProgram)
     {
