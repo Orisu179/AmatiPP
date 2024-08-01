@@ -12,7 +12,7 @@ inline juce::String paramIdForIdx (const size_t idx)
     return paramIdForIdx (static_cast<int> (idx));
 }
 
-class PluginProcessor final : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities
+class PluginProcessor final : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities, private juce::Timer
 {
 public:
     PluginProcessor();
@@ -50,6 +50,7 @@ public:
     juce::String getSourceCode();
     void setBackend (FaustProgram::Backend);
     void setPlayingState (bool);
+    void timerCallback() override;
 
     struct FaustParameter
     {

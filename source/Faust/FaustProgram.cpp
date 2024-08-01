@@ -133,7 +133,6 @@ void FaustProgram::compileSource (const juce::String& source)
                 faustInterface->getParamInit (i),
                 faustInterface->getParamStep (i) });
     }
-    updateAllGuis();
 }
 
 int FaustProgram::getParamCount() const

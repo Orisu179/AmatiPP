@@ -74,6 +74,7 @@ double PluginProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
+
 auto PluginProcessor::handleMidi (const juce::MidiMessage& message) -> void
 {
     if(faustProgram)
@@ -321,6 +322,11 @@ bool PluginProcessor::compileSource (const juce::String& source)
     tmpBufferIn.setSize (inChans, tmpBufferIn.getNumSamples());
     tmpBufferOut.setSize (outChans, tmpBufferOut.getNumSamples());
     return true;
+}
+
+void PluginProcessor::timerCallback()
+{
+    GUI::updateAllGuis();
 }
 
 void PluginProcessor::updateDspParameters() const
