@@ -132,7 +132,7 @@ void FaustProgram::compileSource (const juce::String& source)
                 { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
                 faustInterface->getParamInit (i),
                 faustInterface->getParamStep (i) });
-        midiCheckingValue.push_back (faustInterface->getParamInit(i));
+        midiCheckingValue.push_back (static_cast<float>(faustInterface->getParamRatio(i)));
     }
 }
 
@@ -157,7 +157,7 @@ FaustProgram::Parameter FaustProgram::getParameter (const int idx)
     {
         jassertfalse;
     }
-    return parameters[idx];
+    return parameters[static_cast<unsigned long>(idx)];
 }
 
 float FaustProgram::getValue (const int index) const
@@ -171,18 +171,13 @@ float FaustProgram::getValue (const int index) const
 float FaustProgram::getMidiCheckValue (int index) const
 {
     jassert (index >= 0);
-    if(midiCheckingValue.at (index))
-        return midiCheckingValue[index];
-    else
-    {
-        return -1.0f;
-    }
+    return midiCheckingValue[static_cast<unsigned long> (index)];
 }
 
 void FaustProgram::setMidiCheckValue (int index, float value)
 {
     jassert (index >= 0);
-    midiCheckingValue[index] = value;
+    midiCheckingValue[static_cast<unsigned long>(index)] = value;
 }
 
 void FaustProgram::setValue (const int index, const float value) const

@@ -77,10 +77,10 @@ double PluginProcessor::getTailLengthSeconds() const
 
 void PluginProcessor::handleMidi (const juce::MidiMessage& message)
 {
-    if(faustProgram)
+    if (faustProgram)
     {
         const auto timestamp = message.getTimeStamp();
-        const auto sampleNumber = static_cast<int>(timestamp * sampRate);
+        const auto sampleNumber = static_cast<int> (timestamp * sampRate);
         midiBuffer.addEvent (message, sampleNumber);
         faustProgram->handleMidiBuffer (midiBuffer);
     }
@@ -336,17 +336,25 @@ void PluginProcessor::updateDspParameters() const
     {
         juce::String id = paramIdForIdx (i);
         const float value = *valueTreeState.getRawParameterValue (id);
-        if(value != faustProgram->getValue (i) && value != faustProgram->getMidiCheckValue (i))
+        const float faustProgramValue = faustProgram->getValue (i);
+        const float oldValueTreeStateValue = faustProgram->getMidiCheckValue (i);
+        // This is case where the value are the same so no changes
+        // Floating point compare should be ok here, I think...
+        if (value == faustProgramValue)
         {
-            // The logic here is that when midi sets the value, it will be overriden
-            // So here we set the value that's changed by the slider previously, and compare that with the current value
-            // if that does not match
+            continue;
+        } else if (faustProgramValue == oldValueTreeStateValue)
+        {
+            // This is case where the user changed the slider, so the value is different
+            // The logic here is that when midi sets the value, it will be in the faust instance
+            // but the valueTree is not updated so it will override whatever is in the faust instance
             faustProgram->setMidiCheckValue (i, value);
             faustProgram->setValue (i, value);
-        } else if (faustProgram->getMidiCheckValue (i) != faustProgram->getValue (i))
+        } else
         {
-            *valueTreeState.getRawParameterValue (id) = faustProgram->getValue(i);
-            // we set the valuetree value to the curret getValue
+            // This is the case where the midi is used to change the parameter, and so we update it
+            *valueTreeState.getRawParameterValue (id) = faustProgramValue;
+            faustProgram->setMidiCheckValue(i, faustProgramValue);
         }
     }
 }
