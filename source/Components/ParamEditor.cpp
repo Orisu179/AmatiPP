@@ -163,9 +163,9 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
 
 void ParamEditor::resized()
 {
-    const int margin = 50;
-    const int sliderHeight = 30;
-    const int sideMargin = 10;
+    constexpr int margin = 50;
+    constexpr int sliderHeight = 30;
+    constexpr int sideMargin = 10;
 
     using Type = FaustProgram::ItemType;
     for (int i = 0; i < components.size(); ++i)

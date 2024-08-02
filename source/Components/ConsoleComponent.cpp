@@ -16,12 +16,12 @@ ConsoleComponent::ConsoleComponent()
 
 ConsoleComponent::~ConsoleComponent()
 {
-    juce::Logger::setCurrentLogger (nullptr);
+    setCurrentLogger (nullptr);
 }
 
 void ConsoleComponent::resized()
 {
-    int margin = 10;
+    constexpr int margin = 10;
 
     console.setBounds (
         margin,

@@ -64,6 +64,9 @@ juce_add_plugin("${PROJECT_NAME}"
     # On MacOS, plugin is copied to ~/Users/yourname/Library/Audio/Plug-Ins/
     COPY_PLUGIN_AFTER_BUILD TRUE
 
+   # For Midi input
+    NEED_MIDI_INPUT TRUE
+
     # Change me!
     # A four-character plugin id
     # First character MUST be uppercase for AU formats
@@ -79,7 +82,8 @@ juce_add_plugin("${PROJECT_NAME}"
     # This is how it's listed in the DAW
     # This can be different from PROJECT_NAME and can have spaces!
     # You might want to use v${MAJOR_VERSION} here once you go to v2...
-    PRODUCT_NAME "${PRODUCT_NAME}")
+    PRODUCT_NAME "${PRODUCT_NAME}"
+)
 
 # This is for the CLAP format
 clap_juce_extensions_plugin(TARGET Amati_pp

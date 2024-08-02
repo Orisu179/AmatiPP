@@ -20,11 +20,13 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "FaustProgram.h"
-
+#include <faust/dsp/dsp.h>
 #include <faust/dsp/interpreter-dsp.h>
 #include <faust/dsp/llvm-dsp.h>
-
 #include <memory>
+
+std::list<GUI*> GUI::fGuiList;
+ztimedmap GUI::gTimedZoneMap;
 
 static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
 {
@@ -46,7 +48,7 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
-FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
+FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate), midiCheckingValue ()
 {
     compileSource (source);
 }
@@ -55,14 +57,17 @@ FaustProgram::~FaustProgram()
 {
     // Delete in order.
     faustInterface.reset (nullptr);
-    dspInstance.reset (nullptr);
+    if(midiIsOn) {
+        midiInterface.reset (nullptr);
+    }
 
+    dspInstance.reset (nullptr);
     switch (backend)
     {
-        case FaustProgram::Backend::LLVM:
+        case Backend::LLVM:
             deleteDSPFactory (static_cast<llvm_dsp_factory*> (dspFactory));
             break;
-        case FaustProgram::Backend::Interpreter:
+        case Backend::Interpreter:
             deleteInterpreterDSPFactory (static_cast<interpreter_dsp_factory*> (dspFactory));
             break;
     }
@@ -109,6 +114,16 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance->init (sampleRate);
     faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
+    midiIsOn = source.contains ("declare options \"[midi:on]\";");
+
+    if(midiIsOn)
+    {
+        midi_handler = std::make_unique<FaustMidi>();
+        midiInterface = std::make_unique<MidiUI>(midi_handler.get());
+        dspInstance->buildUserInterface (midiInterface.get());
+        midi_handler->startMidi();
+    }
+
     for (int i { 0 }; i < getParamCount(); i++)
     {
         parameters.push_back (
@@ -117,20 +132,21 @@ void FaustProgram::compileSource (const juce::String& source)
                 { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
                 faustInterface->getParamInit (i),
                 faustInterface->getParamStep (i) });
+        midiCheckingValue.push_back (static_cast<float>(faustInterface->getParamRatio(i)));
     }
 }
 
-int FaustProgram::getParamCount()
+int FaustProgram::getParamCount() const
 {
     return faustInterface->getParamsCount();
 }
 
-int FaustProgram::getNumInChannels()
+int FaustProgram::getNumInChannels() const
 {
     return dspInstance->getNumInputs();
 }
 
-int FaustProgram::getNumOutChannels()
+int FaustProgram::getNumOutChannels() const
 {
     return dspInstance->getNumOutputs();
 }
@@ -141,10 +157,10 @@ FaustProgram::Parameter FaustProgram::getParameter (const int idx)
     {
         jassertfalse;
     }
-    return parameters[idx];
+    return parameters[static_cast<unsigned long>(idx)];
 }
 
-float FaustProgram::getValue (const int index)
+float FaustProgram::getValue (const int index) const
 {
     if (index > 0 || index <= getParamCount())
         return static_cast<float> (faustInterface->getParamRatio (index));
@@ -152,17 +168,37 @@ float FaustProgram::getValue (const int index)
         return 0.0;
 }
 
-void FaustProgram::setValue (int index, float value)
+float FaustProgram::getMidiCheckValue (int index) const
 {
-    if (index > 0 && index <= getParamCount())
+    jassert (index >= 0);
+    return midiCheckingValue[static_cast<unsigned long> (index)];
+}
+
+void FaustProgram::setMidiCheckValue (int index, float value)
+{
+    jassert (index >= 0);
+    midiCheckingValue[static_cast<unsigned long>(index)] = value;
+}
+
+void FaustProgram::setValue (const int index, const float value) const
+{
+    if (index >= 0 && index <= getParamCount())
     {
         faustInterface->setParamRatio (index, value);
     }
 }
 
-void FaustProgram::compute (const int samples, const float* const* in, float* const* out)
+void FaustProgram::compute (const int samples, const float* const* in, float* const* out) const
 {
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
+}
+
+void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
+{
+    if (!message.isEmpty() && midiIsOn)
+    {
+        midi_handler->decodeBuffer (message);
+    }
 }
 
 void FaustProgram::setSampleRate (const int sr)
@@ -174,22 +210,5 @@ void FaustProgram::setSampleRate (const int sr)
     else
     {
         jassertfalse;
-    }
-}
-
-// Convert from 0 to 1 to expected range
-void FaustProgram::convertNormaliseRange (const int index, const float value) const
-{
-    if (value > 1.0f || value < 0.0f)
-    {
-        jassertfalse;
-    }
-
-    if (index >= 0 && index < parameters.size())
-    {
-        const juce::Range<double> range = parameters[index].range;
-        const float convertedValue = (range.getEnd() - range.getStart()) * value + range.getStart();
-        faustInterface->setParamValue (index, convertedValue);
-        // faustInterface->setParamRatio(index, convertedValue);
     }
 }

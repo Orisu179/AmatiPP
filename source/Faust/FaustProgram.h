@@ -21,14 +21,16 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 #include "juce_core/juce_core.h"
-#include <cstring>
+#include "FaustMidi.h"
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
+#include <faust/gui/MidiUI.h>
+#include <faust/gui/GUI.h>
+#include <faust/midi/juce-midi.h>
 
-class FaustProgram
-{
+class FaustProgram final : public GUI {
 public:
-    class CompileError : public std::runtime_error
+    class CompileError final : public std::runtime_error
     {
     public:
         explicit CompileError (const char* message) : std::runtime_error (message) {}
@@ -52,11 +54,11 @@ public:
     /// Construct a Faust Program.
     /// @throws CompileError
     FaustProgram (const juce::String& source, Backend, int sampRate);
-    ~FaustProgram();
+    ~FaustProgram() override;
 
-    int getParamCount();
-    int getNumInChannels();
-    int getNumOutChannels();
+    [[nodiscard]] int getParamCount() const;
+    [[nodiscard]] int getNumInChannels() const;
+    [[nodiscard]] int getNumOutChannels() const;
 
     struct Parameter
     {
@@ -66,24 +68,29 @@ public:
         double init;
         double step;
     };
-    Parameter getParameter (int idx);
-    void convertNormaliseRange (int index, float value) const;
+    Parameter getParameter(int idx);
 
-    float getValue (int index);
-    void setValue (int idx, float);
-    void setSampleRate (int);
-
-    void compute (int sampleCount, const float* const* input, float* const* output);
+    [[nodiscard]] float getValue(int index) const;
+    [[nodiscard]] float getMidiCheckValue(int index) const;
+    void setMidiCheckValue(int index, float);
+    void setValue(int index, float) const;
+    void setSampleRate(int);
+    void compute (int sampleCount, const float* const* input, float* const* output) const;
+    void handleMidiBuffer(juce::MidiBuffer&) const;
 
 private:
     void compileSource (const juce::String&);
 
     Backend backend;
 
-    dsp_factory* dspFactory;
+    dsp_factory* dspFactory{};
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<APIUI> faustInterface;
+    std::unique_ptr<FaustMidi> midi_handler;
+    std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
+    std::vector<float> midiCheckingValue; //used for midi checking
 
     int sampleRate;
+    bool midiIsOn {false};
 };
