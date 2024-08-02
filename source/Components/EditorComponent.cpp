@@ -1,4 +1,5 @@
 #include "EditorComponent.h"
+
 EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
                                      buttons (juce::FlexBox::Direction::row, juce::FlexBox::Wrap::noWrap, juce::FlexBox::AlignContent::center, juce::FlexBox::AlignItems::flexStart, juce::FlexBox::JustifyContent::flexEnd),
                                      workDir (juce::File::getSpecialLocation (juce::File::userHomeDirectory)),
@@ -63,18 +64,17 @@ EditorComponent::EditorComponent() : codeEditor (sourceCode, &tokeniser),
         });
     };
     addAndMakeVisible (exportButton);
-    //==========
     codeEditor.setFont (font);
 }
 
 void EditorComponent::resized()
 {
     auto bounds = getLocalBounds();
-    float margin = 10;
-    int buttonHeight = getHeight() / 15; // 30
-    int buttonWidth = getWidth() / 12; // 75
-    float textHeight = 60; // 60
-    float textWidth = 100; // 100
+    constexpr float margin = 10;
+    const float buttonHeight = static_cast<float> (getHeight()) / 15; // 30
+    const float buttonWidth = static_cast<float> (getWidth()) / 12; // 75
+    constexpr float textHeight = 60; // 60
+    constexpr float textWidth = 100; // 100
 
     auto addButton = [&] (auto& button) {
         button.changeWidthToFitText();
@@ -95,7 +95,7 @@ void EditorComponent::resized()
         getHeight() - 3 * margin - buttonHeight);
 }
 
-juce::String EditorComponent::getSource()
+juce::String EditorComponent::getSource() const
 {
     return sourceCode.getAllContent();
 }

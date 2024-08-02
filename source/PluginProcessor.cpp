@@ -75,6 +75,17 @@ double PluginProcessor::getTailLengthSeconds() const
     return 0.0;
 }
 
+void PluginProcessor::handleMidi (const juce::MidiMessage& message)
+{
+    if (faustProgram)
+    {
+        const auto timestamp = message.getTimeStamp();
+        const auto sampleNumber = static_cast<int> (timestamp * sampRate);
+        midiBuffer.addEvent (message, sampleNumber);
+        faustProgram->handleMidiBuffer (midiBuffer);
+    }
+}
+
 int PluginProcessor::getNumPrograms()
 {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
@@ -153,8 +164,7 @@ bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 
 void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused (midiMessages);
-    int numSamples = buffer.getNumSamples();
+    const int numSamples = buffer.getNumSamples();
     // The host should not give us more samples than expected
     // If it does, we resize our internal buffers
     if (numSamples > tmpBufferIn.getNumSamples())
@@ -164,8 +174,8 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
 
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    const auto totalNumInputChannels = getTotalNumInputChannels();
+    const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     if (!faustProgram || !playing)
     {
@@ -176,7 +186,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     else
     {
         updateDspParameters();
-
         // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
         // tmpBufferOut would then be copied into buffer again
         // This is to make sure that computation is done in a controlled environment
@@ -189,6 +198,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         for (int chan = totalNumInputChannels; chan < tmpBufferIn.getNumChannels(); ++chan)
             tmpBufferIn.clear (chan, 0, numSamples);
 
+        faustProgram->handleMidiBuffer (midiMessages);
         faustProgram->compute (numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
         for (int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan)
         {
@@ -240,7 +250,7 @@ void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
 
     std::unique_ptr<juce::XmlElement> preset (getXmlFromBinary (data, sizeInBytes));
 
-    if (!preset.get())
+    if (!preset)
     {
         logger->writeToLog ("Invalid preset: invalid XML");
         return;
@@ -314,14 +324,38 @@ bool PluginProcessor::compileSource (const juce::String& source)
     return true;
 }
 
+void PluginProcessor::timerCallback()
+{
+    GUI::updateAllGuis();
+}
+
 void PluginProcessor::updateDspParameters() const
 {
-    auto paramCount = faustProgram->getParamCount();
+    const auto paramCount = faustProgram->getParamCount();
     for (int i = 0; i < paramCount; ++i)
     {
         juce::String id = paramIdForIdx (i);
         const float value = *valueTreeState.getRawParameterValue (id);
-        faustProgram->setValue (i, value);
+        const float faustProgramValue = faustProgram->getValue (i);
+        const float oldValueTreeStateValue = faustProgram->getMidiCheckValue (i);
+        // This is case where the value are the same so no changes
+        // Floating point compare should be ok here, I think...
+        if (value == faustProgramValue)
+        {
+            continue;
+        } else if (faustProgramValue == oldValueTreeStateValue)
+        {
+            // This is case where the user changed the slider, so the value is different
+            // The logic here is that when midi sets the value, it will be in the faust instance
+            // but the valueTree is not updated so it will override whatever is in the faust instance
+            faustProgram->setMidiCheckValue (i, value);
+            faustProgram->setValue (i, value);
+        } else
+        {
+            // This is the case where the midi is used to change the parameter, and so we update it
+            *valueTreeState.getRawParameterValue (id) = faustProgramValue;
+            faustProgram->setMidiCheckValue(i, faustProgramValue);
+        }
     }
 }
 

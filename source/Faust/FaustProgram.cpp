@@ -20,9 +20,13 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "FaustProgram.h"
+#include <faust/dsp/dsp.h>
 #include <faust/dsp/interpreter-dsp.h>
 #include <faust/dsp/llvm-dsp.h>
 #include <memory>
+
+std::list<GUI*> GUI::fGuiList;
+ztimedmap GUI::gTimedZoneMap;
 
 static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
 {
@@ -56,6 +60,7 @@ static std::map<juce::String, juce::String> cstringMapToJuceString(std::map<cons
 }
 
 FaustProgram::FaustProgram (const juce::String& source, const Backend b, const int sampRate) : backend (b), sampleRate (sampRate)
+FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate), midiCheckingValue ()
 {
     compileSource (source);
 }
@@ -64,14 +69,17 @@ FaustProgram::~FaustProgram()
 {
     // Delete in order.
     faustInterface.reset (nullptr);
-    dspInstance.reset (nullptr);
+    if(midiIsOn) {
+        midiInterface.reset (nullptr);
+    }
 
+    dspInstance.reset (nullptr);
     switch (backend)
     {
-        case FaustProgram::Backend::LLVM:
+        case Backend::LLVM:
             deleteDSPFactory (static_cast<llvm_dsp_factory*> (dspFactory));
             break;
-        case FaustProgram::Backend::Interpreter:
+        case Backend::Interpreter:
             deleteInterpreterDSPFactory (static_cast<interpreter_dsp_factory*> (dspFactory));
             break;
     }
@@ -118,6 +126,16 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance->init (sampleRate);
     faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
+    midiIsOn = source.contains ("declare options \"[midi:on]\";");
+
+    if(midiIsOn)
+    {
+        midi_handler = std::make_unique<FaustMidi>();
+        midiInterface = std::make_unique<MidiUI>(midi_handler.get());
+        dspInstance->buildUserInterface (midiInterface.get());
+        midi_handler->startMidi();
+    }
+
     for (int i { 0 }; i < getParamCount(); i++)
     {
         parameters.push_back (
@@ -129,6 +147,8 @@ void FaustProgram::compileSource (const juce::String& source)
                 faustInterface->getParamStep (i),
                 cstringMapToJuceString (faustInterface->getMetadata (i)),
             });
+                faustInterface->getParamStep (i) });
+        midiCheckingValue.push_back (static_cast<float>(faustInterface->getParamRatio(i)));
     }
 }
 
@@ -153,7 +173,7 @@ FaustProgram::Parameter FaustProgram::getParameter (const int index)
     {
         jassertfalse;
     }
-    return parameters[index];
+    return parameters[static_cast<unsigned long>(idx)];
 }
 
 float FaustProgram::getValue (const int index) const
@@ -164,14 +184,21 @@ float FaustProgram::getValue (const int index) const
         return 0.0;
 }
 
+float FaustProgram::getMidiCheckValue (int index) const
+{
+    jassert (index >= 0);
+    return midiCheckingValue[static_cast<unsigned long> (index)];
+}
+
+void FaustProgram::setMidiCheckValue (int index, float value)
+{
+    jassert (index >= 0);
+    midiCheckingValue[static_cast<unsigned long>(index)] = value;
+}
+
 void FaustProgram::setValue (const int index, const float value) const
 {
-    if (value > 1.0f || value < 0.0f)
-    {
-        jassertfalse;
-    }
-
-    if (index >= 0 && index < parameters.size())
+    if (index >= 0 && index <= getParamCount())
     {
         faustInterface->setParamRatio (index, value);
     }
@@ -190,6 +217,12 @@ double FaustProgram::ratio2Value (const int index, const double value) const
 double FaustProgram::value2Ratio (const int index, const double value) const
 {
     return faustInterface->value2ratio (index, value);
+void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
+{
+    if (!message.isEmpty() && midiIsOn)
+    {
+        midi_handler->decodeBuffer (message);
+    }
 }
 
 void FaustProgram::setSampleRate (const int sr)
@@ -202,4 +235,3 @@ void FaustProgram::setSampleRate (const int sr)
     {
         jassertfalse;
     }
-}

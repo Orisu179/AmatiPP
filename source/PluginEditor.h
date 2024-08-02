@@ -4,13 +4,14 @@
 #include "BinaryData.h"
 #include "Components/ConsoleComponent.h"
 #include "Components/EditorComponent.h"
+#include "Components/MidiComponent.h"
 #include "Components/ParamEditor.h"
 #include "Components/SettingsComponent.h"
 #include "PluginProcessor.h"
 #include "melatonin_inspector/melatonin_inspector.h"
 
 //==============================================================================
-class PluginEditor : public juce::AudioProcessorEditor,
+class PluginEditor final : public juce::AudioProcessorEditor,
                      public juce::ValueTree::Listener
 {
 public:
@@ -29,10 +30,12 @@ private:
 
     void updateParameters();
     void updateEditor();
+    void onCompile();
 
     SettingsComponent settingsComponent;
     ConsoleComponent consoleComponent;
     EditorComponent editorComponent;
+    MidiComponent midiComponent;
     ParamEditor paramEditor;
     juce::TabbedComponent tabbedComponent;
 

@@ -1,22 +1,18 @@
 #pragma once
-
 #include "Faust/FaustProgram.h"
 #include <clap-juce-extensions/clap-juce-extensions.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#if (MSVC)
-    #include "ipps.h"
-#endif
-inline juce::String paramIdForIdx (int idx)
+inline juce::String paramIdForIdx (const int idx)
 {
     return juce::String ("Param") + juce::String (idx);
 }
-inline juce::String paramIdForIdx (size_t idx)
+inline juce::String paramIdForIdx (const size_t idx)
 {
     return paramIdForIdx (static_cast<int> (idx));
 }
 
-class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities
+class PluginProcessor final : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities, private juce::Timer
 {
 public:
     PluginProcessor();
@@ -38,6 +34,7 @@ public:
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
+    void handleMidi (const juce::MidiMessage&);
 
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -53,6 +50,7 @@ public:
     juce::String getSourceCode();
     void setBackend (FaustProgram::Backend);
     void setPlayingState (bool);
+    void timerCallback() override;
 
     struct FaustParameter
     {
@@ -74,6 +72,7 @@ private:
     bool playing { false };
     bool readyToPlay { false };
     juce::AudioProcessorValueTreeState valueTreeState;
+    juce::MidiBuffer midiBuffer;
 
     // used to copy the input buffers
     juce::AudioBuffer<float> tmpBufferIn;
