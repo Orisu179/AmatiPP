@@ -5,8 +5,11 @@ Based off of the original [Amati Project](https://github.com/glocq/Amati) by [Gr
 and will have more features. 
 This project uses the [pamplejuce](https://github.com/sudara/pamplejuce) template as a starting point.
 
+More details will be added as the project gets developed.
+
 Building
 --------
+
 - To build, make sure that libfaust is installed from [here](https://faust.grame.fr/downloads/), and [CMake](https://cmake.org/download/) is installed.
 
 - Next, populate the sub repositories with ``git submodule update --init --recursive``
@@ -17,5 +20,7 @@ Building
   -   ``cmake ..``
   -   ``cmake --build``
 
+### Nix build
 
-More details will be added as the project gets developed.
+You can build the project using [Nix](https://nixos.org/) on Linux: just perform the above steps from within a Nix shell.
+
