@@ -75,14 +75,14 @@ double PluginProcessor::getTailLengthSeconds() const
     return 0.0;
 }
 
-auto PluginProcessor::handleMidi (const juce::MidiMessage& message) -> void
+void PluginProcessor::handleMidi (const juce::MidiMessage& message)
 {
     if(faustProgram)
     {
         const auto timestamp = message.getTimeStamp();
         const auto sampleNumber = static_cast<int>(timestamp * sampRate);
         midiBuffer.addEvent (message, sampleNumber);
-        faustProgram->handleMidi (midiBuffer);
+        faustProgram->handleMidiBuffer (midiBuffer);
     }
 }
 
@@ -198,7 +198,7 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         for (int chan = totalNumInputChannels; chan < tmpBufferIn.getNumChannels(); ++chan)
             tmpBufferIn.clear (chan, 0, numSamples);
 
-        faustProgram->handleMidi (midiMessages);
+        faustProgram->handleMidiBuffer (midiMessages);
         faustProgram->compute (numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
         for (int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan)
         {
@@ -336,8 +336,18 @@ void PluginProcessor::updateDspParameters() const
     {
         juce::String id = paramIdForIdx (i);
         const float value = *valueTreeState.getRawParameterValue (id);
-        faustProgram->setValue (i, value);
-        // faustProgram->convertNormaliseRange (i, value);
+        if(value != faustProgram->getValue (i) && value != faustProgram->getMidiCheckValue (i))
+        {
+            // The logic here is that when midi sets the value, it will be overriden
+            // So here we set the value that's changed by the slider previously, and compare that with the current value
+            // if that does not match
+            faustProgram->setMidiCheckValue (i, value);
+            faustProgram->setValue (i, value);
+        } else if (faustProgram->getMidiCheckValue (i) != faustProgram->getValue (i))
+        {
+            *valueTreeState.getRawParameterValue (id) = faustProgram->getValue(i);
+            // we set the valuetree value to the curret getValue
+        }
     }
 }
 

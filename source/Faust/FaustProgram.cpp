@@ -48,7 +48,7 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
-FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate)
+FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate), midiCheckingValue ()
 {
     compileSource (source);
 }
@@ -132,6 +132,7 @@ void FaustProgram::compileSource (const juce::String& source)
                 { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
                 faustInterface->getParamInit (i),
                 faustInterface->getParamStep (i) });
+        midiCheckingValue.push_back (faustInterface->getParamInit(i));
     }
 }
 
@@ -167,7 +168,24 @@ float FaustProgram::getValue (const int index) const
         return 0.0;
 }
 
-void FaustProgram::setValue (int index, float value) const
+float FaustProgram::getMidiCheckValue (int index) const
+{
+    jassert (index >= 0);
+    if(midiCheckingValue.at (index))
+        return midiCheckingValue[index];
+    else
+    {
+        return -1.0f;
+    }
+}
+
+void FaustProgram::setMidiCheckValue (int index, float value)
+{
+    jassert (index >= 0);
+    midiCheckingValue[index] = value;
+}
+
+void FaustProgram::setValue (const int index, const float value) const
 {
     if (index >= 0 && index <= getParamCount())
     {
@@ -180,7 +198,7 @@ void FaustProgram::compute (const int samples, const float* const* in, float* co
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
 }
 
-void FaustProgram::handleMidi (juce::MidiBuffer& message) const
+void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
 {
     if (!message.isEmpty() && midiIsOn)
     {

@@ -71,10 +71,12 @@ public:
     Parameter getParameter(int idx);
 
     [[nodiscard]] float getValue(int index) const;
-    void setValue(int idx, float) const;
+    [[nodiscard]] float getMidiCheckValue(int index) const;
+    void setMidiCheckValue(int index, float);
+    void setValue(int index, float) const;
     void setSampleRate(int);
     void compute (int sampleCount, const float* const* input, float* const* output) const;
-    void handleMidi(juce::MidiBuffer&) const;
+    void handleMidiBuffer(juce::MidiBuffer&) const;
 
 private:
     void compileSource (const juce::String&);
@@ -87,6 +89,7 @@ private:
     std::unique_ptr<FaustMidi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
+    std::vector<float> midiCheckingValue; //used for midi checking
 
     int sampleRate;
     bool midiIsOn {false};
