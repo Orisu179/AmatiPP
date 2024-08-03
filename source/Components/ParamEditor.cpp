@@ -56,9 +56,7 @@ ParamEditor::~ParamEditor() noexcept
     components.clear();
 }
 
-void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustParameter>& params,
-    const std::function<double (int, double)>& valueToRatio,
-    const std::function<double (int, double)>& ratioToValue)
+void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustParameter>& params)
 {
     sliderAttachments.clear();
     buttonAttachments.clear();
@@ -76,7 +74,6 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
             {
                 builder.setParameterData (p);
                 auto slider = builder.getSlider();
-                // auto* attachment = new AmatiSliderAttachment (p.index, valueTreeState, param.id, *slider, valueToRatio, ratioToValue);
                 AmatiSliderAttachment* attachment = builder.getAttachment (slider, param.id);
                 auto* label = new juce::Label();
                 label->attachToComponent (slider, false);

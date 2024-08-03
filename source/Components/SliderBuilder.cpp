@@ -2,6 +2,7 @@
 
 SliderBuilder::SliderBuilder (juce::AudioProcessorValueTreeState& vts) : curParam(), valueTreeState (vts), attachment (nullptr)
 {
+
 }
 
 void SliderBuilder::setParameterData (const FaustProgram::Parameter& param)
@@ -96,4 +97,8 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
             }
         }
     }
+}
+void SliderBuilder::buildParameters (const std::vector<FaustProgram::Parameter> params)
+{
+
 }

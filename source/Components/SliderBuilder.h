@@ -10,14 +10,10 @@ public:
 
     void setMetaData (const std::map<juce::String, juce::String>&);
     void setParameterData (const FaustProgram::Parameter&);
+    void buildParameters (const std::vector<FaustProgram::Parameter> params);
     void reset();
     [[nodiscard]] juce::Slider* getSlider() const;
     AmatiSliderAttachment* getAttachment (juce::Slider* slider, const juce::String& id);
-    enum scale
-    {
-        log,
-        exp
-    };
 
 private:
     std::shared_ptr<ValueConverter> fConversion;
@@ -31,8 +27,6 @@ private:
     // TODO: implement the rest
     void buildTooltip();
     void buildStyle();
-    void buildAcc();
-    void buildGyr();
     void buildScreenColor();
 };
 

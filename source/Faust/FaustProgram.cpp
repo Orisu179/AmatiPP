@@ -49,7 +49,7 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
-static std::map<juce::String, juce::String> cstringMapToJuceString(std::map<const char*, const char*> cMap)
+static std::map<juce::String, juce::String> cstringMapToJuceString(const std::map<const char*, const char*>& cMap)
 {
     std::map<juce::String, juce::String> juceStringMap;
     for(const auto& [key, value] : cMap)
@@ -59,8 +59,7 @@ static std::map<juce::String, juce::String> cstringMapToJuceString(std::map<cons
     return juceStringMap;
 }
 
-FaustProgram::FaustProgram (const juce::String& source, const Backend b, const int sampRate) : backend (b), sampleRate (sampRate)
-FaustProgram::FaustProgram (const juce::String& source, Backend b, int sampRate) : backend (b), sampleRate (sampRate), midiCheckingValue ()
+FaustProgram::FaustProgram (const juce::String& source, const Backend b, const int sampRate) : backend (b), midiCheckingValue (), sampleRate (sampRate)
 {
     compileSource (source);
 }
@@ -147,7 +146,6 @@ void FaustProgram::compileSource (const juce::String& source)
                 faustInterface->getParamStep (i),
                 cstringMapToJuceString (faustInterface->getMetadata (i)),
             });
-                faustInterface->getParamStep (i) });
         midiCheckingValue.push_back (static_cast<float>(faustInterface->getParamRatio(i)));
     }
 }
@@ -173,7 +171,7 @@ FaustProgram::Parameter FaustProgram::getParameter (const int index)
     {
         jassertfalse;
     }
-    return parameters[static_cast<unsigned long>(idx)];
+    return parameters[static_cast<unsigned long>(index)];
 }
 
 float FaustProgram::getValue (const int index) const
@@ -217,6 +215,8 @@ double FaustProgram::ratio2Value (const int index, const double value) const
 double FaustProgram::value2Ratio (const int index, const double value) const
 {
     return faustInterface->value2ratio (index, value);
+}
+
 void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
 {
     if (!message.isEmpty() && midiIsOn)
@@ -235,3 +235,4 @@ void FaustProgram::setSampleRate (const int sr)
     {
         jassertfalse;
     }
+}
