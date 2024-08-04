@@ -118,7 +118,9 @@ void ParamEditor::updateParameters (const std::vector<PluginProcessor::FaustPara
                 continue;
         }
         components.add (component);
-        component->getProperties().set ("type", static_cast<int> (p.type));
+        if(component) {
+            component->getProperties().set ("type", static_cast<int> (p.type));
+        }
     }
     resized();
 }

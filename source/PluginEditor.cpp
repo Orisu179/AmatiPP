@@ -86,7 +86,7 @@ void PluginEditor::resized()
 
 void PluginEditor::updateParameters()
 {
-    paramEditor.updateParameters (processorRef.getFaustParameter(), [&] (const int index, const double value) { return processorRef.valueToRatio (index, value); }, [&] (const int index, const double value) { return processorRef.ratioToValue (index, value); });
+    paramEditor.updateParameters (processorRef.getFaustParameter());
 }
 
 void PluginEditor::updateEditor()
@@ -106,6 +106,7 @@ void PluginEditor::onCompile()
         midiComponent.setHandleMidiHandler ([&](const juce::MidiMessage& message) {
           processorRef.handleMidi (message);
         });
+        tabbedComponent.setCurrentTabIndex(0);
     }
     else
     {

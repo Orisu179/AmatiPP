@@ -19,7 +19,6 @@ void SliderBuilder::reset()
 {
     curParam = {};
     attachment = nullptr;
-    fConversion = nullptr;
     attachedSlider = nullptr;
 }
 
@@ -31,7 +30,7 @@ juce::Slider* SliderBuilder::getSlider() const
 
 AmatiSliderAttachment* SliderBuilder::getAttachment (juce::Slider* slider, const juce::String& id)
 {
-    attachment = new AmatiSliderAttachment (valueTreeState, id, *slider, fConversion);
+    attachment = new AmatiSliderAttachment (curParam.index, valueTreeState, id, *slider, curParam.value2Ratio, curParam.ratio2Value);
     return attachment;
 }
 
@@ -50,14 +49,12 @@ void SliderBuilder::buildScale (const juce::String& value = "linear")
     if(value == "linear")
     {
         const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
-        fConversion = std::dynamic_pointer_cast<LinearValueConverter> (temp);
     }
    if(value == "log")
    {
        // const auto temp = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
        // fConversion = std::dynamic_pointer_cast<LogValueConverter> (temp);
         const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
-        fConversion = std::dynamic_pointer_cast<LinearValueConverter> (temp);
         const double min = curParam.range.getStart();
         const double max = curParam.range.getEnd();
         const double mid = std::sqrt(max * min);
@@ -66,7 +63,6 @@ void SliderBuilder::buildScale (const juce::String& value = "linear")
    } else if (value == "exp")
    {
        const auto temp = std::make_shared<ExpValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
-       fConversion = std::dynamic_pointer_cast<ExpValueConverter> (temp);
    }
 }
 
@@ -79,13 +75,13 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
     {
         for (const auto& [key, value] : metaData)
         {
-            if(key == "scale")
-            {
-               buildScale (value);
-            } else
-            {
-                buildScale ();
-            }
+//            if(key == "scale")
+//            {
+//               buildScale (value);
+//            } else
+//            {
+//                buildScale ();
+//            }
 
             if(key == "unit")
             {
@@ -97,8 +93,4 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
             }
         }
     }
-}
-void SliderBuilder::buildParameters (const std::vector<FaustProgram::Parameter> params)
-{
-
 }

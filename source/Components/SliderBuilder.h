@@ -10,13 +10,11 @@ public:
 
     void setMetaData (const std::map<juce::String, juce::String>&);
     void setParameterData (const FaustProgram::Parameter&);
-    void buildParameters (const std::vector<FaustProgram::Parameter> params);
     void reset();
     [[nodiscard]] juce::Slider* getSlider() const;
     AmatiSliderAttachment* getAttachment (juce::Slider* slider, const juce::String& id);
 
 private:
-    std::shared_ptr<ValueConverter> fConversion;
     FaustProgram::Parameter curParam;
     juce::AudioProcessorValueTreeState& valueTreeState;
     AmatiSliderAttachment* attachment;

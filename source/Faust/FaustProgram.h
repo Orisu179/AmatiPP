@@ -82,6 +82,8 @@ public:
         double init;
         double step;
         std::map<juce::String, juce::String> metaData;
+        std::function<double (int, double)> value2Ratio;
+        std::function<double (int, double)> ratio2Value;
     };
     Parameter getParameter (int);
 
@@ -104,8 +106,8 @@ private:
 
     dsp_factory* dspFactory {};
     std::unique_ptr<dsp> dspInstance;
-    std::unique_ptr<APIUI> faustInterface;
-    std::unique_ptr<FaustMidi> midi_handler;
+    std::shared_ptr<APIUI> faustInterface;
+    std::unique_ptr<juce_midi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
     std::vector<float> midiCheckingValue; //used for midi checking

@@ -67,7 +67,7 @@ FaustProgram::FaustProgram (const juce::String& source, const Backend b, const i
 FaustProgram::~FaustProgram()
 {
     // Delete in order.
-    faustInterface.reset (nullptr);
+    faustInterface.reset();
     if(midiIsOn) {
         midiInterface.reset (nullptr);
     }
@@ -123,13 +123,13 @@ void FaustProgram::compileSource (const juce::String& source)
 
     dspInstance.reset (dspFactory->createDSPInstance());
     dspInstance->init (sampleRate);
-    faustInterface = std::make_unique<APIUI>();
+    faustInterface = std::make_shared<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
     midiIsOn = source.contains ("declare options \"[midi:on]\";");
 
     if(midiIsOn)
     {
-        midi_handler = std::make_unique<FaustMidi>();
+        midi_handler = std::make_unique<juce_midi>();
         midiInterface = std::make_unique<MidiUI>(midi_handler.get());
         dspInstance->buildUserInterface (midiInterface.get());
         midi_handler->startMidi();
@@ -145,6 +145,10 @@ void FaustProgram::compileSource (const juce::String& source)
                 faustInterface->getParamInit (i),
                 faustInterface->getParamStep (i),
                 cstringMapToJuceString (faustInterface->getMetadata (i)),
+                [&](int index, double value) -> double{
+                    return faustInterface->value2ratio(index, value); },
+                [&](int index, double ratio) -> double{
+                    return faustInterface->ratio2value(index, ratio); },
             });
         midiCheckingValue.push_back (static_cast<float>(faustInterface->getParamRatio(i)));
     }
