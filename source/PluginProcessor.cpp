@@ -88,8 +88,9 @@ void PluginProcessor::handleMidi (const juce::MidiMessage& message)
 
 int PluginProcessor::getNumPrograms()
 {
-    return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
-        // so this should be at least 1, even if you're not really implementing programs.
+    return 1;
+    // NB: some hosts don't cope very well if you tell them there are 0 programs,
+    // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int PluginProcessor::getCurrentProgram()
@@ -185,7 +186,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
     else
     {
-        updateDspParameters();
         // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
         // tmpBufferOut would then be copied into buffer again
         // This is to make sure that computation is done in a controlled environment
@@ -321,6 +321,18 @@ bool PluginProcessor::compileSource (const juce::String& source)
 
     tmpBufferIn.setSize (inChans, tmpBufferIn.getNumSamples());
     tmpBufferOut.setSize (outChans, tmpBufferOut.getNumSamples());
+    //update map for parameter values
+    if(!paramIdMap.empty())
+    {
+        paramIdMap.clear();
+    }
+
+    for(int i{0}; i<faustProgram->getParamCount(); ++i)
+    {
+        valueTreeState.addParameterListener(paramIdForIdx(i), this);
+        paramIdMap[paramIdForIdx(i)] = i;
+    }
+
     return true;
 }
 
@@ -383,15 +395,6 @@ std::vector<PluginProcessor::FaustParameter> PluginProcessor::getFaustParameter(
     }
     return params;
 }
-double PluginProcessor::valueToRatio (const int index, const double value) const
-{
-    return faustProgram->value2Ratio (index, value);
-}
-
-double PluginProcessor::ratioToValue (const int index, const double value) const
-{
-    return faustProgram->ratio2Value (index, value);
-}
 
 juce::String PluginProcessor::getSourceCode()
 {
@@ -405,4 +408,10 @@ void PluginProcessor::valueTreePropertyChanged (juce::ValueTree& tree, const juc
         int newBackend = tree[property];
         setBackend (static_cast<FaustProgram::Backend> (newBackend - 1));
     }
+}
+
+void PluginProcessor::parameterChanged (const juce::String& parameterID, float newValue)
+{
+    jassert(paramIdMap.contains(parameterID));
+    faustProgram->setValue(paramIdMap[parameterID], newValue);
 }

@@ -7,12 +7,17 @@ inline juce::String paramIdForIdx (const int idx)
 {
     return juce::String ("Param") + juce::String (idx);
 }
+
 inline juce::String paramIdForIdx (const size_t idx)
 {
     return paramIdForIdx (static_cast<int> (idx));
 }
 
-class PluginProcessor final : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities, private juce::Timer
+class PluginProcessor final : public juce::AudioProcessor,
+                              juce::ValueTree::Listener,
+                              public clap_juce_extensions::clap_juce_audio_processor_capabilities,
+                              private juce::Timer,
+                              public juce::AudioProcessorValueTreeState::Listener
 {
 public:
     PluginProcessor();
@@ -36,14 +41,18 @@ public:
     double getTailLengthSeconds() const override;
     void handleMidi (const juce::MidiMessage&);
 
+    //======================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
+    //=========================================
 
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    //========================================
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
 
     // For compiling faust program ---------
     bool compileSource (const juce::String&);
@@ -58,8 +67,6 @@ public:
         FaustProgram::Parameter programParameter;
     };
     std::vector<FaustParameter> getFaustParameter() const;
-    double valueToRatio(int, double) const;
-    double ratioToValue(int, double) const;
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -80,5 +87,6 @@ private:
     double sampRate {};
 
     void updateDspParameters() const;
+    std::unordered_map<juce::String, int> paramIdMap;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };
