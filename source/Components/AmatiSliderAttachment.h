@@ -4,21 +4,13 @@
 class AmatiSliderParameterAttachment final : private juce::Slider::Listener
 {
 public:
+
     AmatiSliderParameterAttachment (
-        int index,
+        FaustProgram::Parameter& faustParam,
         juce::RangedAudioParameter& param,
         juce::Slider& s,
-        const std::function<double(int, double)>& value2Ratio,
-        const std::function<double(int, double)>& ratio2Value,
         juce::UndoManager* undoManager = nullptr
-        );
-
-//    explicit AmatiSliderParameterAttachment (
-//        FaustProgram::Parameter faustParam,
-//        juce::RangedAudioParameter& param,
-//        juce::Slider& s,
-//        juce::UndoManager* undoManager = nullptr
-//    );
+    );
 
     ~AmatiSliderParameterAttachment() override;
 
@@ -31,13 +23,10 @@ private:
     void sliderDragStarted (juce::Slider*) override { attachment.beginGesture(); }
     void sliderDragEnded (juce::Slider*) override { attachment.endGesture(); }
 
-    int idx;
+    FaustProgram::Parameter curParam;
     juce::Slider& slider;
     juce::ParameterAttachment attachment;
     bool ignoreCallbacks = false;
-    const std::shared_ptr<ValueConverter> converter;
-    std::function<double (int, double)> valueToRatio;
-    std::function<double (int, double)> ratioToValue;
 };
 
 /**
@@ -48,12 +37,10 @@ class AmatiSliderAttachment
 {
 public:
     AmatiSliderAttachment (
-        const int index,
+        FaustProgram::Parameter& curParam,
         const juce::AudioProcessorValueTreeState& valueTreeState,
         const juce::String& parameterID,
-        juce::Slider& attachedSlider,
-        const std::function<double (int, double)>& value2Ratio,
-        const std::function<double (int, double)>& ratio2Value
+        juce::Slider& attachedSlider
         );
 
 private:

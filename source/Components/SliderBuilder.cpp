@@ -30,7 +30,7 @@ juce::Slider* SliderBuilder::getSlider() const
 
 AmatiSliderAttachment* SliderBuilder::getAttachment (juce::Slider* slider, const juce::String& id)
 {
-    attachment = new AmatiSliderAttachment (curParam.index, valueTreeState, id, *slider, curParam.value2Ratio, curParam.ratio2Value);
+    attachment =  new AmatiSliderAttachment (curParam, valueTreeState, id, *slider);
     return attachment;
 }
 
@@ -52,8 +52,6 @@ void SliderBuilder::buildScale (const juce::String& value = "linear")
     }
    if(value == "log")
    {
-       // const auto temp = std::make_shared<LogValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
-       // fConversion = std::dynamic_pointer_cast<LogValueConverter> (temp);
         const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
         const double min = curParam.range.getStart();
         const double max = curParam.range.getEnd();
