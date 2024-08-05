@@ -95,8 +95,6 @@ public:
     [[nodiscard]] double ratio2Value (int, double) const;
     [[nodiscard]] double value2Ratio (int, double) const;
 
-    [[nodiscard]] float getMidiCheckValue (int index) const;
-    void setMidiCheckValue (int index, float);
     void handleMidiBuffer (juce::MidiBuffer&) const;
 
 private:
@@ -110,7 +108,6 @@ private:
     std::unique_ptr<juce_midi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
-    std::vector<float> midiCheckingValue; //used for midi checking
 
     int sampleRate;
     bool midiIsOn { false };

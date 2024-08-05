@@ -40,6 +40,7 @@ public:
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
     void handleMidi (const juce::MidiMessage&);
+    void handleMidiBuffer (const juce::MidiBuffer&);
 
     //======================================
     int getNumPrograms() override;
@@ -86,7 +87,7 @@ private:
     juce::AudioBuffer<float> tmpBufferOut;
     double sampRate {};
 
-    void updateDspParameters() const;
+//    void updateDspParameters() const;
     std::unordered_map<juce::String, int> paramIdMap;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };

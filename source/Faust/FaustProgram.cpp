@@ -59,7 +59,7 @@ static std::map<juce::String, juce::String> cstringMapToJuceString(const std::ma
     return juceStringMap;
 }
 
-FaustProgram::FaustProgram (const juce::String& source, const Backend b, const int sampRate) : backend (b), midiCheckingValue (), sampleRate (sampRate)
+FaustProgram::FaustProgram (const juce::String& source, const Backend b, const int sampRate) : backend (b), sampleRate (sampRate)
 {
     compileSource (source);
 }
@@ -150,7 +150,6 @@ void FaustProgram::compileSource (const juce::String& source)
                 [&](int index, double ratio) -> double{
                     return faustInterface->ratio2value(index, ratio); },
             });
-        midiCheckingValue.push_back (static_cast<float>(faustInterface->getParamRatio(i)));
     }
 }
 
@@ -186,18 +185,6 @@ float FaustProgram::getValue (const int index) const
         return 0.0;
 }
 
-float FaustProgram::getMidiCheckValue (int index) const
-{
-    jassert (index >= 0);
-    return midiCheckingValue[static_cast<unsigned long> (index)];
-}
-
-void FaustProgram::setMidiCheckValue (int index, float value)
-{
-    jassert (index >= 0);
-    midiCheckingValue[static_cast<unsigned long>(index)] = value;
-}
-
 void FaustProgram::setValue (const int index, const float value) const
 {
     if (index >= 0 && index <= getParamCount())
@@ -223,7 +210,7 @@ double FaustProgram::value2Ratio (const int index, const double value) const
 
 void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
 {
-    if (!message.isEmpty() && midiIsOn)
+    if (midiIsOn)
     {
         midi_handler->decodeBuffer (message);
     }
