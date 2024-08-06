@@ -70,6 +70,7 @@ public:
     ~FaustProgram() override;
 
     [[nodiscard]] int getParamCount() const;
+    [[nodiscard]] std::vector<int> getMidiIndex() const;
     [[nodiscard]] int getNumInChannels() const;
     [[nodiscard]] int getNumOutChannels() const;
 
@@ -92,13 +93,11 @@ public:
     void setSampleRate (int);
 
     void compute (int sampleCount, const float* const* input, float* const* output) const;
-    [[nodiscard]] double ratio2Value (int, double) const;
-    [[nodiscard]] double value2Ratio (int, double) const;
-
     void handleMidiBuffer (juce::MidiBuffer&) const;
 
 private:
     void compileSource (const juce::String&);
+    void populateMidiParameters();
 
     Backend backend;
 
@@ -108,6 +107,7 @@ private:
     std::unique_ptr<juce_midi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
+    std::vector<int> midiId;
 
     int sampleRate;
     bool midiIsOn { false };

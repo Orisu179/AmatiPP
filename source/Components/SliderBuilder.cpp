@@ -44,15 +44,10 @@ void SliderBuilder::buildUnit (const juce::String& value) const
    attachedSlider->setTextValueSuffix (" " + value);
 }
 
-void SliderBuilder::buildScale (const juce::String& value = "linear")
+void SliderBuilder::buildScale (const juce::String& value)
 {
-    if(value == "linear")
-    {
-        const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
-    }
    if(value == "log")
    {
-        const auto temp = std::make_shared<LinearValueConverter> (curParam.range.getStart(), curParam.range.getEnd(), 0.0, 1.0);
         const double min = curParam.range.getStart();
         const double max = curParam.range.getEnd();
         const double mid = std::sqrt(max * min);
@@ -60,19 +55,13 @@ void SliderBuilder::buildScale (const juce::String& value = "linear")
         attachedSlider->setSkewFactor (skewFactor);
    } else if (value == "exp")
    {
-       const auto temp = std::make_shared<ExpValueConverter>(curParam.range.getStart(), curParam.range.getEnd(), 0.0, 0.1);
    }
 }
 
 void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& metaData)
 {
-    if (metaData.empty())
+    for (const auto& [key, value] : metaData)
     {
-        buildScale ();
-    } else
-    {
-        for (const auto& [key, value] : metaData)
-        {
 //            if(key == "scale")
 //            {
 //               buildScale (value);
@@ -81,14 +70,13 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
 //                buildScale ();
 //            }
 
-            if(key == "unit")
-            {
-                buildUnit(value);
-            }
-            if(key == "hidden")
-            {
-                buildHidden (true);
-            }
+        if(key == "unit")
+        {
+            buildUnit(value);
+        }
+        if(key == "hidden")
+        {
+            buildHidden (true);
         }
     }
 }

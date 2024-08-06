@@ -87,8 +87,9 @@ void PluginProcessor::handleMidiBuffer (const juce::MidiBuffer&)
 {
     if(!midiBuffer.isEmpty() && faustProgram)
     {
+        std::vector<int> midiIndex = faustProgram->getMidiIndex();
         faustProgram->handleMidiBuffer(midiBuffer);
-        for(int i{0}; i<faustProgram->getParamCount(); i++) {
+        for(auto i: midiIndex) {
             const juce::String id = paramIdForIdx(i);
             const float valueTreeValue = *valueTreeState.getRawParameterValue(id);
             const float faustValue = faustProgram->getValue(i);
