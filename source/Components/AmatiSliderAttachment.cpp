@@ -4,6 +4,7 @@
 AmatiSliderParameterAttachment::AmatiSliderParameterAttachment (FaustProgram::Parameter& faustParam, juce::RangedAudioParameter& param, juce::Slider& s, juce::UndoManager* undoManager) : curParam (std::move(faustParam)), slider (s),attachment(param, [this](const float f) { setValue (f);}, undoManager)
 {
    sendInitialUpdate();
+   slider.setValue(faustParam.init);
    slider.valueChanged();
    slider.addListener(this);
 }
@@ -42,8 +43,8 @@ AmatiSliderAttachment::AmatiSliderAttachment (FaustProgram::Parameter& curParam,
 
     if(juce::RangedAudioParameter* parameter = valueTreeState.getParameter(parameterID); parameter)
     {
-        const auto initValue = static_cast<float>(curParam.value2Ratio(curParam.index, attachedSlider.getValue()));
-        parameter->setValueNotifyingHost(initValue);
+//        const auto initValue = static_cast<float>(curParam.value2Ratio(curParam.index, attachedSlider.getValue()));
+//        parameter->setValueNotifyingHost(initValue);
         attachment = std::make_unique<AmatiSliderParameterAttachment>(
             curParam,
             *parameter,

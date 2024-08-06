@@ -46,15 +46,17 @@ void SliderBuilder::buildUnit (const juce::String& value) const
 
 void SliderBuilder::buildScale (const juce::String& value)
 {
+    const double min = curParam.range.getStart();
+    const double max = curParam.range.getEnd();
+    const double mid = std::sqrt(max * min);
+    double skewFactor = std::log2(0.5) / std::log2((mid - min) / (max - min));
    if(value == "log")
    {
-        const double min = curParam.range.getStart();
-        const double max = curParam.range.getEnd();
-        const double mid = std::sqrt(max * min);
-        const double skewFactor = std::log2(0.5) / std::log2((mid - min) / (max - min));
         attachedSlider->setSkewFactor (skewFactor);
    } else if (value == "exp")
    {
+       skewFactor = 1.0 / skewFactor;
+       attachedSlider->setSkewFactor(skewFactor);
    }
 }
 
@@ -62,14 +64,10 @@ void SliderBuilder::setMetaData (const std::map<juce::String, juce::String>& met
 {
     for (const auto& [key, value] : metaData)
     {
-//            if(key == "scale")
-//            {
-//               buildScale (value);
-//            } else
-//            {
-//                buildScale ();
-//            }
-
+        if(key == "scale")
+        {
+            buildScale (value);
+        }
         if(key == "unit")
         {
             buildUnit(value);
