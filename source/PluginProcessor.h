@@ -1,22 +1,23 @@
 #pragma once
-
 #include "Faust/FaustProgram.h"
 #include <clap-juce-extensions/clap-juce-extensions.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#if (MSVC)
-    #include "ipps.h"
-#endif
-inline juce::String paramIdForIdx (int idx)
+inline juce::String paramIdForIdx (const int idx)
 {
     return juce::String ("Param") + juce::String (idx);
 }
-inline juce::String paramIdForIdx (size_t idx)
+
+inline juce::String paramIdForIdx (const size_t idx)
 {
     return paramIdForIdx (static_cast<int> (idx));
 }
 
-class PluginProcessor : public juce::AudioProcessor, juce::ValueTree::Listener, public clap_juce_extensions::clap_juce_audio_processor_capabilities
+class PluginProcessor final : public juce::AudioProcessor,
+                              juce::ValueTree::Listener,
+                              public clap_juce_extensions::clap_juce_audio_processor_capabilities,
+                              private juce::Timer,
+                              public juce::AudioProcessorValueTreeState::Listener
 {
 public:
     PluginProcessor();
@@ -38,21 +39,28 @@ public:
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
+    void handleMidi (const juce::MidiMessage&);
+    void handleMidiBuffer (const juce::MidiBuffer&);
 
+    //======================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
+    //=========================================
 
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    //========================================
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
 
     // For compiling faust program ---------
     bool compileSource (const juce::String&);
     juce::String getSourceCode();
     void setBackend (FaustProgram::Backend);
     void setPlayingState (bool);
+    void timerCallback() override;
 
     struct FaustParameter
     {
@@ -72,12 +80,14 @@ private:
     bool playing { false };
     bool readyToPlay { false };
     juce::AudioProcessorValueTreeState valueTreeState;
+    juce::MidiBuffer midiBuffer;
 
     // used to copy the input buffers
     juce::AudioBuffer<float> tmpBufferIn;
     juce::AudioBuffer<float> tmpBufferOut;
     double sampRate {};
 
-    void updateDspParameters() const;
+//    void updateDspParameters() const;
+    std::unordered_map<juce::String, int> paramIdMap;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };

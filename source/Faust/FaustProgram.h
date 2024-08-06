@@ -20,15 +20,18 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
+#include "FaustMidi.h"
 #include "juce_core/juce_core.h"
-#include <cstring>
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
+#include <faust/gui/GUI.h>
+#include <faust/gui/MidiUI.h>
+#include <faust/midi/juce-midi.h>
 
-class FaustProgram
+class FaustProgram final : public GUI
 {
 public:
-    class CompileError : public std::runtime_error
+    class CompileError final : public std::runtime_error
     {
     public:
         explicit CompileError (const char* message) : std::runtime_error (message) {}
@@ -44,6 +47,18 @@ public:
         CheckButton,
     };
 
+    enum class MetaData {
+        tooltip,
+        hidden,
+        unit,
+        scale,
+        style,
+        acc,
+        gyr,
+        screencolor,
+        midi
+    };
+
     enum class Backend {
         LLVM,
         Interpreter,
@@ -52,38 +67,48 @@ public:
     /// Construct a Faust Program.
     /// @throws CompileError
     FaustProgram (const juce::String& source, Backend, int sampRate);
-    ~FaustProgram();
+    ~FaustProgram() override;
 
-    int getParamCount();
-    int getNumInChannels();
-    int getNumOutChannels();
+    [[nodiscard]] int getParamCount() const;
+    [[nodiscard]] std::vector<int> getMidiIndex() const;
+    [[nodiscard]] int getNumInChannels() const;
+    [[nodiscard]] int getNumOutChannels() const;
 
     struct Parameter
     {
+        int index;
         juce::String label;
         ItemType type;
         juce::Range<double> range;
         double init;
         double step;
+        std::map<juce::String, juce::String> metaData;
+        std::function<double (int, double)> value2Ratio;
+        std::function<double (int, double)> ratio2Value;
     };
-    Parameter getParameter (int idx);
-    void convertNormaliseRange (int index, float value) const;
+    Parameter getParameter (int);
 
-    float getValue (int index);
-    void setValue (int idx, float);
+    [[nodiscard]] float getValue (int) const;
+    void setValue (int, float) const;
     void setSampleRate (int);
 
-    void compute (int sampleCount, const float* const* input, float* const* output);
+    void compute (int sampleCount, const float* const* input, float* const* output) const;
+    void handleMidiBuffer (juce::MidiBuffer&) const;
 
 private:
     void compileSource (const juce::String&);
+    void populateMidiParameters();
 
     Backend backend;
 
-    dsp_factory* dspFactory;
+    dsp_factory* dspFactory {};
     std::unique_ptr<dsp> dspInstance;
-    std::unique_ptr<APIUI> faustInterface;
+    std::shared_ptr<APIUI> faustInterface;
+    std::unique_ptr<juce_midi> midi_handler;
+    std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
+    std::vector<int> midiId;
 
     int sampleRate;
+    bool midiIsOn { false };
 };

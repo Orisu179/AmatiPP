@@ -12,11 +12,11 @@ public:
     void paint (juce::Graphics&) override {}
     void resized() override;
 
-    juce::String getSource();
+    juce::String getSource() const;
     void setSource (const juce::String&);
-    std::function<void (void)> onCompile;
-    std::function<void (void)> onStart;
-    std::function<void (void)> onStop;
+    std::function<void ()> onCompile;
+    std::function<void ()> onStart;
+    std::function<void ()> onStop;
     void setStatus (const juce::String&, juce::NotificationType);
     void setStartButtonEnabled (bool);
 
