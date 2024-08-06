@@ -88,6 +88,7 @@ void FaustProgram::compileSource (const juce::String& source)
 {
     const char* argv[] = { "" }; // compilation arguments
     std::string errorString;
+    midiIsOn = source.contains ("declare options \"[midi:on]\";");
 
     switch (backend)
     {
@@ -125,10 +126,10 @@ void FaustProgram::compileSource (const juce::String& source)
     dspInstance->init (sampleRate);
     faustInterface = std::make_shared<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
-    midiIsOn = source.contains ("declare options \"[midi:on]\";");
 
     if(midiIsOn)
     {
+        midiId.clear();
         midi_handler = std::make_unique<juce_midi>();
         midiInterface = std::make_unique<MidiUI>(midi_handler.get());
         dspInstance->buildUserInterface (midiInterface.get());
@@ -150,6 +151,10 @@ void FaustProgram::compileSource (const juce::String& source)
                 [&](int index, double ratio) -> double{
                     return faustInterface->ratio2value(index, ratio); },
             });
+    }
+
+    if(midiIsOn) {
+        populateMidiParameters();
     }
 }
 
@@ -198,16 +203,6 @@ void FaustProgram::compute (const int samples, const float* const* in, float* co
     dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
 }
 
-double FaustProgram::ratio2Value (const int index, const double value) const
-{
-    return faustInterface->ratio2value (index, value);
-}
-
-double FaustProgram::value2Ratio (const int index, const double value) const
-{
-    return faustInterface->value2ratio (index, value);
-}
-
 void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
 {
     if (midiIsOn)
@@ -226,4 +221,19 @@ void FaustProgram::setSampleRate (const int sr)
     {
         jassertfalse;
     }
+}
+void FaustProgram::populateMidiParameters()
+{
+    for(const auto& param: parameters) {
+        for(const auto& [value, key]: param.metaData){
+            if(value == "midi"){
+               midiId.push_back(param.index);
+            }
+        }
+    }
+}
+
+std::vector<int> FaustProgram::getMidiIndex() const
+{
+    return midiId;
 }
