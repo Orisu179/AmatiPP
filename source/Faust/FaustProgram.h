@@ -23,10 +23,15 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 #include "FaustMidi.h"
 #include "juce_core/juce_core.h"
 #include <faust/dsp/dsp.h>
+#include <faust/dsp/poly-dsp.h>
+#include <faust/dsp/poly-llvm-dsp.h>
+#include <faust/dsp/poly-interpreter-dsp.h>
 #include <faust/gui/APIUI.h>
 #include <faust/gui/GUI.h>
 #include <faust/gui/MidiUI.h>
 #include <faust/midi/juce-midi.h>
+#include <string>
+#include <regex>
 
 class FaustProgram final : public GUI
 {
@@ -47,21 +52,11 @@ public:
         CheckButton,
     };
 
-    enum class MetaData {
-        tooltip,
-        hidden,
-        unit,
-        scale,
-        style,
-        acc,
-        gyr,
-        screencolor,
-        midi
-    };
-
     enum class Backend {
         LLVM,
         Interpreter,
+        PolyLLVM,
+        PolyInterpreter,
     };
 
     /// Construct a Faust Program.
@@ -97,17 +92,23 @@ public:
 
 private:
     void compileSource (const juce::String&);
+    void buildPolyInstance();
+    void buildStandardInstance(const bool& midi);
     void populateMidiParameters();
 
     Backend backend;
 
     dsp_factory* dspFactory {};
+    dsp_poly_factory* dspPolyFactory {};
     std::unique_ptr<dsp> dspInstance;
-    std::shared_ptr<APIUI> faustInterface;
+    std::unique_ptr<dsp_poly> polyDspInstance;
+
+    std::unique_ptr<APIUI> faustInterface;
     std::unique_ptr<juce_midi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
     std::vector<int> midiId;
+    int matchPolyAndExtractVoices(const juce::String& input);
 
     int sampleRate;
     bool midiIsOn { false };

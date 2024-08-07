@@ -73,6 +73,7 @@ FaustProgram::~FaustProgram()
     }
 
     dspInstance.reset (nullptr);
+    polyDspInstance.reset(nullptr);
     switch (backend)
     {
         case Backend::LLVM:
@@ -89,6 +90,7 @@ void FaustProgram::compileSource (const juce::String& source)
     const char* argv[] = { "" }; // compilation arguments
     std::string errorString;
     midiIsOn = source.contains ("declare options \"[midi:on]\";");
+    int polyVoices = matchPolyAndExtractVoices(source);
 
     switch (backend)
     {
@@ -124,7 +126,7 @@ void FaustProgram::compileSource (const juce::String& source)
 
     dspInstance.reset (dspFactory->createDSPInstance());
     dspInstance->init (sampleRate);
-    faustInterface = std::make_shared<APIUI>();
+    faustInterface = std::make_unique<APIUI>();
     dspInstance->buildUserInterface (faustInterface.get());
 
     if(midiIsOn)
@@ -152,10 +154,7 @@ void FaustProgram::compileSource (const juce::String& source)
                     return faustInterface->ratio2value(index, ratio); },
             });
     }
-
-    if(midiIsOn) {
-        populateMidiParameters();
-    }
+    populateMidiParameters();
 }
 
 int FaustProgram::getParamCount() const
@@ -224,10 +223,12 @@ void FaustProgram::setSampleRate (const int sr)
 }
 void FaustProgram::populateMidiParameters()
 {
-    for(const auto& param: parameters) {
-        for(const auto& [value, key]: param.metaData){
-            if(value == "midi"){
-               midiId.push_back(param.index);
+    if(midiIsOn){
+        for(const auto& param: parameters) {
+            for(const auto& [value, key]: param.metaData){
+                if(value == "midi"){
+                    midiId.push_back(param.index);
+                }
             }
         }
     }
@@ -236,4 +237,37 @@ void FaustProgram::populateMidiParameters()
 std::vector<int> FaustProgram::getMidiIndex() const
 {
     return midiId;
+}
+
+int FaustProgram::matchPolyAndExtractVoices (const juce::String& input)
+{
+    // Define the regular expression pattern with a capture group for the number
+    std::string stdStringInput = input.toStdString();
+    std::regex pattern(R"(declare options \[midi:on\]\[nvoices:(\d+)\];)");
+    std::smatch matches;
+
+    // Check if the input string matches the pattern
+    if (std::regex_match(stdStringInput, matches, pattern)) {
+        // Extract the number from the first capture group
+        return std::stoi(matches[1].str());
+    }
+    return -1;
+}
+
+void FaustProgram::buildPolyInstance()
+{
+
+}
+
+void FaustProgram::buildStandardInstance (const bool& midi)
+{
+
+    if(midi){
+        midiId.clear();
+        midi_handler = std::make_unique<juce_midi>();
+        midiInterface = std::make_unique<MidiUI>(midi_handler.get());
+        dspInstance->buildUserInterface (midiInterface.get());
+        midi_handler->startMidi();
+
+    }
 }
