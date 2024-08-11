@@ -12,7 +12,6 @@ public:
     void resized() override;
 
     void updateParameters (const std::vector<PluginProcessor::FaustParameter>&);
-    void updateParameters (const std::vector<juce::Component>&);
 
 private:
     juce::AudioProcessorValueTreeState& valueTreeState;

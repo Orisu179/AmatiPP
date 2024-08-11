@@ -1,7 +1,6 @@
 #pragma once
 #include "juce_audio_devices/juce_audio_devices.h"
 #include "juce_gui_basics/juce_gui_basics.h"
-#include "../Faust/FaustMidi.h"
 #include "juce_audio_utils/gui/juce_KeyboardComponentBase.h"
 #include "juce_audio_utils/gui/juce_MidiKeyboardComponent.h"
 class MidiComponent final : public juce::Component,

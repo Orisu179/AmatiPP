@@ -20,8 +20,9 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
-#include "FaustMidi.h"
 #include "juce_core/juce_core.h"
+#include "juce_audio_basics/juce_audio_basics.h"
+#include "juce_audio_devices/juce_audio_devices.h"
 #include <faust/dsp/dsp.h>
 #include <faust/gui/APIUI.h>
 #include <faust/gui/GUI.h>
@@ -47,18 +48,6 @@ public:
         CheckButton,
     };
 
-    enum class MetaData {
-        tooltip,
-        hidden,
-        unit,
-        scale,
-        style,
-        acc,
-        gyr,
-        screencolor,
-        midi
-    };
-
     enum class Backend {
         LLVM,
         Interpreter,
@@ -70,7 +59,6 @@ public:
     ~FaustProgram() override;
 
     [[nodiscard]] int getParamCount() const;
-    [[nodiscard]] std::vector<int> getMidiIndex() const;
     [[nodiscard]] int getNumInChannels() const;
     [[nodiscard]] int getNumOutChannels() const;
 
@@ -97,7 +85,6 @@ public:
 
 private:
     void compileSource (const juce::String&);
-    void populateMidiParameters();
 
     Backend backend;
 

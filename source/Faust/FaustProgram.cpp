@@ -152,10 +152,6 @@ void FaustProgram::compileSource (const juce::String& source)
                     return faustInterface->ratio2value(index, ratio); },
             });
     }
-
-    if(midiIsOn) {
-        populateMidiParameters();
-    }
 }
 
 int FaustProgram::getParamCount() const
@@ -221,19 +217,4 @@ void FaustProgram::setSampleRate (const int sr)
     {
         jassertfalse;
     }
-}
-void FaustProgram::populateMidiParameters()
-{
-    for(const auto& param: parameters) {
-        for(const auto& [value, key]: param.metaData){
-            if(value == "midi"){
-               midiId.push_back(param.index);
-            }
-        }
-    }
-}
-
-std::vector<int> FaustProgram::getMidiIndex() const
-{
-    return midiId;
 }
