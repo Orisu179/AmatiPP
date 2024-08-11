@@ -87,7 +87,7 @@ private:
     juce::AudioBuffer<float> tmpBufferOut;
     double sampRate {};
 
-//    void updateDspParameters() const;
+    void syncDspParameters() const;
     std::unordered_map<juce::String, int> paramIdMap;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };

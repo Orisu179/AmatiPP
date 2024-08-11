@@ -87,17 +87,7 @@ void PluginProcessor::handleMidiBuffer (const juce::MidiBuffer&)
 {
     if(!midiBuffer.isEmpty() && faustProgram)
     {
-        std::vector<int> midiIndex = faustProgram->getMidiIndex();
         faustProgram->handleMidiBuffer(midiBuffer);
-        for(auto i: midiIndex) {
-            const juce::String id = paramIdForIdx(i);
-            const float valueTreeValue = *valueTreeState.getRawParameterValue(id);
-            const float faustValue = faustProgram->getValue(i);
-            if(faustValue != valueTreeValue)
-            {
-                *valueTreeState.getRawParameterValue(id) = faustValue;
-            }
-        }
     }
 }
 
@@ -201,6 +191,8 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
     }
     else
     {
+        // First, we update the parameters to make sure both matches
+        syncDspParameters();
         // here, the buffers are copied into tmpBufferIn, then processed into tmpBufferOut
         // tmpBufferOut would then be copied into buffer again
         // This is to make sure that computation is done in a controlled environment
@@ -336,6 +328,7 @@ bool PluginProcessor::compileSource (const juce::String& source)
 
     tmpBufferIn.setSize (inChans, tmpBufferIn.getNumSamples());
     tmpBufferOut.setSize (outChans, tmpBufferOut.getNumSamples());
+
     //update map for parameter values
     // TODO: optimize this
     if(!paramIdMap.empty())
@@ -356,36 +349,6 @@ void PluginProcessor::timerCallback()
 {
     GUI::updateAllGuis();
 }
-
-//void PluginProcessor::updateDspParameters() const
-//{
-//    const auto paramCount = faustProgram->getParamCount();
-//    for (int i = 0; i < paramCount; ++i)
-//    {
-//        juce::String id = paramIdForIdx (i);
-//        const float value = *valueTreeState.getRawParameterValue (id);
-//        const float faustProgramValue = faustProgram->getValue (i);
-//        const float oldValueTreeStateValue = faustProgram->getMidiCheckValue (i);
-//        // This is case where the value are the same so no changes
-//        // Floating point compare should be ok here, I think...
-//        if (value == faustProgramValue)
-//        {
-//            continue;
-//        } else if (faustProgramValue == oldValueTreeStateValue)
-//        {
-//            // This is case where the user changed the slider, so the value is different
-//            // The logic here is that when midi sets the value, it will be in the faust instance
-//            // but the valueTree is not updated so it will override whatever is in the faust instance
-//            faustProgram->setMidiCheckValue (i, value);
-//            faustProgram->setValue (i, value);
-//        } else
-//        {
-//            // This is the case where the midi is used to change the parameter, and so we update it
-//            *valueTreeState.getRawParameterValue (id) = faustProgramValue;
-//            faustProgram->setMidiCheckValue(i, faustProgramValue);
-//        }
-//    }
-//}
 
 void PluginProcessor::setBackend (const FaustProgram::Backend newBackend)
 {
@@ -430,4 +393,19 @@ void PluginProcessor::parameterChanged (const juce::String& parameterID, float n
 {
     jassert(paramIdMap.contains(parameterID));
     faustProgram->setValue(paramIdMap[parameterID], newValue);
+}
+
+void PluginProcessor::syncDspParameters() const
+{
+    float valueTreeValue = 0.f;
+    float faustValue = 0.f;
+    for(int i{0}; i<faustProgram->getParamCount(); i++) {
+        const juce::String id = paramIdForIdx(i);
+        valueTreeValue = *valueTreeState.getRawParameterValue(id);
+        faustValue = faustProgram->getValue(i);
+        if(faustValue != valueTreeValue)
+        {
+            valueTreeState.getParameter(id)->setValueNotifyingHost(faustValue);
+        }
+    }
 }
