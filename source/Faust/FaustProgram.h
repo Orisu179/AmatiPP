@@ -20,8 +20,9 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #pragma once
-#include "FaustMidi.h"
 #include "juce_core/juce_core.h"
+#include "juce_audio_devices/juce_audio_devices.h"
+#include "juce_audio_basics/juce_audio_basics.h"
 #include <faust/dsp/dsp.h>
 #include <faust/dsp/poly-dsp.h>
 #include <faust/dsp/poly-llvm-dsp.h>
@@ -65,7 +66,6 @@ public:
     ~FaustProgram() override;
 
     [[nodiscard]] int getParamCount() const;
-    [[nodiscard]] std::vector<int> getMidiIndex() const;
     [[nodiscard]] int getNumInChannels() const;
     [[nodiscard]] int getNumOutChannels() const;
 
@@ -91,15 +91,16 @@ public:
     void handleMidiBuffer (juce::MidiBuffer&) const;
 
 private:
+    static int matchPolyAndExtractVoices(const juce::String& input);
     void compileSource (const juce::String&);
-    void buildPolyInstance();
-    void buildStandardInstance(const bool& midi);
-    void populateMidiParameters();
+    void initDspFactory(Backend&, const juce::String&);
+    void fillParameters (std::vector<Parameter>& parameterVector, std::unique_ptr<APIUI>& interface);
+    void buildMidi(std::unique_ptr<dsp>&);
 
     Backend backend;
 
     dsp_factory* dspFactory {};
-    dsp_poly_factory* dspPolyFactory {};
+    std::unique_ptr<dsp_poly_factory> polyDspFactory {};
     std::unique_ptr<dsp> dspInstance;
     std::unique_ptr<dsp_poly> polyDspInstance;
 
@@ -107,9 +108,7 @@ private:
     std::unique_ptr<juce_midi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
-    std::vector<int> midiId;
-    int matchPolyAndExtractVoices(const juce::String& input);
-
     int sampleRate;
     bool midiIsOn { false };
+    bool poly { false };
 };
