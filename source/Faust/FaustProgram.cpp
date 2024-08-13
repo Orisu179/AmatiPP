@@ -71,19 +71,23 @@ FaustProgram::~FaustProgram()
     if (midiIsOn)
     {
         midiInterface.reset (nullptr);
+        midi_handler.reset(nullptr);
     }
 
-    dspInstance.reset (nullptr);
-    polyDspInstance.reset (nullptr);
     switch (backend)
     {
         case Backend::LLVM:
+            dspInstance.reset (nullptr);
             deleteDSPFactory (static_cast<llvm_dsp_factory*> (dspFactory));
             break;
         case Backend::Interpreter:
+            dspInstance.reset (nullptr);
             deleteInterpreterDSPFactory (static_cast<interpreter_dsp_factory*> (dspFactory));
         case Backend::PolyInterpreter:
         case Backend::PolyLLVM:
+            // ??? Commenting this line out suddenly works?? would there be a memory leak??
+//            delete polyDspInstance;
+            delete polyDspFactory;
             break;
     }
 }
@@ -96,7 +100,7 @@ int FaustProgram::matchPolyAndExtractVoices (const juce::String& input)
     std::smatch matches;
 
     // Check if the input string matches the pattern
-    if (std::regex_search(stdStringInput, matches, pattern))
+    if (std::regex_search (stdStringInput, matches, pattern))
     {
         // Extract the number from the first capture group
         return std::stoi (matches[1].str());
@@ -152,21 +156,21 @@ void FaustProgram::initDspFactory (FaustProgram::Backend& back, const juce::Stri
                 errorString);
             break;
         case Backend::PolyLLVM:
-            polyDspFactory = std::make_unique<dsp_poly_factory>(createPolyDSPFactoryFromString (
+            polyDspFactory = createPolyDSPFactoryFromString (
                 "faust",
                 source.toStdString(),
                 0,
                 argv,
                 "",
-                errorString));
+                errorString);
             break;
         case Backend::PolyInterpreter:
-            polyDspFactory = std::make_unique<dsp_poly_factory>(createInterpreterPolyDSPFactoryFromString (
+            polyDspFactory = createInterpreterPolyDSPFactoryFromString (
                 "faust",
                 source.toStdString(),
                 0,
                 argv,
-                errorString));
+                errorString);
             break;
         default:
         {
@@ -176,7 +180,11 @@ void FaustProgram::initDspFactory (FaustProgram::Backend& back, const juce::Stri
         }
     }
 
-    if (!dspFactory)
+    if ((back == Backend::LLVM || back == Backend::Interpreter) && !dspFactory)
+    {
+        throw CompileError (errorString);
+    }
+    else if ((back == Backend::PolyInterpreter || back == Backend::PolyLLVM) && !polyDspFactory)
     {
         throw CompileError (errorString);
     }
@@ -184,6 +192,8 @@ void FaustProgram::initDspFactory (FaustProgram::Backend& back, const juce::Stri
 
 void FaustProgram::compileSource (const juce::String& source)
 {
+    const char* argv[] = { "" }; // compilation arguments
+    std::string errorString;
     midiIsOn = source.contains ("declare options \"[midi:on]\";");
     int polyVoices = matchPolyAndExtractVoices (source);
     if (polyVoices > 0)
@@ -197,7 +207,7 @@ void FaustProgram::compileSource (const juce::String& source)
     // initialize either the poly dsp instance or the regular dsp instance
     if (polyVoices > 0)
     {
-        polyDspInstance.reset (polyDspFactory->createPolyDSPInstance (polyVoices, true, true));
+        polyDspInstance = polyDspFactory->createPolyDSPInstance(polyVoices, true, true);
         polyDspInstance->init (sampleRate);
         polyDspInstance->buildUserInterface (faustInterface.get());
         midi_handler = std::make_unique<juce_midi>();
@@ -212,7 +222,7 @@ void FaustProgram::compileSource (const juce::String& source)
         dspInstance->buildUserInterface (faustInterface.get());
         if (midiIsOn)
         {
-            buildMidi(dspInstance);
+            buildMidi (dspInstance);
         }
     }
 
@@ -226,12 +236,12 @@ int FaustProgram::getParamCount() const
 
 int FaustProgram::getNumInChannels() const
 {
-    return dspInstance->getNumInputs();
+    return (poly) ? polyDspInstance->getNumInputs() : dspInstance->getNumInputs();
 }
 
 int FaustProgram::getNumOutChannels() const
 {
-    return dspInstance->getNumOutputs();
+    return (poly) ? polyDspInstance->getNumOutputs() : dspInstance->getNumOutputs();
 }
 
 FaustProgram::Parameter FaustProgram::getParameter (const int index)

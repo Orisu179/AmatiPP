@@ -100,9 +100,9 @@ private:
     Backend backend;
 
     dsp_factory* dspFactory {};
-    std::unique_ptr<dsp_poly_factory> polyDspFactory {};
+    dsp_poly_factory* polyDspFactory {};
     std::unique_ptr<dsp> dspInstance;
-    std::unique_ptr<dsp_poly> polyDspInstance;
+    dsp_poly* polyDspInstance;
 
     std::unique_ptr<APIUI> faustInterface;
     std::unique_ptr<juce_midi> midi_handler;
