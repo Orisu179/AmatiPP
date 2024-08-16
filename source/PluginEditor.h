@@ -7,6 +7,7 @@
 #include "Components/MidiComponent.h"
 #include "Components/ParamEditor.h"
 #include "Components/SettingsComponent.h"
+#include "Components/DiagramComponent.h"
 #include "PluginProcessor.h"
 #include "melatonin_inspector/melatonin_inspector.h"
 
@@ -36,6 +37,7 @@ private:
     ConsoleComponent consoleComponent;
     EditorComponent editorComponent;
     MidiComponent midiComponent;
+    DiagramComponent diagramComponent;
     ParamEditor paramEditor;
     juce::TabbedComponent tabbedComponent;
 

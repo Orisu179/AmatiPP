@@ -35,8 +35,9 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     tabbedComponent.addTab ("Editor", tabColour, &editorComponent, false);
     tabbedComponent.addTab ("Parameters", tabColour, &paramEditor, false);
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
-    tabbedComponent.addTab ("Settings", tabColour, &settingsComponent, false);
     tabbedComponent.addTab ("Midi Keyboard", tabColour, &midiComponent, false);
+    tabbedComponent.addTab("Diagram", tabColour, &diagramComponent, false);
+    tabbedComponent.addTab ("Settings", tabColour, &settingsComponent, false);
 
     setResizable (true, true);
     setResizeLimits (100, 100, std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
@@ -99,6 +100,7 @@ void PluginEditor::onCompile()
     consoleComponent.clearMessages();
     if (processorRef.compileSource (editorComponent.getSource()))
     {
+        diagramComponent.setSource(editorComponent.getSource());
         editorComponent.setStatus ("Status: Compiled", juce::sendNotification);
         processorRef.setPlayingState (false);
         updateParameters();
