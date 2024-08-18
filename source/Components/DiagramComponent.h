@@ -11,7 +11,9 @@ public:
     void setSource(juce::String source);
     void paint (juce::Graphics&) override;
     void resized() override;
+    void setSvg(bool);
 private:
+    bool showSvg;
    std::unique_ptr<juce::Drawable> svg;
    juce::String path;
 };

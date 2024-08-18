@@ -1,12 +1,26 @@
 #include "DiagramComponent.h"
 
-DiagramComponent::DiagramComponent() : path("/home/tyler/.config")
+DiagramComponent::DiagramComponent() : path("/home/tyler/.config"), showSvg (true)
 {
+    juce::File svgCloud = juce::File("/home/tyler/temp/simple-cloud.svg");
+    if(svgCloud.exists() && showSvg)
+    {
+        svg = juce::Drawable::createFromSVGFile(svgCloud);
+        addAndMakeVisible(svg.get());
+    }
+}
+
+DiagramComponent::~DiagramComponent()
+{
+
 }
 
 void DiagramComponent::resized()
 {
-
+//    if(showSvg)
+//    {
+//        svg->setBounds(getLocalBounds());
+//    }
 }
 
 void DiagramComponent::paint (juce::Graphics& g)
@@ -27,14 +41,13 @@ void DiagramComponent::setSource (juce::String source)
     if(!generateAuxFilesFromString("AmatiSVG", "process = vslider(\"Volume\", 0.5, 0, 1, 0.025);", argc, argv2, errorMsg))
     {
         DBG(errorMsg);
-        jassertfalse;
     } else {
         juce::File svgFile = juce::File(path + "/AmatiSVG/process.svg");
         svg = juce::Drawable::createFromSVGFile(svgFile);
     }
 }
 
-DiagramComponent::~DiagramComponent()
+void DiagramComponent::setSvg (bool value)
 {
-
+    showSvg = value;
 }
