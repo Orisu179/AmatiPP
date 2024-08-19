@@ -32,12 +32,13 @@ private:
     void updateEditor();
     void onCompile();
 
+    juce::TabbedComponent tabbedComponent;
+    juce::Viewport paramViewport;
     SettingsComponent settingsComponent;
     ConsoleComponent consoleComponent;
     EditorComponent editorComponent;
     MidiComponent midiComponent;
     ParamEditor paramEditor;
-    juce::TabbedComponent tabbedComponent;
 
     // melatonin stuff
     std::unique_ptr<melatonin::Inspector> inspector;
