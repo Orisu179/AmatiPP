@@ -6,16 +6,16 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
       processorRef (p),
       valueTreeState (vts),
       settingTree (vts.state.getOrCreateChildWithName ("settings", nullptr)),
+      tabbedComponent (juce::TabbedButtonBar::TabsAtTop),
       settingsComponent (settingTree),
-      paramEditor (vts),
-      tabbedComponent (juce::TabbedButtonBar::TabsAtTop)
+      paramEditor (vts)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     juce::LookAndFeel_V4::setDefaultLookAndFeel (&amatiLookAndFeel);
-    setSize (800, 600);
-    setResizable (true, true);
+    setResizable (true, false);
     setResizeLimits (800, 600, 1920, 1080);
+    setSize (800, 600);
 
     addAndMakeVisible (inspectButton);
     // this chunk of code instantiates and opens the melatonin inspector
@@ -32,11 +32,13 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     addAndMakeVisible (&tabbedComponent);
 
     const juce::Colour tabColour = getLookAndFeel().findColour (juce::TabbedComponent::backgroundColourId);
+    paramViewport.setViewedComponent (&paramEditor, false);
+    paramViewport.setScrollBarsShown (true, false);
     tabbedComponent.addTab ("Editor", tabColour, &editorComponent, false);
-    tabbedComponent.addTab ("Parameters", tabColour, &paramEditor, false);
+    tabbedComponent.addTab ("Parameters", tabColour, &paramViewport, false);
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
-    tabbedComponent.addTab ("Settings", tabColour, &settingsComponent, false);
     tabbedComponent.addTab ("Midi Keyboard", tabColour, &midiComponent, false);
+    tabbedComponent.addTab ("Settings", tabColour, &settingsComponent, false);
 
     setResizable (true, true);
     setResizeLimits (100, 100, std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
@@ -78,10 +80,20 @@ void PluginEditor::paint (juce::Graphics& g)
 void PluginEditor::resized()
 {
     constexpr int margin = 10;
+    const int parameterHeight = static_cast<int>(processorRef.getFaustParameter().size() * 75);
     auto bounds = getLocalBounds();
 
     inspectButton.setBounds (bounds.removeFromBottom (30));
     tabbedComponent.setBounds (bounds.reduced (margin, margin));
+    if( parameterHeight > tabbedComponent.getHeight())
+    {
+        const int addedHeight = parameterHeight - tabbedComponent.getHeight();
+        paramViewport.setBounds (tabbedComponent.getLocalBounds().expanded (0, addedHeight));
+    } else
+    {
+        paramViewport.setBounds (tabbedComponent.getLocalBounds());
+    }
+    paramEditor.setBounds (paramViewport.getLocalBounds());
 }
 
 void PluginEditor::updateParameters()
