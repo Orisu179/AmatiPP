@@ -133,7 +133,6 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
     tmpBufferIn = juce::AudioBuffer<float> (numChannelsIn, samplesPerBlock);
     tmpBufferOut = juce::AudioBuffer<float> (numChannelsOut, samplesPerBlock);
-    compileSource (sourceCode);
     readyToPlay = true;
 }
 
@@ -303,9 +302,11 @@ bool PluginProcessor::compileSource (const juce::String& source)
     switch (backend)
     {
         case FaustProgram::Backend::LLVM:
+        case FaustProgram::Backend::PolyLLVM:
             juce::Logger::writeToLog ("Compiling with LLVM backend...");
             break;
         case FaustProgram::Backend::Interpreter:
+        case FaustProgram::Backend::PolyInterpreter:
             juce::Logger::writeToLog ("Compiling with Interpreter backend...");
             break;
     }
@@ -353,7 +354,6 @@ void PluginProcessor::timerCallback()
 void PluginProcessor::setBackend (const FaustProgram::Backend newBackend)
 {
     backend = newBackend;
-    compileSource (sourceCode);
 }
 
 void PluginProcessor::setPlayingState (const bool state)
@@ -403,6 +403,7 @@ void PluginProcessor::syncDspParameters() const
         const juce::String id = paramIdForIdx(i);
         valueTreeValue = *valueTreeState.getRawParameterValue(id);
         faustValue = faustProgram->getValue(i);
+        // Comparing float should be ok here since the value are the exact same if equals
         if(faustValue != valueTreeValue)
         {
             valueTreeState.getParameter(id)->setValueNotifyingHost(faustValue);

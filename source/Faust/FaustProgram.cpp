@@ -192,8 +192,6 @@ void FaustProgram::initDspFactory (FaustProgram::Backend& back, const juce::Stri
 
 void FaustProgram::compileSource (const juce::String& source)
 {
-    const char* argv[] = { "" }; // compilation arguments
-    std::string errorString;
     midiIsOn = source.contains ("declare options \"[midi:on]\";");
     int polyVoices = matchPolyAndExtractVoices (source);
     if (polyVoices > 0)
@@ -207,7 +205,7 @@ void FaustProgram::compileSource (const juce::String& source)
     // initialize either the poly dsp instance or the regular dsp instance
     if (polyVoices > 0)
     {
-        polyDspInstance = polyDspFactory->createPolyDSPInstance(polyVoices, true, true);
+        polyDspInstance = polyDspFactory->createPolyDSPInstance(polyVoices, false, true);
         polyDspInstance->init (sampleRate);
         polyDspInstance->buildUserInterface (faustInterface.get());
         midi_handler = std::make_unique<juce_midi>();
