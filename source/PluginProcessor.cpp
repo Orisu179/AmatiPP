@@ -133,7 +133,7 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
     tmpBufferIn = juce::AudioBuffer<float> (numChannelsIn, samplesPerBlock);
     tmpBufferOut = juce::AudioBuffer<float> (numChannelsOut, samplesPerBlock);
-    compileSource (sourceCode);
+//    compileSource (sourceCode);
     readyToPlay = true;
 }
 

@@ -59,7 +59,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     };
 
     updateEditor(); // set editor to display the processor's source code
-    updateParameters(); // set the right display for the parameters
+//    updateParameters(); // set the right display for the parameters
 
     juce::Logger::setCurrentLogger (&consoleComponent);
     settingTree.addListener (this);
