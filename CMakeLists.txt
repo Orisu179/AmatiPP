@@ -21,7 +21,7 @@ set(PROJECT_NAME "Amati_pp")
 set(PRODUCT_NAME "Amati_pp")
 
 # Change me! Used for the MacOS bundle name and Installers
-set(COMPANY_NAME "Tyler Li")
+set(COMPANY_NAME "Orisu179")
 
 # Change me! Used for the MacOS bundle identifier (and signing)
 set(BUNDLE_ID "com.orisu179.amatipp")

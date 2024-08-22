@@ -40,7 +40,7 @@ public:
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
     void handleMidi (const juce::MidiMessage&);
-    void handleMidiBuffer (const juce::MidiBuffer&);
+    void handleMidiBuffer (juce::MidiBuffer&);
 
     //======================================
     int getNumPrograms() override;

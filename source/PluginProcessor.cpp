@@ -83,11 +83,11 @@ void PluginProcessor::handleMidi (const juce::MidiMessage& message)
     handleMidiBuffer(midiBuffer);
 }
 
-void PluginProcessor::handleMidiBuffer (const juce::MidiBuffer&)
+void PluginProcessor::handleMidiBuffer (juce::MidiBuffer& buffer)
 {
     if(!midiBuffer.isEmpty() && faustProgram)
     {
-        faustProgram->handleMidiBuffer(midiBuffer);
+        faustProgram->handleMidiBuffer(buffer);
     }
 }
 
