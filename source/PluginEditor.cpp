@@ -39,10 +39,6 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     tabbedComponent.addTab ("Console", tabColour, &consoleComponent, false);
     tabbedComponent.addTab ("Midi Keyboard", tabColour, &midiComponent, false);
     tabbedComponent.addTab ("Settings", tabColour, &settingsComponent, false);
-
-    setResizable (true, true);
-    setResizeLimits (100, 100, std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-
     //---------------------------------------------------------------------------
 
     editorComponent.onCompile = [&] {
@@ -60,7 +56,6 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     };
 
     updateEditor(); // set editor to display the processor's source code
-    updateParameters(); // set the right display for the parameters
 
     juce::Logger::setCurrentLogger (&consoleComponent);
     settingTree.addListener (this);

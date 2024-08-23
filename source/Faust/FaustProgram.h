@@ -21,13 +21,18 @@ along with Amati.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 #include "juce_core/juce_core.h"
-#include "juce_audio_basics/juce_audio_basics.h"
 #include "juce_audio_devices/juce_audio_devices.h"
+#include "juce_audio_basics/juce_audio_basics.h"
 #include <faust/dsp/dsp.h>
+#include <faust/dsp/poly-dsp.h>
+#include <faust/dsp/poly-llvm-dsp.h>
+#include <faust/dsp/poly-interpreter-dsp.h>
 #include <faust/gui/APIUI.h>
 #include <faust/gui/GUI.h>
 #include <faust/gui/MidiUI.h>
 #include <faust/midi/juce-midi.h>
+#include <string>
+#include <regex>
 
 class FaustProgram final : public GUI
 {
@@ -51,6 +56,8 @@ public:
     enum class Backend {
         LLVM,
         Interpreter,
+        PolyLLVM,
+        PolyInterpreter,
     };
 
     /// Construct a Faust Program.
@@ -84,18 +91,26 @@ public:
     void handleMidiBuffer (juce::MidiBuffer&) const;
 
 private:
+    static int matchPolyAndExtractVoices(const std::string& input);
+    static bool matchMidiOn(const std::string& input);
     void compileSource (const juce::String&);
+    void initDspFactory(Backend&, const juce::String&);
+    void fillParameters (std::vector<Parameter>& parameterVector, std::unique_ptr<APIUI>& interface);
+    void buildMidi(std::unique_ptr<dsp>&);
+    static juce::String addEffect(juce::String);
 
     Backend backend;
 
     dsp_factory* dspFactory {};
+    dsp_poly_factory* polyDspFactory {};
     std::unique_ptr<dsp> dspInstance;
-    std::shared_ptr<APIUI> faustInterface;
+    dsp_poly* polyDspInstance;
+
+    std::unique_ptr<APIUI> faustInterface;
     std::unique_ptr<juce_midi> midi_handler;
     std::unique_ptr<MidiUI> midiInterface;
     std::vector<Parameter> parameters;
-    std::vector<int> midiId;
-
     int sampleRate;
     bool midiIsOn { false };
+    bool poly { false };
 };

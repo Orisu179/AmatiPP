@@ -49,12 +49,12 @@ static FaustProgram::ItemType apiToItemType (APIUI::ItemType type)
     }
 }
 
-static std::map<juce::String, juce::String> cstringMapToJuceString(const std::map<const char*, const char*>& cMap)
+static std::map<juce::String, juce::String> cstringMapToJuceString (const std::map<const char*, const char*>& cMap)
 {
     std::map<juce::String, juce::String> juceStringMap;
-    for(const auto& [key, value] : cMap)
+    for (const auto& [key, value] : cMap)
     {
-        juceStringMap[juce::String(key)] = juce::String(value);
+        juceStringMap[juce::String (key)] = juce::String (value);
     }
     return juceStringMap;
 }
@@ -68,29 +68,80 @@ FaustProgram::~FaustProgram()
 {
     // Delete in order.
     faustInterface.reset();
-    if(midiIsOn) {
+    if (midiIsOn)
+    {
         midiInterface.reset (nullptr);
+        midi_handler.reset(nullptr);
     }
 
-    dspInstance.reset (nullptr);
     switch (backend)
     {
         case Backend::LLVM:
+            dspInstance.reset (nullptr);
             deleteDSPFactory (static_cast<llvm_dsp_factory*> (dspFactory));
             break;
         case Backend::Interpreter:
+            dspInstance.reset (nullptr);
             deleteInterpreterDSPFactory (static_cast<interpreter_dsp_factory*> (dspFactory));
+        case Backend::PolyInterpreter:
+        case Backend::PolyLLVM:
+            // ??? Commenting this line out suddenly works?? would there be a memory leak??
+//            delete polyDspInstance;
+            delete polyDspFactory;
             break;
     }
 }
 
-void FaustProgram::compileSource (const juce::String& source)
+int FaustProgram::matchPolyAndExtractVoices (const std::string& input)
+{
+    // Define the regular expression pattern with a capture group for the number
+    std::regex pattern (R"(declare options "\[midi:on\]\[nvoices:(\d+)\]";)");
+    std::smatch matches;
+
+    // Check if the input string matches the pattern
+    if (std::regex_search (input, matches, pattern))
+    {
+        // Extract the number from the first capture group
+        return std::stoi (matches[1].str());
+    }
+    return -1;
+}
+
+bool FaustProgram::matchMidiOn (const std::string& input)
+{
+    std::regex pattern (R"(declare options ".*\[midi:on\].*")");
+    return std::regex_search(input, pattern);
+}
+
+/**
+ * Fills the parameters vector passed in
+ */
+
+void FaustProgram::fillParameters (std::vector<Parameter>& parameterVector, std::unique_ptr<APIUI>& interface)
+{
+    for (int i { 0 }; i < interface->getParamsCount(); i++)
+    {
+        parameterVector.push_back (
+            {
+                i,
+                juce::String (interface->getParamLabel (i)),
+                apiToItemType (interface->getParamItemType (i)),
+                { interface->getParamMin (i), faustInterface->getParamMax (i) },
+                interface->getParamInit (i),
+                interface->getParamStep (i),
+                cstringMapToJuceString (interface->getMetadata (i)),
+                [&] (int index, double value) -> double { return interface->value2ratio (index, value); },
+                [&] (int index, double ratio) -> double { return interface->ratio2value (index, ratio); },
+            });
+    }
+}
+
+void FaustProgram::initDspFactory (FaustProgram::Backend& back, const juce::String& source)
 {
     const char* argv[] = { "" }; // compilation arguments
     std::string errorString;
-    midiIsOn = source.contains ("declare options \"[midi:on]\";");
 
-    switch (backend)
+    switch (back)
     {
         case Backend::LLVM:
             dspFactory = createDSPFactoryFromString (
@@ -109,6 +160,23 @@ void FaustProgram::compileSource (const juce::String& source)
                 argv,
                 errorString);
             break;
+        case Backend::PolyLLVM:
+            polyDspFactory = createPolyDSPFactoryFromString (
+                "faust",
+                source.toStdString(),
+                0,
+                argv,
+                "",
+                errorString);
+            break;
+        case Backend::PolyInterpreter:
+            polyDspFactory = createInterpreterPolyDSPFactoryFromString (
+                "faust",
+                source.toStdString(),
+                0,
+                argv,
+                errorString);
+            break;
         default:
         {
             juce::String message ("Invalid backend: ");
@@ -117,41 +185,53 @@ void FaustProgram::compileSource (const juce::String& source)
         }
     }
 
-    if (!dspFactory)
+    if ((back == Backend::LLVM || back == Backend::Interpreter) && !dspFactory)
     {
         throw CompileError (errorString);
     }
-
-    dspInstance.reset (dspFactory->createDSPInstance());
-    dspInstance->init (sampleRate);
-    faustInterface = std::make_shared<APIUI>();
-    dspInstance->buildUserInterface (faustInterface.get());
-
-    if(midiIsOn)
+    else if ((back == Backend::PolyInterpreter || back == Backend::PolyLLVM) && !polyDspFactory)
     {
-        midiId.clear();
+        throw CompileError (errorString);
+    }
+}
+
+void FaustProgram::compileSource (const juce::String& source)
+{
+    juce::String inputSource = source;
+    std::string stdSource = source.toStdString();
+    midiIsOn = matchMidiOn(stdSource);
+    int polyVoices = matchPolyAndExtractVoices (stdSource);
+    if (polyVoices > 0)
+    {
+        backend = (backend == Backend::LLVM) ? Backend::PolyLLVM : Backend::PolyInterpreter;
+        poly = true;
+        inputSource = addEffect(source);
+    }
+    initDspFactory (backend, inputSource);
+    faustInterface = std::make_unique<APIUI>();
+    // initialize either the poly dsp instance or the regular dsp instance
+    if (polyVoices > 0)
+    {
+        polyDspInstance = polyDspFactory->createPolyDSPInstance(polyVoices, false, true);
+        polyDspInstance->init (sampleRate);
+        polyDspInstance->buildUserInterface (faustInterface.get());
         midi_handler = std::make_unique<juce_midi>();
-        midiInterface = std::make_unique<MidiUI>(midi_handler.get());
-        dspInstance->buildUserInterface (midiInterface.get());
+        midiInterface = std::make_unique<MidiUI> (midi_handler.get());
+        polyDspInstance->buildUserInterface (midiInterface.get());
         midi_handler->startMidi();
     }
-
-    for (int i { 0 }; i < getParamCount(); i++)
+    else
     {
-        parameters.push_back (
-            { i,
-                juce::String (faustInterface->getParamLabel (i)),
-                apiToItemType (faustInterface->getParamItemType (i)),
-                { faustInterface->getParamMin (i), faustInterface->getParamMax (i) },
-                faustInterface->getParamInit (i),
-                faustInterface->getParamStep (i),
-                cstringMapToJuceString (faustInterface->getMetadata (i)),
-                [&](int index, double value) -> double{
-                    return faustInterface->value2ratio(index, value); },
-                [&](int index, double ratio) -> double{
-                    return faustInterface->ratio2value(index, ratio); },
-            });
+        dspInstance.reset (dspFactory->createDSPInstance());
+        dspInstance->init (sampleRate);
+        dspInstance->buildUserInterface (faustInterface.get());
+        if (midiIsOn)
+        {
+            buildMidi (dspInstance);
+        }
     }
+
+    fillParameters (parameters, faustInterface);
 }
 
 int FaustProgram::getParamCount() const
@@ -161,12 +241,12 @@ int FaustProgram::getParamCount() const
 
 int FaustProgram::getNumInChannels() const
 {
-    return dspInstance->getNumInputs();
+    return (poly) ? polyDspInstance->getNumInputs() : dspInstance->getNumInputs();
 }
 
 int FaustProgram::getNumOutChannels() const
 {
-    return dspInstance->getNumOutputs();
+    return (poly) ? polyDspInstance->getNumOutputs() : dspInstance->getNumOutputs();
 }
 
 FaustProgram::Parameter FaustProgram::getParameter (const int index)
@@ -175,7 +255,7 @@ FaustProgram::Parameter FaustProgram::getParameter (const int index)
     {
         jassertfalse;
     }
-    return parameters[static_cast<unsigned long>(index)];
+    return parameters[static_cast<unsigned long> (index)];
 }
 
 float FaustProgram::getValue (const int index) const
@@ -196,7 +276,14 @@ void FaustProgram::setValue (const int index, const float value) const
 
 void FaustProgram::compute (const int samples, const float* const* in, float* const* out) const
 {
-    dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
+    if (!poly)
+    {
+        dspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
+    }
+    else
+    {
+        polyDspInstance->compute (samples, const_cast<float**> (in), const_cast<float**> (out));
+    }
 }
 
 void FaustProgram::handleMidiBuffer (juce::MidiBuffer& message) const
@@ -217,4 +304,21 @@ void FaustProgram::setSampleRate (const int sr)
     {
         jassertfalse;
     }
+}
+
+void FaustProgram::buildMidi (std::unique_ptr<dsp>& dsp)
+{
+    midi_handler = std::make_unique<juce_midi>();
+    midiInterface = std::make_unique<MidiUI> (midi_handler.get());
+    dsp->buildUserInterface (midiInterface.get());
+    midi_handler->startMidi();
+}
+
+juce::String FaustProgram::addEffect(juce::String source)
+{
+   if(!source.contains("effect"))
+   {
+      source.append("effect = _;\n", 15);
+   }
+   return source;
 }
