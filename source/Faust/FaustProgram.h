@@ -91,11 +91,13 @@ public:
     void handleMidiBuffer (juce::MidiBuffer&) const;
 
 private:
-    static int matchPolyAndExtractVoices(const juce::String& input);
+    static int matchPolyAndExtractVoices(const std::string& input);
+    static bool matchMidiOn(const std::string& input);
     void compileSource (const juce::String&);
     void initDspFactory(Backend&, const juce::String&);
     void fillParameters (std::vector<Parameter>& parameterVector, std::unique_ptr<APIUI>& interface);
     void buildMidi(std::unique_ptr<dsp>&);
+    static juce::String addEffect(juce::String);
 
     Backend backend;
 

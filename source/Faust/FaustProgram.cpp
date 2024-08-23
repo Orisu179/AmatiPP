@@ -92,20 +92,25 @@ FaustProgram::~FaustProgram()
     }
 }
 
-int FaustProgram::matchPolyAndExtractVoices (const juce::String& input)
+int FaustProgram::matchPolyAndExtractVoices (const std::string& input)
 {
     // Define the regular expression pattern with a capture group for the number
-    std::string stdStringInput = input.toStdString();
     std::regex pattern (R"(declare options "\[midi:on\]\[nvoices:(\d+)\]";)");
     std::smatch matches;
 
     // Check if the input string matches the pattern
-    if (std::regex_search (stdStringInput, matches, pattern))
+    if (std::regex_search (input, matches, pattern))
     {
         // Extract the number from the first capture group
         return std::stoi (matches[1].str());
     }
     return -1;
+}
+
+bool FaustProgram::matchMidiOn (const std::string& input)
+{
+    std::regex pattern (R"(declare options ".*\[midi:on\].*")");
+    return std::regex_search(input, pattern);
 }
 
 /**
@@ -192,15 +197,17 @@ void FaustProgram::initDspFactory (FaustProgram::Backend& back, const juce::Stri
 
 void FaustProgram::compileSource (const juce::String& source)
 {
-    midiIsOn = source.contains ("declare options \"[midi:on]\";");
-    int polyVoices = matchPolyAndExtractVoices (source);
+    juce::String inputSource = source;
+    std::string stdSource = source.toStdString();
+    midiIsOn = matchMidiOn(stdSource);
+    int polyVoices = matchPolyAndExtractVoices (stdSource);
     if (polyVoices > 0)
     {
         backend = (backend == Backend::LLVM) ? Backend::PolyLLVM : Backend::PolyInterpreter;
-        midiIsOn = true;
         poly = true;
+        inputSource = addEffect(source);
     }
-    initDspFactory (backend, source);
+    initDspFactory (backend, inputSource);
     faustInterface = std::make_unique<APIUI>();
     // initialize either the poly dsp instance or the regular dsp instance
     if (polyVoices > 0)
@@ -305,4 +312,13 @@ void FaustProgram::buildMidi (std::unique_ptr<dsp>& dsp)
     midiInterface = std::make_unique<MidiUI> (midi_handler.get());
     dsp->buildUserInterface (midiInterface.get());
     midi_handler->startMidi();
+}
+
+juce::String FaustProgram::addEffect(juce::String source)
+{
+   if(!source.contains("effect"))
+   {
+      source.append("effect = _;\n", 15);
+   }
+   return source;
 }
