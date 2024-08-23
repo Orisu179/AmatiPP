@@ -85,7 +85,7 @@ void PluginProcessor::handleMidi (const juce::MidiMessage& message)
 
 void PluginProcessor::handleMidiBuffer (juce::MidiBuffer& buffer)
 {
-    if(!midiBuffer.isEmpty() && faustProgram)
+    if(!buffer.isEmpty() && faustProgram)
     {
         faustProgram->handleMidiBuffer(buffer);
     }
@@ -133,7 +133,6 @@ void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
     tmpBufferIn = juce::AudioBuffer<float> (numChannelsIn, samplesPerBlock);
     tmpBufferOut = juce::AudioBuffer<float> (numChannelsOut, samplesPerBlock);
-    compileSource (sourceCode);
     readyToPlay = true;
 }
 
@@ -204,7 +203,6 @@ void PluginProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Midi
         // clear remaining channels
         for (int chan = totalNumInputChannels; chan < tmpBufferIn.getNumChannels(); ++chan)
             tmpBufferIn.clear (chan, 0, numSamples);
-
         handleMidiBuffer(midiMessages);
         faustProgram->compute (numSamples, tmpBufferIn.getArrayOfReadPointers(), tmpBufferOut.getArrayOfWritePointers());
         for (int chan = 0; (chan < totalNumOutputChannels) && (chan < tmpBufferOut.getNumChannels()); ++chan)

@@ -52,6 +52,7 @@ find_package(FAUST)
 # This adds the melatonin inspector module
 add_subdirectory (modules/melatonin_inspector)
 
+
 # See `docs/CMake API.md` in the JUCE repo for all config options
 juce_add_plugin("${PROJECT_NAME}"
     # Icons for the standalone app
@@ -65,7 +66,9 @@ juce_add_plugin("${PROJECT_NAME}"
     COPY_PLUGIN_AFTER_BUILD TRUE
 
    # For Midi input
-    NEED_MIDI_INPUT TRUE
+        IS_SYNTH TRUE
+    NEEDS_MIDI_INPUT TRUE
+        NEEDS_MIDI_OUTPUT TRUE
 
     # Change me!
     # A four-character plugin id
