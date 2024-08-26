@@ -17,17 +17,17 @@ PluginEditor::PluginEditor (PluginProcessor& p, juce::AudioProcessorValueTreeSta
     setResizeLimits (800, 600, 1920, 1080);
     setSize (800, 600);
 
-    addAndMakeVisible (inspectButton);
-    // this chunk of code instantiates and opens the melatonin inspector
-    inspectButton.onClick = [&] {
-        if (!inspector)
-        {
-            inspector = std::make_unique<melatonin::Inspector> (*this);
-            inspector->onClose = [this]() { inspector.reset(); };
-        }
-
-        inspector->setVisible (true);
-    };
+//    addAndMakeVisible (inspectButton);
+//    // this chunk of code instantiates and opens the melatonin inspector
+//    inspectButton.onClick = [&] {
+//        if (!inspector)
+//        {
+//            inspector = std::make_unique<melatonin::Inspector> (*this);
+//            inspector->onClose = [this]() { inspector.reset(); };
+//        }
+//
+//        inspector->setVisible (true);
+//    };
 
     addAndMakeVisible (&tabbedComponent);
 
@@ -78,7 +78,7 @@ void PluginEditor::resized()
     const int parameterHeight = static_cast<int>(processorRef.getFaustParameter().size() * 75);
     auto bounds = getLocalBounds();
 
-    inspectButton.setBounds (bounds.removeFromBottom (30));
+//    inspectButton.setBounds (bounds.removeFromBottom (30));
     tabbedComponent.setBounds (bounds.reduced (margin, margin));
     if( parameterHeight > tabbedComponent.getHeight())
     {
