@@ -18,7 +18,7 @@ Building
   -   ``mkdir build``
   -   ``cd build``
   -   ``cmake ..``
-  -   ``cmake --build``
+  -   ``cmake --build .``  
 
 ### Nix build
 
